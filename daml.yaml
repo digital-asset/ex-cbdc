@@ -4,3 +4,8 @@
 #
 
 sdk-version: 1.10.0
+version: 1.0.0
+name: cbdc
+source: pkg # This is just a dummy folder.
+dependencies:
+  - daml-prim

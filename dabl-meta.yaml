@@ -1,0 +1,16 @@
+#
+# Copyright (c) 2021, Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+#
+
+catalog:
+  name: cbdc-demo
+  version: 1.0.0
+  short_description: CBDC Demo Application
+  description: A Daml demo application that demonstrates CBDC.
+  author: Digital Asset (Switzerland) GmbH
+  url: https://github.com/DACH-NY/cbdc-demo
+# TODO: Find the license information.
+#  license: Apache-2.0
+  tags: [ dabl-sample-app, application ]
+  icon_file: cbdc-demo.png
