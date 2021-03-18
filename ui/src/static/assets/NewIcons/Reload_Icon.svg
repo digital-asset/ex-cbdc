@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="13px" height="14px" viewBox="0 0 13 14" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Group 2</title>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" stroke-linecap="round">
+        <g id="Info-2" transform="translate(-1449.000000, -103.000000)" stroke="#A7F6FF">
+            <g id="Group-3" transform="translate(1391.000000, 100.000000)">
+                <g id="Group-2" transform="translate(59.041890, 4.000000)">
+                    <polyline id="Rectangle" stroke-width="1.5" points="9.25408071 1.72891756 9.25408071 4.49002119 6.49408071 4.49002119"></polyline>
+                    <path d="M5.53502607,9.21211022 C7.4680227,9.21211022 9.03502607,7.64510684 9.03502607,5.71211022 C9.03502607,3.77911359 7.4680227,2.21211022 5.53502607,2.21211022 C3.60202945,2.21211022 2.03502607,3.77911359 2.03502607,5.71211022 C2.03502607,6.19181515 2.13153247,6.64897981 2.30618936,7.06524828" id="Oval" stroke-width="2" transform="translate(5.535026, 5.712110) rotate(-132.000000) translate(-5.535026, -5.712110) "></path>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

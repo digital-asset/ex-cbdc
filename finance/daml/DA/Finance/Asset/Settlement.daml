@@ -1,0 +1,150 @@
+--
+-- Copyright (c) 2021, Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+--
+
+module DA.Finance.Asset.Settlement where
+
+import DA.Assert
+import DA.Next.Set as Set
+import DA.Optional
+import DA.Foldable (forA_)
+
+import DA.Finance.Asset
+import DA.Finance.Types
+import DA.Finance.Utils
+
+import Certificates.Sector.Economic
+import DA.Lib.Types.Sector (Sector)
+
+-- | Rule that allows to credit or transfer asset deposits
+-- in the specified account.
+template AssetSettlementRule
+  with
+    account : Account
+      -- ^ The account for which the rule can be used.
+    observers : Set Party
+      -- ^ Set of parties that will be added as observers
+      -- when an asset is credited, i.e. an asset deposit is
+      -- created.
+    ctrls : Set Party
+      -- ^ Set of parties who can act as a controller
+      -- of the `AssetSettlement_Credit` choice.
+  where
+    signatory account.id.signatories
+    observer ctrls, observers
+
+    key account.id : Id
+    maintainer key.signatories
+
+    controller account.owner can
+      nonconsuming AssetSettlement_Transfer : ContractId AssetDeposit
+        -- ^ Gives the owner the right to transfer an asset deposit to a new owner.
+        -- Requires that the AssetSettlementRule of the receiver account is available
+        -- for use.
+        with
+          receiverAccountId : Id
+            -- ^ The account id to which the asset deposit will be transferred to.
+          amount : Optional Decimal
+          depositCids : [ContractId AssetDeposit]
+            -- ^ The asset deposits that will be consumed.
+        do
+          checkAndTransferDeposits self account depositCids amount receiverAccountId isNonEarmarked "non-earmarked"
+
+      nonconsuming AssetSettlement_Earmarked_Transfer : ContractId AssetDeposit
+        -- ^ Gives the owner the right to transfer an asset deposit to a new owner.
+        -- Requires that the AssetSettlementRule of the receiver account is available
+        -- for use.
+        with
+          receiverAccountId : Id
+            -- ^ The account id to which the asset deposit will be transferred to.
+          depositCids : [ContractId AssetDeposit]
+            -- ^ The asset deposits that will be consumed.
+          amount : Optional Decimal
+          certificateCid : ContractId DistributedEconomicSectorCertificate
+        do
+          certificate <- fetch certificateCid
+          assertMsg "Account provider must match the certificate issuer." (certificate.centralBank == account.provider)
+          checkAndTransferDeposits self account depositCids amount receiverAccountId isEarmarked "earmarked"
+
+      AssetSettlement_AddController : ContractId AssetSettlementRule
+        with
+          ctrl : Party
+        do
+          create this with ctrls = Set.insert ctrl ctrls
+
+    controller account.id.signatories can
+      nonconsuming AssetSettlement_Debit : Asset
+        -- ^ Gives the account.id.signatories the right to debit (i.e. archive)
+        -- an asset deposit.
+        with
+          depositCid : ContractId AssetDeposit
+            -- ^ The asset deposit that will be consumed.
+        do
+          deposit <- fetchAndArchive depositCid
+          deposit.account === account
+          return deposit.asset
+
+    nonconsuming choice AssetSettlement_Credit : ContractId AssetDeposit
+      -- ^ Allows a `ctrl` (if part of `ctrls`) to create an asset deposit.
+      -- The controller parties are the the account.id.signatories less account.owner
+      -- plus `ctrl` to guarantee that the choice can only be called from another choice
+      -- like the Transfer choice. The receiving account.owner is removed from the controlling set
+      -- because his signature is in general not available.
+      with
+        asset : Asset
+          -- ^ The asset to be created.
+        ctrl : Party
+      controller Set.delete account.owner account.id.signatories, ctrl
+      do
+        assertMsg ("ctrl must be part of ctrls: " <> show ctrl <> ", " <> show ctrls) $ ctrl `Set.member` ctrls
+        create AssetDeposit with account, asset, observers
+
+checkDeposits
+  : [AssetDeposit] -> Decimal -> (Optional Sector -> Bool) -> Text -> Update ()
+checkDeposits deposits transferAmount earmarkPredicate nameOfAssets = do
+    let sumQuantity = sum $ map (\d -> d.asset.quantity) deposits
+    forA_ deposits \deposit ->
+      assertMsg
+        ("Transfer this way is only possible for a specific asset type (" <> nameOfAssets <> ".)") $
+        earmarkPredicate deposit.asset.earmark
+    assertMsg "All assets to be transfered have to be the same." $
+      allTheSame (.asset.id) deposits
+    assertMsg "All assets to be transfered have to have the same earmark." $
+      allTheSame (.asset.earmark) deposits
+    assertMsg "The targeted transfer amount must be less or equal to the total provided asset quantity." $
+      transferAmount <= sumQuantity
+
+transferDeposits
+  : ContractId AssetSettlementRule
+  -> Account
+  -> [ContractId AssetDeposit]
+  -> [AssetDeposit]
+  -> Decimal
+  -> Id
+  -> Text
+  -> Update (ContractId AssetDeposit)
+transferDeposits assetSettlementRule account depositCids deposits transferAmount receiverAccountId nameOfAssets = do
+    newDepositCid <- splitMergeNewAssetFromAssetsForQuantity depositCids deposits transferAmount (nameOfAssets <> " transfer")
+    newDeposit <- fetch newDepositCid
+    asset <- exercise assetSettlementRule AssetSettlement_Debit with
+                depositCid = newDepositCid
+    exerciseByKey @AssetSettlementRule receiverAccountId AssetSettlement_Credit with
+      asset = asset with earmark = None
+      ctrl = account.owner
+
+checkAndTransferDeposits
+  : ContractId AssetSettlementRule
+  -> Account
+  -> [ContractId AssetDeposit]
+  -> Optional Decimal
+  -> Id
+  -> (Optional Sector -> Bool)
+  -> Text
+  -> Update (ContractId AssetDeposit)
+checkAndTransferDeposits assetSettlementRule account depositCids amount receiverAccountId earmarkPredicate nameOfAssets = do
+    deposits <- mapA fetch depositCids
+    let sumQuantity = sum $ map (\d -> d.asset.quantity) deposits
+        transferAmount = fromOptional sumQuantity amount
+    checkDeposits deposits transferAmount earmarkPredicate nameOfAssets
+    transferDeposits assetSettlementRule account depositCids deposits transferAmount receiverAccountId nameOfAssets

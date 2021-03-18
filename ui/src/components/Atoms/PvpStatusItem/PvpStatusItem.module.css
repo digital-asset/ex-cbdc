@@ -1,0 +1,30 @@
+/**
+ * Copyright (c) 2021, Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+.container{
+    border-left: 2px solid #65d3df;
+    padding-left: 8px;
+    margin-top: 2px;
+}
+
+.textStyle {
+    font-family: Bold;
+    font-size: 8px;
+    letter-spacing: 0.09px;
+    color: #2d3e55;
+}
+.resultText {
+    font-weight: bold;
+}
+.resultContainer{
+   position: relative;
+}
+.img{
+    position: absolute;
+    width: 9px;
+    height: 9px;
+}
+._textWithImg{
+    margin-left: 11px;
+}

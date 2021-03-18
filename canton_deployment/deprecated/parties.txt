@@ -1,0 +1,10 @@
+{
+  "landlord": "Landlord",
+  "renter": "Alice",
+  "demoAdmin": "DemoAdmin",
+  "usFRB": "USFRB",
+  "landlordsAssociation": "LandlordsAssociation",
+  "bankB": "BankB",
+  "bankA": "BankA",
+  "ecb": "ECB"
+}

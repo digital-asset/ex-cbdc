@@ -1,0 +1,57 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!--
+
+    Copyright (c) 2021, Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.
+    SPDX-License-Identifier: Apache-2.0
+
+-->
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd https://oss.sonatype.org/content/repositories/snapshots/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.digitalasset.refapps</groupId>
+    <artifactId>cbdc-demo</artifactId>
+    <version>1.0.0</version>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.mycila</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <version>3.0</version>
+                <configuration>
+                    <header>license-header.txt</header>
+                    <excludes>
+                        <exclude>ui/**/node_modules/**</exclude>
+                        <exclude>ui/daml.js/**</exclude>
+                        <exclude>ui/build/**</exclude>
+                        <exclude>**/.dlint.yaml</exclude>
+                        <exclude>**/*.log</exclude>
+                        <exclude>**/.daml/**</exclude>
+                        <exclude>**/*.dar</exclude>
+                        <exclude>**/*.cfg</exclude>
+                        <exclude>launchers/*</exclude>
+                        <exclude>LICENSE</exclude>
+                        <exclude>**/Pipfile*</exclude>
+                        <exclude>venv/**</exclude>
+                        <exclude>**/*.txt</exclude>
+                    </excludes>
+                    <mapping>
+                        <daml>DOUBLEDASHES_STYLE</daml>
+                        <tsx>DOUBLESLASH_STYLE</tsx>
+                        <Makefile>SCRIPT_STYLE</Makefile>
+                        <mk>SCRIPT_STYLE</mk>
+                        <env>SCRIPT_STYLE</env>
+                    </mapping>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+       </plugins>
+    </build>
+</project>

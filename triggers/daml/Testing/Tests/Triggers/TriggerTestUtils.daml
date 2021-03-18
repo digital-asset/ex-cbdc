@@ -1,0 +1,18 @@
+--
+-- Copyright (c) 2021, Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+--
+
+
+module Testing.Tests.Triggers.TriggerTestUtils where
+
+import DA.Next.Map qualified as Maps
+import Daml.Script (Script)
+import Daml.Trigger.Assert
+import Daml.Trigger.LowLevel (Command)
+import Daml.Trigger (Trigger)
+
+testTrigger : Trigger () -> Party -> ACSBuilder -> Script ([Command])
+testTrigger trigger party acs = do
+  ((), commands) <- testRule trigger party acs Maps.empty ()
+  pure $ flattenCommands commands

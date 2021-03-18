@@ -1,0 +1,83 @@
+--
+-- Copyright (c) 2021, Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+--
+
+{-# LANGUAGE AllowAmbiguousTypes #-}
+
+module Test.DA.Reset.Tests where
+
+import Daml.Script
+import DA.Foldable hiding (elem)
+import DA.Assert
+import DA.Next.Set qualified as Set
+
+import DA.Reset.Reset
+import DA.Reset.ResetImplementation
+import DA.Reset.Util
+
+import Banking.Role.Bank
+import DA.Finance.Types
+import Testing.Common.Parties
+
+test_authorizeAgreementByAll: Script ()
+test_authorizeAgreementByAll = do
+  alice <- allocateParty "Alice"
+  bob <- allocateParty "Bob"
+  resetAgreement <- authorizeAgreementByAll $ fromList [alice, bob]
+  Some contract <- queryContractId @ResetAgreement alice resetAgreement
+  contract === ResetAgreement with signatories = [alice, bob]
+
+test_deleteAll: Script ()
+test_deleteAll = do
+  (resetAgreement, parties) <- setupWithResetAgreement
+  deleteAllContracts resetAgreement parties
+  forA_ parties
+    (\party -> do
+      assertNoSuchContract @BankRole party
+      assertNoSuchContract @BankRoleInvite party
+    )
+  where
+    setupWithResetAgreement : Script (ContractId ResetAgreement, [Party])
+    setupWithResetAgreement = do
+      alice <- allocateParty "Alice"
+      bob <- allocateParty "Bob"
+      createSomeContracts alice bob
+      resetAgreement <- authorizeAgreementByAll $ fromList [alice, bob]
+      pure (resetAgreement, [alice, bob])
+
+test_resetIfRequested: Script()
+test_resetIfRequested = do
+  parties <- allocateParties
+  let resetAdmin = getResetAdmin parties
+  let owner = parties.bankA
+  createSomeContracts owner owner
+  submit resetAdmin do
+    createCmd ResetRequest with party = resetAdmin
+  t1sBefore <- queryCids @BankRole owner
+  assert $ (Prelude.length t1sBefore) > 0
+  resetIfRequested parties
+  t1sAfter <- queryCids @BankRole owner
+  t1sBefore =/= t1sAfter
+  where
+    allocateParties: Script Parties
+    allocateParties = setupParties
+
+createSomeContracts : Party -> Party -> Script (ContractId BankRole)
+createSomeContracts alice bob = do
+  let
+    idAlice = Id (Set.singleton alice) "" 1
+    accountAlice = Account with id = idAlice, provider = alice, owner = alice
+    idBob = Id (Set.singleton bob) "" 1
+    accountBob = Account with id = idBob, provider = bob, owner = bob
+  submit alice do
+    createCmd BankRole with centralBank = alice, bank = alice, cashLabel = "", account = accountAlice
+  submit alice do
+    createCmd BankRoleInvite with centralBank = alice, bank = alice, cashLabel = "", accountId = idAlice
+  submit bob do
+    createCmd BankRole with centralBank = bob, bank = bob, cashLabel = "", account = accountBob
+
+assertNoSuchContract : forall t. (Template t, Show t, Eq t) => Party -> Script ()
+assertNoSuchContract party = do
+  contracts <- query @t party
+  [] === contracts

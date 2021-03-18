@@ -1,0 +1,177 @@
+--
+-- Copyright (c) 2021, Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+--
+
+module DA.Reset.Reset where
+
+import Daml.Script
+import DA.List
+import DA.Foldable hiding (elem)
+import DA.Action (void)
+import DA.NonEmpty
+
+import DA.Reset.Util
+
+import Banking.Role.Bank
+import Banking.Role.CentralBank
+import Landlord.Landlord
+import DemoAdmin.Role.DemoAdmin
+import Certificates.Sector.Economic
+import DA.Finance.Asset
+import DA.Finance.Asset.Settlement
+import DA.Finance.Trade.Dvp
+import DA.Finance.Trade.SettlementInstruction
+import DA.Finance.Trade.Dvp.Settlement
+import DA.Finance.Trade.DvpProposal
+import DA.Finance.Process.AssetExtraction
+import DA.Finance.Process.AssetInjection
+
+import Testing.Init.Init
+import Testing.Models.Parties
+
+template ResetAgreement
+  with
+    signatories: [Party]
+  where
+    signatory signatories
+    ensure unique signatories
+
+    nonconsuming choice DeleteAll : () with
+      party : Party
+      assetDeposits : [ContractId AssetDeposit]
+      assetExtractionFailures : [ContractId AssetExtractionFailure]
+      assetExtractionNotifications : [ContractId AssetExtractionNotification]
+      assetExtractionRequests : [ContractId AssetExtractionRequest]
+      assetInjectionFailures : [ContractId AssetInjectionFailure]
+      assetInjectionNotifications : [ContractId AssetInjectionNotification]
+      assetInjectionRequests : [ContractId AssetInjectionRequest]
+      assetSettlementRules : [ContractId AssetSettlementRule]
+      bankRoles : [ContractId BankRole]
+      bankRoleInvites : [ContractId BankRoleInvite]
+      centralBankRoles : [ContractId CentralBankRole]
+      centralBankRoleInvites : [ContractId CentralBankRoleInvite]
+      demoAdminRoles : [ContractId DemoAdminRole]
+      distributedEconomicSectorCertificates : [ContractId DistributedEconomicSectorCertificate]
+      dvps : [ContractId Dvp]
+      dvpCancellations : [ContractId DvpCancellation]
+      dvpProposals : [ContractId DvpProposal]
+      dvpSettlementRules : [ContractId DvpSettlementRule]
+      economicSectorCertificates : [ContractId EconomicSectorCertificate]
+      landlordRoles : [ContractId LandlordRole]
+      landlordRoleInvitations : [ContractId LandlordRoleInvitation]
+      landlordsAssociationRoles : [ContractId LandlordsAssociationRole]
+      lastPaidRentInvoices : [ContractId LastPaidRentInvoice]
+      rentInvoices : [ContractId RentInvoice]
+      settlementInstructions : [ContractId SettlementInstruction]
+      uniqueIdGenerators : [ContractId UniqueIdGenerator]
+     controller party
+        do
+          mapA_ archive assetDeposits
+          mapA_ archive assetExtractionFailures
+          mapA_ archive assetExtractionNotifications
+          mapA_ archive assetExtractionRequests
+          mapA_ archive assetInjectionFailures
+          mapA_ archive assetInjectionNotifications
+          mapA_ archive assetInjectionRequests
+          mapA_ archive assetSettlementRules
+          mapA_ archive bankRoles
+          mapA_ archive bankRoleInvites
+          mapA_ archive centralBankRoles
+          mapA_ archive centralBankRoleInvites
+          mapA_ archive demoAdminRoles
+          mapA_ archive distributedEconomicSectorCertificates
+          mapA_ archive dvps
+          mapA_ archive dvpCancellations
+          mapA_ archive dvpProposals
+          mapA_ archive dvpSettlementRules
+          mapA_ archive economicSectorCertificates
+          mapA_ archive landlordRoles
+          mapA_ archive landlordRoleInvitations
+          mapA_ archive landlordsAssociationRoles
+          mapA_ archive lastPaidRentInvoices
+          mapA_ archive rentInvoices
+          mapA_ archive settlementInstructions
+          mapA_ archive uniqueIdGenerators
+
+    choice Revoke : () with
+       party : Party
+     controller party
+        do
+          pure ()
+
+deleteAllContracts: ContractId ResetAgreement -> [Party] -> Script ()
+deleteAllContracts resetAgreement parties = do
+  forA_ parties
+    (\party -> do
+      assetDeposits <- queryCids @AssetDeposit party
+      assetExtractionFailures <- queryCids @AssetExtractionFailure party
+      assetExtractionNotifications <- queryCids @AssetExtractionNotification party
+      assetExtractionRequests <- queryCids @AssetExtractionRequest party
+      assetInjectionFailures <- queryCids @AssetInjectionFailure party
+      assetInjectionNotifications <- queryCids @AssetInjectionNotification party
+      assetInjectionRequests <- queryCids @AssetInjectionRequest party
+      assetSettlementRules <- queryCids @AssetSettlementRule party
+      bankRoles <- queryCids @BankRole party
+      bankRoleInvites <- queryCids @BankRoleInvite party
+      centralBankRoles <- queryCids @CentralBankRole party
+      centralBankRoleInvites <- queryCids @CentralBankRoleInvite party
+      demoAdminRoles <- queryCids @DemoAdminRole party
+      distributedEconomicSectorCertificates <- queryCids @DistributedEconomicSectorCertificate party
+      dvps <- queryCids @Dvp party
+      dvpCancellations <- queryCids @DvpCancellation party
+      dvpProposals <- queryCids @DvpProposal party
+      dvpSettlementRules <- queryCids @DvpSettlementRule party
+      economicSectorCertificates <- queryCids @EconomicSectorCertificate party
+      landlordRoles <- queryCids @LandlordRole party
+      landlordRoleInvitations <- queryCids @LandlordRoleInvitation party
+      landlordsAssociationRoles <- queryCids @LandlordsAssociationRole party
+      lastPaidRentInvoices <- queryCids @LastPaidRentInvoice party
+      rentInvoices <- queryCids @RentInvoice party
+      settlementInstructions <- queryCids @SettlementInstruction party
+      uniqueIdGenerators <- queryCids @UniqueIdGenerator party
+
+      submit party do
+        exerciseCmd resetAgreement DeleteAll with
+          party
+          assetDeposits
+          assetExtractionFailures
+          assetExtractionNotifications
+          assetExtractionRequests
+          assetInjectionFailures
+          assetInjectionNotifications
+          assetInjectionRequests
+          assetSettlementRules
+          bankRoles
+          bankRoleInvites
+          centralBankRoles
+          centralBankRoleInvites
+          demoAdminRoles
+          distributedEconomicSectorCertificates
+          dvps
+          dvpCancellations
+          dvpProposals
+          dvpSettlementRules
+          economicSectorCertificates
+          landlordRoles
+          landlordRoleInvitations
+          landlordsAssociationRoles
+          lastPaidRentInvoices
+          rentInvoices
+          settlementInstructions
+          uniqueIdGenerators
+        )
+
+type Parties = PartiesForTesting
+
+getResetAdmin: Parties -> Party
+getResetAdmin = demoAdmin
+
+-- listKnownParties may add additional parties not properly listed in participants config e.g. on Canton.
+getAllParties: Parties -> Script (NonEmpty Party)
+getAllParties parties@PartiesForTesting{..} =
+  pure $ fromList [usFRB, ecb, bankA, bankB, demoAdmin, landlord, landlordsAssociation, renter]
+-- getAllParties parties = (fmap (.party)) <$> listKnownParties
+
+initLedgerAfterReset: Parties -> Script ()
+initLedgerAfterReset parties = void $ initDemo parties

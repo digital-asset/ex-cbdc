@@ -1,0 +1,16 @@
+///
+/// Copyright (c) 2021, Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.
+/// SPDX-License-Identifier: Apache-2.0
+///
+
+export enum TransactionStatus {
+    TRANSPARENT_ERROR_ATTEMPT='TRANSPARENT_ERROR_ATTEMPT',
+    TRANSPARENT_FIRST_ERROR_ATTEMPT="TRANSPARENT_FIRST_ERROR_ATTEMPT",
+    CONNECTED = 'CONNECTED',
+    ERROR_ATTEMPT = 'ERROR_ATTEMPT',
+    ERROR_FAIL = 'ERROR_FAIL',
+    SUCCESS_ATTEMPT = "SUCCESS_ATTEMPT",
+    SUCCESS_FIRST_ATTEMPT = "SUCCESS_FIREST_ATTEMPT",
+    SUCCESS = 'SUCCESS',
+    FINISH = "FINISH"
+}

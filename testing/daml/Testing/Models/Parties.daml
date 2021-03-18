@@ -1,0 +1,18 @@
+--
+-- Copyright (c) 2021, Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+--
+
+module Testing.Models.Parties where
+
+data PartiesForTesting = PartiesForTesting with
+    usFRB : Party
+    ecb : Party
+    bankA        : Party
+    bankB        : Party
+    demoAdmin    : Party
+    landlord     : Party
+    landlordsAssociation : Party
+    renter       : Party
+
+

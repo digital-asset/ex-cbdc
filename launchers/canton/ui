@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+#
+# Copyright (c) 2021, Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+#
+
+basedir=$(dirname "$0")
+
+cp "$basedir/../../canton-credentials-config.json" "$basedir/../../ui/src/canton-credentials-config.json"
+
+REACT_APP_CONFIG_FILE="./canton-credentials-config.json" "$basedir/../ui"

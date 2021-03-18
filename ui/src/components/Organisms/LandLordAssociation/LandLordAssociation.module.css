@@ -1,0 +1,97 @@
+/**
+ * Copyright (c) 2021, Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+.bankContainer {
+  position: relative;
+  top: 210px;
+  left: 60px;
+  padding: 21px 0 4px 0;
+  width: 218px;
+  box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.5);
+  border: solid 1px #a7f6ff;
+  background-color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.bankText {
+  position: relative;
+  margin: unset;
+  text-align: center;
+  text-transform: uppercase;
+  color: #232f40;
+  letter-spacing: 0.23px;
+  font-size: 10px;
+  font-family: Brown-Bold;
+}
+
+.bankTop {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 29px;
+  width: 100%;
+  border-bottom: 1px solid #232f40;
+}
+
+.bankBottom {
+  position: relative;
+  width: 100%;
+}
+
+.bankImgContainer {
+  width: 55px;
+  height: 55px;
+}
+
+.bankImg {
+  width: 100%;
+}
+
+.bankList {
+  padding-top: 9px;
+}
+
+.bankListItem:hover {
+  /*background-color: rgba(167, 246, 255, 0.51);*/
+  cursor: pointer;
+}
+
+.bankListImg {
+  position: absolute;
+  top: calc(50% - 4px);
+  right: 4px;
+  height: 7px;
+  transform: rotate(-90deg);
+}
+
+.customerStyles {
+  position: absolute;
+  bottom: -14px;
+  left: 100%;
+}
+
+._active {
+  background-color: rgba(167, 246, 255, 0.51);
+}
+
+._topTitle {
+  margin: 22px 0;
+}
+
+._bottomTitle {
+  margin: 0 11px;
+  padding: 16px 0;
+  border-bottom: solid 2px #a7f6ff;
+}
+
+._personName {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 22px;
+  letter-spacing: 0.19px;
+  font-size: 10px;
+}

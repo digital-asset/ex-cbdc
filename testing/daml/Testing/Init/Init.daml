@@ -1,0 +1,519 @@
+--
+-- Copyright (c) 2021, Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+--
+
+module Testing.Init.Init where
+
+import Banking.Role.Bank
+import Banking.Role.CentralBank
+import Landlord.Landlord
+import Daml.Script hiding (party)
+import DemoAdmin.Role.DemoAdmin
+import Testing.Models.Parties
+import Testing.Common.Parties
+import Testing.Common.TestUtilities
+import Certificates.Sector.Economic
+import DA.Lib.Types.Sector
+import DA.Next.Set
+import DA.Time
+import DA.Date as Date
+import DA.Assert
+import DA.Optional
+import DA.Finance.Asset
+import DA.Finance.Asset.Settlement
+import DA.Finance.Types
+import DA.Finance.Trade.Dvp
+import DA.Finance.Trade.SettlementInstruction
+import DA.Finance.Trade.Dvp.Settlement
+import DA.List (head)
+
+data InitData =
+  InitData with
+    parties : PartiesForTesting
+    usFRBRole : ContractId CentralBankRole
+    usFRBBankARole : ContractId BankRole
+    usFRBBankBRole : ContractId BankRole
+    usdCbdc : ContractId AssetDeposit
+    ecbRole : ContractId CentralBankRole
+    ecbBankARole : ContractId BankRole
+    ecbBankBRole : ContractId BankRole
+    eurCbdc : ContractId AssetDeposit
+    renterAccount : Account
+    landlordAccount : Account
+    landlordRole : ContractId LandlordRole
+    distributedCert : ContractId DistributedEconomicSectorCertificate
+
+data PvpContracts =
+  PvpContracts with
+    dvpSettlementRule : ContractId DvpSettlementRule
+    dvp : ContractId Dvp
+    payment : ContractId SettlementInstruction
+    delivery : ContractId SettlementInstruction
+
+allocateAndInitDemo : Script InitData
+allocateAndInitDemo = script do
+  -- Participants set up parties, connecting to the two Banking domains (EUR/GBP)
+  parties@PartiesForTesting{..} <- setupParties
+  initDemo parties
+
+initDemo : PartiesForTesting -> Script InitData
+initDemo parties@PartiesForTesting{..} = script do
+  let ledgerSetupTask = "Ledger Setup"
+  started ledgerSetupTask
+
+  let task = "Create demoAdmin role"
+  started task
+  demoAdminRole <- demoAdmin `singleSubmit`
+    createCmd DemoAdminRole with demoAdmin
+  finished task
+
+  let task = "Create USD FRB role"
+  started task
+  usFRBRoleInvite <- demoAdmin `singleSubmit`
+    exerciseCmd demoAdminRole AddCentralBank with
+      centralBank = usFRB
+      cashLabel = "USD"
+  usFRBRoleInvite <- synchronize usFRB usFRBRoleInvite
+  usFRBRole <- usFRB `singleSubmit`
+    exerciseCmd usFRBRoleInvite CentralBankRoleInvite_Accept
+  finished task
+
+  let task = "FRB invites BankA"
+  started task
+  usFRBBankAInvite <- usFRB `singleSubmit`
+    exerciseCmd usFRBRole InviteBank with
+      bank = bankA
+      accountId = getId [usFRB, bankA]
+
+  usFRBBankAInvite <- synchronize bankA usFRBBankAInvite
+  usFRBBankARole <- bankA `singleSubmit`
+    exerciseCmd usFRBBankAInvite BankRoleInvite_Accept
+  finished task
+
+  let task = "FRB invites BankB"
+  started task
+  usFRBbankBInvite <- usFRB `singleSubmit`
+    exerciseCmd usFRBRole InviteBank with
+      bank = bankB
+      accountId = getId [usFRB, bankB]
+
+  usFRBbankBInvite <- synchronize bankB usFRBbankBInvite
+  usFRBBankBRole <- bankB `singleSubmit`
+    exerciseCmd usFRBbankBInvite BankRoleInvite_Accept
+  finished task
+
+  let task = "Create EUR ECB role"
+  started task
+  ecbRoleInvite <- demoAdmin `singleSubmit`
+    exerciseCmd demoAdminRole AddCentralBank with
+      centralBank = ecb
+      cashLabel = "EUR"
+  ecbRoleInvite <- synchronize ecb ecbRoleInvite
+  ecbRole <- ecb `singleSubmit`
+    exerciseCmd ecbRoleInvite CentralBankRoleInvite_Accept
+  finished task
+
+  let task = "ECB invites BankA"
+  started task
+  ecbBankAInvite <- ecb `singleSubmit`
+    exerciseCmd ecbRole InviteBank with
+      bank = bankA
+      accountId = getId [ecb, bankA]
+
+  ecbBankAInvite <- synchronize bankA ecbBankAInvite
+  ecbBankARole <- bankA `singleSubmit`
+    exerciseCmd ecbBankAInvite BankRoleInvite_Accept
+  finished task
+
+  let task = "ECB invites BankB"
+  started task
+  ecbBankBInvite <- ecb `singleSubmit`
+    exerciseCmd ecbRole InviteBank with
+      bank = bankB
+      accountId = getId [ecb, bankB]
+
+  ecbBankBInvite <- synchronize bankB ecbBankBInvite
+  ecbBankBRole <- bankB `singleSubmit`
+    exerciseCmd ecbBankBInvite BankRoleInvite_Accept
+  finished task
+
+  let task = "Issue USD to Federal Reserve Bank"
+  started task
+  usdCbdc <- usFRB `singleSubmit`
+    exerciseCmd usFRBRole CreateCbdc with
+      quantity = 900_000_000.0
+      targetAccount = None
+  finished task
+
+  let task = "Issue EUR to European Central Bank"
+  started task
+  eurCbdc <- ecb `singleSubmit`
+    exerciseCmd ecbRole CreateCbdc with
+      quantity = 700_000_000.0
+      targetAccount = None
+
+  -- These steps are needed to provide visibility for the Pvp parties.
+  -- We add the other bank to the bank's account as a controller to enable crediting.
+  eurCbdc <- synchronize ecb eurCbdc
+  Some ecbBankARoleData <- queryContractId bankA ecbBankARole
+  Some usFRBBankBRoleData <- queryContractId bankB usFRBBankBRole
+  Some usFRBBankARoleData <- queryContractId bankA usFRBBankARole
+  bankA `singleSubmit`
+    exerciseByKeyCmd @AssetSettlementRule
+      ecbBankARoleData.account.id AssetSettlement_AddController with
+        ctrl = bankB
+
+  bankA `singleSubmit`
+    exerciseByKeyCmd @AssetSettlementRule
+      usFRBBankARoleData.account.id AssetSettlement_AddController with
+        ctrl = bankB
+
+  bankB `singleSubmit`
+    exerciseByKeyCmd @AssetSettlementRule
+      usFRBBankBRoleData.account.id AssetSettlement_AddController with
+        ctrl = bankA
+
+  Some ecbBankBRoleData <- queryContractId bankB ecbBankBRole
+  bankB `singleSubmit`
+    exerciseByKeyCmd @AssetSettlementRule
+      ecbBankBRoleData.account.id AssetSettlement_AddController with
+        ctrl = bankA
+  finished task
+
+  let earmarkedSetupTask = "Earmarked CBDC / rent invoice setup"
+  started earmarkedSetupTask
+
+  let task = "Create Landlord's account"
+  started task
+  let landlordAccount =
+        Account with
+          id = getLabelledId [usFRB] "Landlord acc "
+          provider = usFRB
+          owner = landlord
+  cid <- usFRB `singleSubmit`
+    createCmd AssetSettlementRule with
+      account = landlordAccount
+      observers = empty
+      ctrls = fromList [landlord, usFRB]
+  synchronize landlord cid
+  landlord `singleSubmit`
+    exerciseByKeyCmd @AssetSettlementRule
+      landlordAccount.id AssetSettlement_AddController with
+        ctrl = renter
+  finished task
+
+  let task = "Create renter's account"
+  started task
+  let renterAccount =
+        Account
+          with
+            id = getLabelledId [usFRB] "Renter acc "
+            provider = usFRB
+            owner = renter
+  usFRB `singleSubmit`
+    createCmd AssetSettlementRule with
+      account = renterAccount
+      observers = empty
+      ctrls = fromList [renter, usFRB]
+  finished task
+
+  let task = "Landlords association"
+  started task
+  landlordsAssociationRole <- landlordsAssociation `singleSubmit`
+    createCmd LandlordsAssociationRole with
+      ..
+  finished task
+
+  let task = "A landlord"
+  started task
+  landlordInvitation <- landlordsAssociation `singleSubmit`
+    exerciseCmd landlordsAssociationRole Invite_Landlord with ..
+  landlordInvitation <- synchronize landlord landlordInvitation
+  landlordRole <- landlord `singleSubmit`
+    exerciseCmd landlordInvitation LandlordRoleInvitation_Accept with
+      landlordAccountId = landlordAccount.id
+  finished task
+
+  -- Certificate
+  let task = "Central Bank creates proposal of EconomicSectorCertificate"
+  started task
+  economicSectorCertificateCid <- usFRB `singleSubmit`
+    exerciseCmd usFRBRole CreateCertificate with
+      sector = Housing
+      ..
+
+  economicSectorCertificateCid <- synchronize landlordsAssociation economicSectorCertificateCid
+  distributedCert <- landlordsAssociation `singleSubmit`
+    exerciseCmd economicSectorCertificateCid Distribute with
+      name = landlord
+
+  finished earmarkedSetupTask
+
+  finished ledgerSetupTask
+  pure $ InitData with ..
+
+transferFromCentralbankToBank : Party -> Party -> Decimal -> Script (ContractId AssetDeposit)
+transferFromCentralbankToBank cb bank amount = do
+  (_, cbRole)::_ <- query @CentralBankRole cb
+  (_, bankRole)::_ <- queryFilter @BankRole bank (\c -> c.centralBank == cb)
+  cbdc <- firstContractId <$> queryFilter @AssetDeposit cb (\c -> c.account.owner == cb)
+  _ <- cb `singleSubmit`
+    exerciseByKeyCmd @AssetSettlementRule cbRole.account.id
+      AssetSettlement_Transfer with
+          receiverAccountId = bankRole.account.id
+          amount = Some amount
+          depositCids = [cbdc]
+  cbdc <- firstContractId <$> queryFilter @AssetDeposit cb (\c -> c.account.owner == cb)
+  pure cbdc
+
+all_slides_workflow_works : Script ()
+all_slides_workflow_works = script do
+  initData@InitData{..} <- allocateAndInitDemo
+  let PartiesForTesting{..} = initData.parties
+  let isOwnedBy bank = (bank ==) . (.account.owner)
+  let firstContractId = fst . head
+
+  -- Slide 10-16, transfer money from USFRB's account to BankA
+  usdCbdc <- transferFromCentralbankToBank usFRB bankA 100_000_000.0
+
+  -- Slide 17, transfer money from ECB's account to BankB
+  eurCbdc <- transferFromCentralbankToBank ecb bankB 85_000_000.0
+
+  -- Slide 18-19: No actual steps.
+  -- Slide 20-21: No steps just UI shows settlement risk.
+  -- Pvp that will fail:
+  -- 100M USD vs. 185M EUR
+  -- Bank B does not have 185M EUR.
+  Some eurCbdcData <- queryContractId ecb eurCbdc -- TODO BankA should be able to get this somehow.
+  Some ecbBankARoleData <- queryContractId bankA ecbBankARole
+  pvpProposalCid
+    <- bankA `submit`
+    exerciseCmd usFRBBankARole RequestPvp
+        with
+          quantityToSend = 100_000_000.0
+          receiver = bankB
+          incomingCashId = eurCbdcData.asset.id
+          incomingCashQuantity = 185_000_000.0
+          ownAccountForIncoming = ecbBankARoleData.account
+
+  Some usFRBBankBRoleData <- queryContractId bankB usFRBBankBRole
+  pvpThatFails
+    <- toPvpContracts <$> (bankB `submit`
+    exerciseCmd ecbBankBRole AcceptPvp
+      with
+        pvpRequestCid = pvpProposalCid
+        ownAccountForIncoming = usFRBBankBRoleData.account)
+
+  -- Pvp that works:
+  -- 100M USD vs. 85M EUR
+  Some eurCbdcData <- queryContractId ecb eurCbdc -- TODO BankA should be able to get this somehow.
+  Some ecbBankARoleData <- queryContractId bankA ecbBankARole
+  pvpProposalCid
+    <- bankA `submit`
+    exerciseCmd usFRBBankARole RequestPvp
+        with
+          quantityToSend = 100_000_000.0
+          receiver = bankB
+          incomingCashId = eurCbdcData.asset.id
+          incomingCashQuantity = 85_000_000.0
+          ownAccountForIncoming = ecbBankARoleData.account
+
+  Some usFRBBankBRoleData <- queryContractId bankB usFRBBankBRole
+  workingPvp <- toPvpContracts <$> (bankB `submit`
+    exerciseCmd ecbBankBRole AcceptPvp
+      with
+        pvpRequestCid = pvpProposalCid
+        ownAccountForIncoming = usFRBBankBRoleData.account)
+
+  -- Slide 22-24: Precanned Pvp 100USD vs 185EUR, should fail.
+  bankUsdCash <- firstContractId <$> queryFilter @AssetDeposit bankA (isOwnedBy bankA)
+  paySettleCid <- bankA `submit`
+    exerciseCmd pvpThatFails.payment SettlementInstruction_AllocateNext with
+      depositCids = [bankUsdCash]
+      ctrl = bankA
+
+  -- It fails at the allocation.
+  bankEurCash <- firstContractId <$> queryFilter @AssetDeposit bankB (isOwnedBy bankB)
+  bankB `submitMustFail`
+    exerciseCmd pvpThatFails.delivery SettlementInstruction_AllocateNext with
+      depositCids = [bankEurCash]
+      ctrl = bankB
+
+  -- Slide 25-27: Precanned Pvp 100USD vs 85EUR, should work.
+  bankUsdCash <- firstContractId <$> queryFilter @AssetDeposit bankA (isOwnedBy bankA)
+  paySettleCid <- bankA `submit`
+    exerciseCmd workingPvp.payment SettlementInstruction_AllocateNext with
+      depositCids = [bankUsdCash]
+      ctrl = bankA
+
+  bankEurCash <- firstContractId <$> queryFilter @AssetDeposit bankB (isOwnedBy bankB)
+  delSettleCid <- bankB `submit`
+    exerciseCmd workingPvp.delivery SettlementInstruction_AllocateNext with
+      depositCids = [bankEurCash]
+      ctrl = bankB
+
+  -- The trigger does the following step automatically:
+  bankA `submit`
+    exerciseCmd workingPvp.dvpSettlementRule DvpSettlement_Process with
+      paymentInstructionCids = [paySettleCid]
+      deliveryInstructionCids = [delSettleCid]
+      ctrl = bankA
+      dvpCid = workingPvp.dvp
+  -- let activeContracts =
+  --         toACS paySettleCid <> toACS delSettleCid <>
+  --         toACS workingPvp.dvp <> toACS pvpThatFails.dvp <>
+  --         toACS workingPvp.dvpSettlementRule <> toACS pvpThatFails.dvpSettlementRule
+  -- testRule autoSettleTrigger bankA activeContracts Map.empty ()
+
+  -- Earmarked CBDC / rent invoice payment workflow
+
+  actualTime <- getTime
+  assetDepositCid <- usFRB `submit`
+    exerciseCmd usFRBRole CreateSpecialCbdc with
+      quantity = 3000.0
+      earmark = Housing
+      targetAccount = renterAccount
+
+  -- Creation of rent invoice
+  invoice <- landlord `submit`
+    exerciseCmd landlordRole CreateRentInvoice with
+      economicSectorCertificate = Some distributedCert
+      date = Date.date 2020 Date.Feb 02
+      price = 1998.0
+      ..
+
+  -- Renter pays the rent invoice
+  resultCash <- renter `submit`
+    exerciseCmd invoice RentInvoice_Pay with assetDepositCids = [assetDepositCid], ..
+
+  pure ()
+
+bankA_can_process : Script ()
+bankA_can_process = do
+  let bankASentAmount = 1.0
+      bankBSentAmount = 2.0
+  (bankA, bankB, paySettleCid, delSettleCid, workingPvp)
+    <- bankAEurVsbankBUsdWorkflow bankASentAmount bankBSentAmount
+  DvpSettlement_Process_Result dvpCid [[money1Cid]] [[money2Cid]] <- bankA `submit`
+    exerciseCmd workingPvp.dvpSettlementRule DvpSettlement_Process with
+      paymentInstructionCids = [paySettleCid]
+      deliveryInstructionCids = [delSettleCid]
+      ctrl = bankA
+      dvpCid = workingPvp.dvp
+
+  Some dvp <- queryContractId bankA dvpCid
+  assertMsg "Settlement type is not specified." $ isSome dvp.settledAtTime
+
+  Some money1Data <- queryContractId bankB money1Cid
+  money1Data.asset.quantity === bankASentAmount
+
+  Some money2Data <- queryContractId bankA money2Cid
+  money2Data.asset.quantity === bankBSentAmount
+
+bankB_can_process : Script ()
+bankB_can_process = do
+  let bankASentAmount = 1.0
+      bankBSentAmount = 2.0
+  (bankA, bankB, paySettleCid, delSettleCid, workingPvp)
+    <- bankAEurVsbankBUsdWorkflow bankASentAmount bankBSentAmount
+  DvpSettlement_Process_Result dvpCid [[money1Cid]] [[money2Cid]] <- bankB `submit`
+    exerciseCmd workingPvp.dvpSettlementRule DvpSettlement_Process with
+      paymentInstructionCids = [paySettleCid]
+      deliveryInstructionCids = [delSettleCid]
+      ctrl = bankB
+      dvpCid = workingPvp.dvp
+
+  Some dvp <- queryContractId bankA dvpCid
+  assertMsg "Settlement type is not specified." $ isSome dvp.settledAtTime
+
+  Some money1Data <- queryContractId bankB money1Cid
+  money1Data.asset.quantity === bankASentAmount
+
+  Some money2Data <- queryContractId bankA money2Cid
+  money2Data.asset.quantity === bankBSentAmount
+
+bankAEurVsbankBUsdWorkflow
+  : Decimal
+  -> Decimal
+  -> Script (Party, Party, ContractId SettlementInstruction,
+             ContractId SettlementInstruction, PvpContracts)
+bankAEurVsbankBUsdWorkflow bankASentAmount bankBSentAmount = script do
+  initData@InitData{..} <- allocateAndInitDemo
+  let PartiesForTesting{..} = initData.parties
+  let amount: Decimal = 200_000_000.0
+  let isOwnedBy bank = (bank ==) . (.account.owner)
+
+  -- Transfer money from USFRB's account to BankB
+  usdCbdc <- transferFromCentralbankToBank usFRB bankB amount
+
+  -- Transfer money from ECB's account to BankA
+  eurCbdc <- transferFromCentralbankToBank ecb bankA amount
+
+  -- Pvp
+  Some usdCbdcData <- queryContractId usFRB usdCbdc
+  Some usFRBBankARoleData <- queryContractId bankA usFRBBankARole
+  pvpProposalCid
+    <- bankA `submit`
+    exerciseCmd ecbBankARole RequestPvp
+        with
+          quantityToSend = bankASentAmount
+          receiver = bankB
+          incomingCashId = usdCbdcData.asset.id
+          incomingCashQuantity = bankBSentAmount
+          ownAccountForIncoming = usFRBBankARoleData.account
+
+  Some ecbBankBRoleData <- queryContractId bankB ecbBankBRole
+  workingPvp <- toPvpContracts <$> (bankB `submit`
+    exerciseCmd usFRBBankBRole AcceptPvp
+      with
+        pvpRequestCid = pvpProposalCid
+        ownAccountForIncoming = ecbBankBRoleData.account)
+
+  let myCash bank c = isOwnedBy bank c && c.asset.quantity == amount
+  bankEurCash <- firstContractId <$> queryFilter @AssetDeposit bankA (myCash bankA)
+  paySettleCid <- bankA `submit`
+    exerciseCmd workingPvp.payment SettlementInstruction_AllocateNext with
+      depositCids = [bankEurCash]
+      ctrl = bankA
+
+  bankUsdCash <- firstContractId <$> queryFilter @AssetDeposit bankB (myCash bankB)
+  delSettleCid <- bankB `submit`
+    exerciseCmd workingPvp.delivery SettlementInstruction_AllocateNext with
+      depositCids = [bankUsdCash]
+      ctrl = bankB
+
+  pure (bankA, bankB, paySettleCid, delSettleCid, workingPvp)
+
+toPvpContracts
+  : (ContractId DvpSettlementRule,
+     ContractId Dvp,
+     ContractId SettlementInstruction,
+     ContractId SettlementInstruction)
+  -> PvpContracts
+toPvpContracts (rule, dvp, si1, si2) =
+  PvpContracts rule dvp si1 si2
+
+synchronize : Template a => Party -> ContractId a -> Script (ContractId a)
+synchronize party cid = do
+  result <- queryContractId party cid
+  case result of
+    None -> do
+      sleep $ convertMicrosecondsToRelTime 300_000
+      synchronize party cid
+    Some _ ->
+      pure cid
+
+
+started : Action m => Text -> m ()
+started message = debug $ "Started: " <> message
+
+finished : Action m => Text -> m ()
+finished message = debug $ "Finished: " <> message
+
+-- TODO: 'submit' is broken in SDK 1.9.0 when used with the JSON API.
+singleSubmit : Party -> Commands a -> Script a
+singleSubmit party commands = submitMulti [party] [party] commands
+
+firstContractId : [(c, b)] -> c
+firstContractId = fst . head

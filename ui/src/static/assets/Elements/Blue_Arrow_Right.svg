@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="128px" height="120px" viewBox="0 0 128 120" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Group 13</title>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Group-13" transform="translate(63.800000, 60.203904) scale(-1, 1) translate(-63.800000, -60.203904) translate(1.800000, 2.203904)" stroke="#A7F6FF" stroke-width="3">
+            <polyline id="Line-11" transform="translate(61.590484, 57.616895) scale(-1, 1) rotate(220.000000) translate(-61.590484, -57.616895) " points="3.25788046 46.8026693 21.5329631 31.4680542 65.415929 83.7657364 119.923087 38.0287999"></polyline>
+            <polyline id="Rectangle" stroke-linecap="round" transform="translate(30.718308, 103.396548) scale(1, -1) rotate(135.000000) translate(-30.718308, -103.396548) " points="36.7183078 97.3965478 36.7183078 109.396548 24.7183078 109.396548"></polyline>
+        </g>
+    </g>
+</svg>

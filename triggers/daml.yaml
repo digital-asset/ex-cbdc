@@ -1,0 +1,18 @@
+#
+# Copyright (c) 2021, Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+#
+
+sdk-version: 1.10.0
+name: triggers
+source: daml
+version: 1.0.0
+dependencies:
+  - daml-prim
+  - daml-script
+  - daml-stdlib
+  - daml-trigger
+  - ../lib/.daml/dist/lib-1.0.0.dar
+  - ../certificates/.daml/dist/certificates-1.0.0.dar
+  - ../finance/.daml/dist/finance-1.0.0.dar
+  - ../banking/.daml/dist/banking-1.0.0.dar

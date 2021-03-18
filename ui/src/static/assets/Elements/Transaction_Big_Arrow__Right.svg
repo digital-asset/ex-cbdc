@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="220px" height="202px" viewBox="0 0 220 202" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Group 19</title>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" stroke-linecap="round">
+        <g id="Slide-20" transform="translate(-781.000000, -368.000000)" stroke="#A7F6FF" stroke-width="3">
+            <g id="Group-19" transform="translate(782.772330, 370.738975)">
+                <line x1="19" y1="39" x2="194.716164" y2="157.522049" id="Line-11" transform="translate(106.858082, 98.261025) scale(1, -1) rotate(326.000000) translate(-106.858082, -98.261025) "></line>
+                <polyline id="Rectangle" transform="translate(207.044540, 98.204914) scale(-1, -1) rotate(135.000000) translate(-207.044540, -98.204914) " points="213.04454 92.2049137 213.04454 104.204914 201.04454 104.204914"></polyline>
+            </g>
+        </g>
+    </g>
+</svg>

@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+#
+# Copyright (c) 2021, Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+#
+
+scripts/waitForLedger.sh localhost 6865
+daml json-api --ledger-host localhost --ledger-port 6865 --http-port 4000

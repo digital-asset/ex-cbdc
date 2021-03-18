@@ -1,0 +1,26 @@
+#
+# Copyright (c) 2021, Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+#
+
+sdk-version: 1.10.0
+name: banking
+source: daml
+version: 1.0.0
+parties:
+  - DemoAdmin
+  - CentralBank
+  - BankA
+  - BankB
+dependencies:
+  - daml-prim
+  - daml-stdlib
+  - daml-script
+  - ../lib/.daml/dist/lib-1.0.0.dar
+  - ../certificates/.daml/dist/certificates-1.0.0.dar
+  - ../finance/.daml/dist/finance-1.0.0.dar
+build-options:
+  - '--ghc-option'
+  - '-Werror'
+  - '--ghc-option'
+  - '-Wunused-binds'

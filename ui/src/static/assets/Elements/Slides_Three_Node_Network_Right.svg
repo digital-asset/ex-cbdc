@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="108px" height="112px" viewBox="0 0 108 112" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Group 13</title>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Slide-22" transform="translate(-991.000000, -445.000000)" stroke="#FFFFFF">
+            <g id="Group-13" transform="translate(992.566398, 448.152102)">
+                <circle id="Oval" stroke-width="5" fill="#232F40" transform="translate(29.486343, 98.235016) scale(-1, 1) rotate(-10.000000) translate(-29.486343, -98.235016) " cx="29.4863427" cy="98.2350162" r="6"></circle>
+                <path d="M95.6760512,52.8427633 C98.9897597,52.8427633 101.676051,50.1564718 101.676051,46.8427633 C101.676051,43.5290548 98.9897597,40.8427633 95.6760512,40.8427633 C92.3623427,40.8427633 89.6760512,43.5290548 89.6760512,46.8427633 C89.6760512,50.1564718 92.3623427,52.8427633 95.6760512,52.8427633 Z" id="Oval" stroke-width="5" fill="#232F40" transform="translate(95.676051, 46.842763) scale(-1, 1) rotate(-10.000000) translate(-95.676051, -46.842763) "></path>
+                <line x1="39.0943829" y1="45.5864334" x2="86.8090277" y2="100.506791" id="Line-2" stroke-width="2" stroke-linecap="square" transform="translate(62.951705, 73.046612) scale(-1, 1) rotate(-10.000000) translate(-62.951705, -73.046612) "></line>
+                <line x1="35.3607009" y1="15.111447" x2="7" y2="90.1567102" id="Line-2" stroke-width="2" stroke-linecap="square" transform="translate(21.180350, 52.634079) scale(-1, 1) rotate(-10.000000) translate(-21.180350, -52.634079) "></line>
+                <line x1="92.3480522" y1="16.4810427" x2="16.1682399" y2="36.3206744" id="Line-2" stroke-width="2" stroke-linecap="square" transform="translate(54.258146, 26.400859) scale(-1, 1) rotate(-10.000000) translate(-54.258146, -26.400859) "></line>
+                <circle id="Oval" stroke-width="5" fill="#232F40" transform="translate(13.079886, 7.000000) scale(-1, 1) rotate(-10.000000) translate(-13.079886, -7.000000) " cx="13.0798861" cy="7" r="6"></circle>
+            </g>
+        </g>
+    </g>
+</svg>

@@ -1,0 +1,31 @@
+--
+-- Copyright (c) 2021, Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+--
+
+
+module Testing.Common.Parties where
+
+import Daml.Script
+
+import Testing.Models.Parties
+
+setupParties : Script PartiesForTesting
+setupParties = do
+  usFRB <- allocate "USFRB" "usfrb"
+  ecb <- allocate "ECB" "ecb"
+
+  bankA <- allocate "BankA" "bankA"
+  bankB <- allocate "BankB" "bankB"
+  demoAdmin <- allocate "DemoAdmin" "ecb"
+  landlord <- allocate "Landlord" "landlordsAssociation"
+  landlordsAssociation <- allocate "LandlordsAssociation" "landlordsAssociation"
+  renter <- allocate "Alice" "alice"
+
+  return $ PartiesForTesting with ..
+  where
+    allocate name participant =
+      allocatePartyWithHintOn
+        name
+        (PartyIdHint with partyIdHint = name)
+        (ParticipantName participant)

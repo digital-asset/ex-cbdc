@@ -1,0 +1,20 @@
+--
+-- Copyright (c) 2021, Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+--
+
+{-# LANGUAGE AllowAmbiguousTypes #-}
+
+module DA.Reset.Util where
+
+import Daml.Script
+import DA.NonEmpty
+import DA.Optional (fromSomeNote)
+
+queryCids : forall t p. (Template t, IsParties p) => p -> Script [ContractId t]
+queryCids p = do
+  contracts <- query p
+  pure $ fst <$> contracts
+
+fromList : [a] -> NonEmpty a
+fromList = fromSomeNote "NonEmpty from empty list" . nonEmpty

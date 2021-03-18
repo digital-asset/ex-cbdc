@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+#
+# Copyright (c) 2021, Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+#
+
+daml sandbox --ledgerid demo testing/.daml/dist/testing-1.0.0.dar reset/.daml/dist/reset-1.0.0.dar

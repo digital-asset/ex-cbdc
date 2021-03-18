@@ -1,0 +1,123 @@
+--
+-- Copyright (c) 2021, Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+--
+
+module DA.Finance.Trade.SettlementInstruction where
+
+import DA.Either
+import DA.Next.Set
+import DA.Optional hiding (fromSomeNote)
+import DA.Finance.Asset
+import DA.Finance.Asset.Settlement
+import DA.Finance.Types
+
+-- | Data describing settlement details.
+data SettlementDetails = SettlementDetails
+  with
+    senderAccount : Account
+      -- ^ The sender account.
+    receiverAccount : Account
+      -- ^ The receiver account.
+    depositCid : Optional (ContractId AssetDeposit)
+      -- ^ The allocated asset deposit.
+  deriving (Eq, Show)
+
+-- | Represents a settlement instruction for a specific trade. It is typically
+-- created at the same time than the trade is instructed. Allows to allocate assets
+-- and, once done, settle the instruction.
+-- If both counterparties have an account with the same provider, a single step,
+-- i.e. a direct transfer, suffices. If assets need to be atomically transferred up
+-- and down an account hierarchy, then multiple steps are required.
+template SettlementInstruction
+  with
+    masterAgreement : MasterAgreement
+      -- ^ The master agreement to which the settlement applies.
+    tradeId : Id
+      -- ^ The trade under the master agreement to which the settlement applies.
+    asset : Asset
+      -- ^ The id and amount of the asset to be settled.
+    steps : [SettlementDetails]
+      -- ^ The steps in the settlement. If both counterparties have an account
+      -- with the same provider, a single step, i.e. a direct transfer, suffices.
+    observers : Set Party
+  where
+    signatory getSignatories masterAgreement steps
+    observer getAllObservers masterAgreement steps observers
+    -- ensure length steps > 0 && asset.quantity > 0.0
+    --   && all (\(s1,s2) -> s1.receiverAccount.owner == s2.senderAccount.owner) (zip steps $ tail steps)
+
+    key (masterAgreement.id, tradeId, asset.id) : (Id, Id, Id)
+    maintainer key._1.signatories
+
+    choice SettlementInstruction_AllocateNext : ContractId SettlementInstruction
+      -- ^ Allocates an asset deposit to the next step of the settlement instruction.
+      -- In the simple case where both counterparties have an account with the same provider
+      -- a single allocation by the sender party is required.
+      with
+        -- depositCid : ContractId AssetDeposit <---
+        depositCids : [ContractId AssetDeposit]
+            -- ^ Specifies the asset deposit contract to be allocated.
+        ctrl : Party
+          -- ^ The next sender.
+      controller ctrl
+      do
+        assertMsg "List of deposits should not be empty." $ not $ Prelude.null depositCids
+        deposits <- mapA fetch depositCids
+        let (done, curr :: next) = break (\x -> isNone x.depositCid) steps
+            isMatchingDeposit =
+              \deposit -> deposit.account == curr.senderAccount &&
+                          deposit.asset.id == asset.id &&
+                          deposit.asset.earmark == asset.earmark
+            isAllMatching = all isMatchingDeposit deposits
+
+        case (nextSender this, isAllMatching) of
+          (None, _) ->
+            error "Fully allocated already."
+          (Some sender, _) | ctrl /= sender ->
+            error "Expecting controller to be next sender."
+          (_, False) ->
+            error "AssetDeposits passed to AllocateNext don't match the Settlement Instruction."
+          (Some sender, True) -> do
+            newDepositCid <- splitMergeNewAssetFromAssetsForQuantity depositCids deposits asset.quantity "allocation"
+            let currNew = curr with depositCid = Some newDepositCid
+            create this with steps = done ++ currNew :: next
+
+    controller masterAgreement.id.signatories can
+      SettlementInstruction_Process : [ContractId AssetDeposit]
+        -- ^ Processes a settlement instruction by transferring all allocated asset deposits.
+        -- This choice is often called from the trade itself to atomically settle all
+        -- assets involved.
+        do
+          mapA
+            (\x -> do
+              exerciseByKey @AssetSettlementRule x.senderAccount.id AssetSettlement_Transfer with
+                receiverAccountId = x.receiverAccount.id, depositCids = [fromSome x.depositCid]
+                amount = None
+            )
+            steps
+
+      SettlementInstruction_Archive : () do return ()
+
+-- | HIDE
+nextSender : SettlementInstruction -> Optional Party
+nextSender SettlementInstruction{..} = (.senderAccount.owner) <$> find (\step -> isNone step.depositCid) steps
+
+getSignatories : MasterAgreement -> [SettlementDetails] -> Set Party
+getSignatories masterAgreement steps =
+  union masterAgreement.id.signatories $ fromList $ snd $ senderDoneAndPending steps
+
+getAllObservers : MasterAgreement -> [SettlementDetails] -> Set Party -> Set Party
+getAllObservers masterAgreement steps observers =
+  insert masterAgreement.party1
+      $ insert masterAgreement.party2
+      $ union observers $ fromList $ fst $ senderDoneAndPending steps
+
+senderDoneAndPending : [SettlementDetails] -> ([Party], [Party])
+senderDoneAndPending steps =
+  partitionEithers $
+    map (\x ->
+      if isSome x.depositCid
+      then Left x.senderAccount.owner
+      else Right x.senderAccount.owner)
+    steps

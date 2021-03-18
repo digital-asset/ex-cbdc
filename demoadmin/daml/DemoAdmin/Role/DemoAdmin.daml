@@ -1,0 +1,28 @@
+--
+-- Copyright (c) 2021, Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+--
+
+module DemoAdmin.Role.DemoAdmin where
+
+import Banking.Role.CentralBank
+import DA.Finance.Types
+import DA.Next.Set qualified as Set
+
+template DemoAdminRole
+  with
+    demoAdmin: Party
+  where
+    signatory demoAdmin
+
+    controller demoAdmin can
+      nonconsuming AddCentralBank: ContractId CentralBankRoleInvite
+        with
+          centralBank : Party
+          cashLabel : Text
+        do
+          let accountId =  Id with
+                          label = "Central bank account"
+                          signatories = Set.singleton centralBank
+                          version = 1
+          create CentralBankRoleInvite with ..

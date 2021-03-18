@@ -1,0 +1,28 @@
+/**
+ * Copyright (c) 2021, Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+.progress {
+    position: relative;
+    height: 3px;
+    width: 100%;
+    overflow: hidden;
+}
+
+.progressLine {
+    position: absolute;
+    left: -100%;
+    height: 3px;
+    width: 100%;
+    background-image: linear-gradient(to right, #f5fdfd 0%, #65d3df 95%);
+    animation: line 2s linear infinite;
+}
+
+._second {
+    animation-delay: 1s;
+}
+
+@keyframes line {
+    from { left: -100% }
+    to { left: 100% }
+}

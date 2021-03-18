@@ -1,0 +1,107 @@
+--
+-- Copyright (c) 2021, Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+--
+
+module DA.Reset.ResetImplementation where
+
+import Daml.Script
+import DA.List
+import DA.Action (foldlA)
+
+import DA.Reset.Reset
+import DA.NonEmpty hiding (foldlA)
+
+template PendingResetAgreement
+  with
+    resetAgreement: ResetAgreement
+    alreadySigned: [Party]
+  where
+    signatory alreadySigned
+    observer resetAgreement.signatories
+    ensure unique alreadySigned
+
+    choice Sign : ContractId PendingResetAgreement with
+        signer : Party
+      controller signer
+        do
+          let toSign: [Party] = filter (`notElem` alreadySigned) resetAgreement.signatories
+          assert (signer `elem` toSign)
+          create this with alreadySigned = signer :: alreadySigned
+
+    choice Finalize : ContractId ResetAgreement with
+        closer : Party
+      controller closer
+        do
+          assert (sort alreadySigned == sort resetAgreement.signatories)
+          create resetAgreement
+
+authorizeAgreementByAll : NonEmpty Party -> Script (ContractId ResetAgreement)
+authorizeAgreementByAll signatories@(NonEmpty leader rest) = do
+  pending <- submit leader do
+    createCmd PendingResetAgreement with
+      resetAgreement = ResetAgreement with signatories = leader::rest
+      alreadySigned = [leader]
+  let addSignature cid party =
+        submit party do
+          exerciseCmd cid Sign with
+            signer = party
+  finalPending <- foldlA
+    addSignature
+    pending
+    rest
+  submit leader do
+    exerciseCmd finalPending Finalize with
+      closer = leader
+
+template ResetRequest
+  with
+    party : Party
+  where
+    signatory party
+    key party: Party
+    maintainer key
+
+    controller party can
+      StartReset : ContractId ResetInProgress
+        do
+          create ResetInProgress with party
+
+template ResetInProgress
+  with
+    party : Party
+  where
+    signatory party
+    key party: Party
+    maintainer key
+
+    controller party can
+      CompleteReset : ()
+        do
+          pure ()
+
+resetIfRequested: Parties -> Script ()
+resetIfRequested parties = do
+  request <- queryContractKey @ResetRequest theResetAdmin theResetAdmin
+  case request of
+    None ->
+      debug "No reset request found."
+    Some (requestCid, _) ->
+      reset requestCid
+  where
+    reset: ContractId ResetRequest -> Script ()
+    reset requestCid = do
+      acceptedRequest <- submit theResetAdmin do
+        exerciseCmd requestCid StartReset
+      debug "Reset started."
+      allParties <- getAllParties parties
+      resetAgreement <- authorizeAgreementByAll allParties
+      deleteAllContracts resetAgreement (toList allParties)
+      initLedgerAfterReset parties
+      submit theResetAdmin do
+        exerciseCmd resetAgreement Revoke with party = theResetAdmin
+      submit theResetAdmin do
+        exerciseCmd acceptedRequest CompleteReset
+      debug "Reset completed."
+
+    theResetAdmin = getResetAdmin parties

@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+#
+# Copyright (c) 2021, Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+#
+
+basedir="$(dirname "$0")/../../"
+
+"$basedir/scripts/waitForCantonLedgers.sh"
+
+participants_json=${1:-"$basedir/canton-participants.json"}
+parties_json=${1:-"$basedir/canton-parties.json"}
+"$basedir/scripts/ledger-setup.sh" "$participants_json" "$parties_json"

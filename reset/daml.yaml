@@ -1,0 +1,29 @@
+#
+# Copyright (c) 2021, Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+#
+
+sdk-version: 1.10.0
+name: reset
+source: daml
+version: 1.0.0
+parties:
+  - DemoAdmin
+dependencies:
+  - daml-prim
+  - daml-stdlib
+  - daml-script
+  - ../lib/.daml/dist/lib-1.0.0.dar
+  - ../certificates/.daml/dist/certificates-1.0.0.dar
+  - ../finance/.daml/dist/finance-1.0.0.dar
+  - ../banking/.daml/dist/banking-1.0.0.dar
+  - ../demoadmin/.daml/dist/demoadmin-1.0.0.dar
+  - ../landlord/.daml/dist/landlord-1.0.0.dar
+  - ../testing/.daml/dist/testing-1.0.0.dar
+sandbox-options:
+  - --wall-clock-time
+build-options:
+  - '--ghc-option'
+  - '-Werror'
+  - '--ghc-option'
+  - '-Wunused-binds'

@@ -1,0 +1,88 @@
+--
+-- Copyright (c) 2021, Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+--
+
+module Banking.Role.CentralBank where
+
+import Banking.Role.Bank
+import Certificates.Sector.Economic
+
+import DA.Finance.Asset
+import DA.Finance.Types
+import DA.Finance.Asset.Settlement
+import DA.Lib.Types.Sector
+import DA.Next.Set as Set
+import DA.Optional
+
+template CentralBankRole
+  with
+    demoAdmin : Party
+    centralBank : Party
+    cashLabel : Text
+    account : Account
+  where
+    signatory demoAdmin, centralBank
+
+    controller centralBank can
+      nonconsuming InviteBank: ContractId BankRoleInvite
+        with
+          bank: Party
+          accountId : Id
+        do
+          create BankRoleInvite with ..
+
+      nonconsuming CreateCbdc: ContractId AssetDeposit
+        with
+          targetAccount : Optional Account
+          quantity : Decimal
+        do
+          let targetAccount' = fromOptional account targetAccount
+              asset = getAsset quantity None $ getCashId centralBank cashLabel
+              deposit = AssetDeposit with account = targetAccount', observers = Set.empty, ..
+          exerciseByKey @AssetSettlementRule deposit.account.id AssetSettlement_Credit with
+            asset = deposit.asset
+            ctrl = deposit.account.provider
+
+      nonconsuming CreateSpecialCbdc: ContractId AssetDeposit
+        with
+          targetAccount : Account
+          quantity : Decimal
+          earmark : Sector
+        do
+          let asset = getAsset quantity (Some earmark) $ getCashId centralBank cashLabel
+              deposit = AssetDeposit with account = targetAccount, observers = Set.empty, ..
+          exerciseByKey @AssetSettlementRule deposit.account.id AssetSettlement_Credit with
+            asset = deposit.asset
+            ctrl = deposit.account.provider
+
+      nonconsuming CreateCertificate : ContractId EconomicSectorCertificate
+        with
+          landlordsAssociation: Party
+          sector : Sector
+        do
+          create EconomicSectorCertificate with ..
+
+
+template CentralBankRoleInvite
+  with
+    demoAdmin : Party
+    centralBank : Party
+    cashLabel : Text
+    accountId : Id
+  where
+    signatory demoAdmin
+    ensure accountId.signatories == Set.fromList [centralBank]
+
+    controller centralBank can
+      CentralBankRoleInvite_Accept : ContractId CentralBankRole
+        do
+          let account = Account with id = accountId, provider = centralBank, owner = centralBank
+          create AssetSettlementRule with
+            ctrls = Set.singleton centralBank
+            observers = Set.empty
+            account
+          create CentralBankRole with ..
+
+      CentralBankRoleInvite_Reject : ()
+        do return ()

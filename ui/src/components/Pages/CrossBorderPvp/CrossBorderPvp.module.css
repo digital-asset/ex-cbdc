@@ -1,0 +1,156 @@
+/**
+ * Copyright (c) 2021, Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+.main {
+  position: relative;
+  margin: 0 auto;
+  width: 1366px;
+  height: 693px;
+
+  background-size: contain;
+  background-image: url("../../../static/assets/Elements/Background_Image.svg");
+}
+.mainTitle {
+  position: absolute;
+  left: 60px;
+  top: 15px;
+  margin: unset;
+  color: #fff;
+  font-family: Brown-Regular;
+  font-size: 36px;
+  font-weight: normal;
+  letter-spacing: 2px;
+  display: flex;
+}
+
+.mainFishTitle{
+  font-size: 28px;
+  letter-spacing: 1.48px;
+}
+.boxWrapper {
+  display: flex;
+  position: absolute;
+  justify-content: space-between;
+  left: 520px;
+  top: 350px;
+  width: 360px;
+}
+.customBorder {
+  position: absolute;
+  width: 200px;
+  border: dashed rgba(167, 246, 255, 0.51) 1px;
+  top: 83px;
+  left: 100px;
+}
+.atomicImg {
+  z-index: 10;
+}
+.leftBox {
+  position: relative;
+  z-index: 10;
+}
+.leftTransparent {
+  position: absolute;
+  top: 122px;
+  left: 182px;
+}
+.rightTransparent {
+  position: absolute;
+  top: 53px;
+  right: 203px;
+}
+.middleComponent {
+  position: absolute;
+  left: 551px;
+  bottom: 0;
+}
+.finishBlueBox {
+  position: absolute;
+  left: 564px;
+  top: 322px;
+}
+.rightBox {
+  position: relative;
+  z-index: 10;
+}
+.privacyIcon {
+  position: absolute;
+  left: 37px;
+  top: -18px;
+}
+
+.centralTransactionBox {
+  position: absolute;
+  top: 330px;
+  left: 579px;
+  width: 244px;
+}
+.damlArrows {
+  position: absolute;
+  left: 500px;
+  top: 530px;
+
+}
+.damlLeftArrow {
+  position: absolute;
+  left: -99px;
+  bottom: -20px;
+}
+.damlRightArrow {
+  position: absolute;
+  left: 278px;
+  bottom: 60px;
+}
+
+.leftLogosWrapper {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  left: 220px;
+  top: 480px;
+}
+.leftLogosShrinked {
+  transform: scale(0.7);
+  top: 430px;
+  left: 250px;
+}
+.rightLogosWrapper {
+  position: relative;
+  top: 200px;
+  left: 880px;
+  width: 200px;
+  height: 200px;
+}
+.rightLogosShrinked {
+  transform: scale(0.7);
+  top: 150px;
+  left: 870px;
+}
+.finalScreen{
+  position: absolute;
+  left: 181px;
+  bottom: 0;
+}
+
+/* BlueBoxes */
+.boxesContainer{
+  position: absolute;
+  display: flex;
+  top:272px;
+  left: 564px;
+}
+/*Hints*/
+.textHints{
+  font-weight: normal;
+  font-size: 12px;
+  font-family: Brown;
+}
+.additionalHintsContainer{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.hintButton {
+  width: 104px;
+}

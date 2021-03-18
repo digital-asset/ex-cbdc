@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="108px" height="104px" viewBox="0 0 108 104" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Group 12</title>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" stroke-linecap="round">
+        <g id="Slide-23" transform="translate(-780.000000, -404.000000)" stroke="#A7F6FF" stroke-width="3">
+            <g id="Group-12" transform="translate(782.174167, 405.390753)">
+                <line x1="12" y1="82.4193969" x2="88.7720477" y2="18" id="Line-11" transform="translate(50.386024, 50.209698) rotate(220.000000) translate(-50.386024, -50.209698) "></line>
+                <polyline id="Rectangle" transform="translate(94.862191, 50.209698) scale(-1, -1) rotate(135.000000) translate(-94.862191, -50.209698) " points="100.862191 44.2096985 100.862191 56.2096985 88.8621911 56.2096985"></polyline>
+            </g>
+        </g>
+    </g>
+</svg>

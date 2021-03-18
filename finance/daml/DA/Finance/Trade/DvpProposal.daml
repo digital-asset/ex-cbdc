@@ -1,0 +1,114 @@
+--
+-- Copyright (c) 2021, Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+--
+
+module DA.Finance.Trade.DvpProposal where
+
+import DA.Finance.Trade.SettlementInstruction
+import DA.Finance.Trade.Dvp.Settlement
+import DA.Finance.Trade.Dvp
+import DA.Finance.Types
+import DA.Next.Set as Set
+
+template DvpProposal
+  with
+    proposer : Party
+    dvpSettlement : DvpSettlementRule
+    dvp : Dvp
+    paymentAccounts: [Account]
+    deliveryAccounts: [Account]
+  where
+    signatory proposer
+    ensure proposer `elem` [dvp.masterAgreement.party1, dvp.masterAgreement.party2] &&
+           dvp.masterAgreement.id.signatories == Set.fromList [proposer, getAcceptingParty dvp proposer] &&
+           isValidDvp dvp &&
+           length dvp.payments == length paymentAccounts &&
+           length dvp.deliveries == length deliveryAccounts
+
+    controller getAcceptingParty dvp proposer can
+      DvpProposal_Accept : (ContractId DvpSettlementRule, ContractId Dvp, [ContractId SettlementInstruction])
+        with
+          otherPaymentAccounts : [Account]
+          otherDeliveryAccounts : [Account]
+        do
+          assertMsg "number of settlement contracts matches (payments)" $
+            length dvp.payments == length otherPaymentAccounts
+          assertMsg "number of settlement contracts matches (deliveries)" $
+            length dvp.deliveries == length otherDeliveryAccounts
+
+          dvpSettlementCid <- createDvpSettlementIfNeeded dvpSettlement
+          dvpCid <- create dvp with status = SettlementStatus_Instructed
+
+          paymentCids <- forA (zip3 dvp.payments paymentAccounts otherPaymentAccounts)
+                              (createSettlementInstructionForPayment proposer dvp)
+          deliveryCids <- forA (zip3 dvp.deliveries deliveryAccounts otherDeliveryAccounts)
+                               (createSettlementInstructionForDelivery proposer dvp)
+
+          pure (dvpSettlementCid, dvpCid, paymentCids ++ deliveryCids)
+
+    controller getAcceptingParty dvp proposer can
+      DvpProposal_Reject : ContractId DvpCancellation
+        do create DvpCancellation with dvp, info = "unilateral", canceledBy = getAcceptingParty dvp proposer
+
+    controller proposer can
+      DvpProposal_Cancel : ContractId DvpCancellation
+        do create DvpCancellation with dvp, info = "unilateral", canceledBy = proposer
+
+
+template DvpCancellation
+  with
+    dvp: Dvp
+    info: Text
+    canceledBy : Party
+  where
+    signatory canceledBy
+    ensure canceledBy == dvp.masterAgreement.party1 || canceledBy == dvp.masterAgreement.party2
+    observer if canceledBy == dvp.masterAgreement.party1 then dvp.masterAgreement.party2 else dvp.masterAgreement.party1
+
+getAcceptingParty : Dvp -> Party -> Party
+getAcceptingParty dvp proposer =
+  if proposer == dvp.masterAgreement.party1
+  then dvp.masterAgreement.party2
+  else dvp.masterAgreement.party1
+
+createSettlementInstructionForPayment : Party -> Dvp -> (Asset, Account, Account) -> Update (ContractId SettlementInstruction)
+createSettlementInstructionForPayment proposer dvp (asset, paymentAccount, otherPaymentAccount) =
+  create SettlementInstruction with
+    masterAgreement = dvp.masterAgreement
+    tradeId = dvp.tradeId
+    steps = [
+      SettlementDetails with
+          senderAccount = if proposer == dvp.buyer then paymentAccount else otherPaymentAccount
+            -- ^ The sender account.
+          receiverAccount = if proposer == dvp.buyer then otherPaymentAccount else paymentAccount
+            -- ^ The receiver account.
+          depositCid = None
+            -- ^ The allocated asset deposit.
+      ]
+    observers = Set.empty
+    ..
+
+createSettlementInstructionForDelivery : Party -> Dvp -> (Asset, Account, Account) -> Update (ContractId SettlementInstruction)
+createSettlementInstructionForDelivery proposer dvp (asset, deliveryAccount, otherDeliveryAccount) =
+  create SettlementInstruction with
+    masterAgreement = dvp.masterAgreement
+    tradeId = dvp.tradeId
+    steps = [
+      SettlementDetails with
+          senderAccount = if proposer == dvp.buyer then otherDeliveryAccount else deliveryAccount
+            -- ^ The sender account.
+          receiverAccount = if proposer == dvp.buyer then deliveryAccount else otherDeliveryAccount
+            -- ^ The receiver account.
+          depositCid = None
+            -- ^ The allocated asset deposit.
+      ]
+    observers = Set.empty
+    ..
+
+createDvpSettlementIfNeeded : DvpSettlementRule -> Update (ContractId DvpSettlementRule)
+createDvpSettlementIfNeeded dvpSettlement = do
+  maybeDvpSettlementCid <- lookupByKey @DvpSettlementRule dvpSettlement.masterAgreement.id
+  case maybeDvpSettlementCid of
+    None -> create dvpSettlement
+    Some cid -> pure cid

@@ -1,0 +1,72 @@
+{
+  "name": "cbdc",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "@daml.js/banking-1.0.0": "file:./daml.js/banking-1.0.0",
+    "@daml.js/certificates-1.0.0": "file:./daml.js/certificates-1.0.0",
+    "@daml.js/demoadmin-1.0.0": "file:./daml.js/demoadmin-1.0.0",
+    "@daml.js/finance-1.0.0": "file:./daml.js/finance-1.0.0",
+    "@daml.js/landlord-1.0.0": "file:./daml.js/landlord-1.0.0",
+    "@daml.js/lib-1.0.0": "file:./daml.js/lib-1.0.0",
+    "@daml.js/reset-1.0.0": "file:./daml.js/reset-1.0.0",
+    "@daml/ledger": "1.10.0",
+    "@daml/react": "1.10.0",
+    "@daml/types": "1.10.0",
+    "@types/react-router-dom": "^5.1.6",
+    "dotenv": "^8.2.0",
+    "jwt-simple": "^0.5.6",
+    "lodash": "^4.17.20",
+    "react": "^16.14.0",
+    "react-dom": "^16.12.0",
+    "react-elastic-carousel": "^0.9.4",
+    "react-number-format": "^4.4.1",
+    "react-router-dom": "^5.2.0",
+    "react-router-transition": "^2.0.0",
+    "semantic-ui-css": "^2.4.1",
+    "semantic-ui-react": "^0.88.1",
+    "styled-components": "^5.2.1"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --testURL='http://localhost:7575'",
+    "eject": "react-scripts eject",
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx src/"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@types/dotenv": "^8.2.0",
+    "@types/jest": "^26.0.20",
+    "@types/jwt-simple": "^0.5.33",
+    "@types/lodash": "^4.14.162",
+    "@types/react": "^16.9.16",
+    "@types/react-dom": "^16.9.4",
+    "http-proxy-middleware": "^1.0.4",
+    "react-scripts": "^4.0.3",
+    "typescript": "~3.8.3"
+  },
+  "jest": {
+    "transformIgnorePatterns": [
+      "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$",
+      "node_modules/(?!(react-native|react-dom|react-elastic-carousel|react-number-format|react-router-dom|react-router-transition)/)"
+    ],
+    "moduleNameMapper": {
+      "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$": "<rootDir>/__mocks__/fileMock.js"
+    }
+  }
+}

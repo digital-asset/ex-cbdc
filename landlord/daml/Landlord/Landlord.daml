@@ -1,0 +1,164 @@
+--
+-- Copyright (c) 2021, Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+--
+
+module Landlord.Landlord where
+
+import DA.Finance.Asset
+import DA.Finance.Types
+import DA.Finance.Asset.Settlement
+import DA.Lib.Types.Sector
+import DA.List
+import DA.Foldable (forA_)
+
+import Certificates.Sector.Economic
+import DA.Next.Set as Set
+import DA.Optional
+import Prelude hiding (forA)
+import DA.Traversable
+
+template LandlordRole
+  with
+    landlordsAssociation : Party
+    landlord : Party
+    landlordAccountId : Id
+  where
+    signatory landlordsAssociation, landlord
+
+    controller landlord can
+      nonconsuming CreateRentInvoice : ContractId RentInvoice
+        with
+          economicSectorCertificate : Optional (ContractId DistributedEconomicSectorCertificate)
+          renter : Party
+          date : Date
+          price : Decimal
+        do
+          economicSectorCertificate <- forA economicSectorCertificate \certificateCid -> do
+            certificate <- fetch certificateCid
+            assertMsg "Rent invoice can only be created using a certificate for the Housing sector." $
+              Housing == certificate.sector
+            exercise certificateCid AddObserver with newObserver = renter
+          last <- lookupByKey @LastPaidRentInvoice (landlord, renter)
+          forA_ last (`exercise` LastPaidRentInvoice_Archive)
+          create RentInvoice with ..
+
+template RentInvoice
+  with
+    landlordsAssociation : Party
+    landlord : Party
+    renter : Party
+    date : Date
+    price : Decimal
+    economicSectorCertificate : Optional (ContractId DistributedEconomicSectorCertificate)
+    landlordAccountId : Id
+  where
+    signatory landlordsAssociation, landlord
+
+    controller renter can
+      RentInvoice_Pay : (ContractId LastPaidRentInvoice, [ContractId AssetDeposit])
+        with
+          assetDepositCids : [ContractId AssetDeposit]
+        do
+          assetDeposits <- Prelude.mapA fetch assetDepositCids
+          assertMsg "Payment needs some asset deposit." $ not $ Prelude.null assetDepositCids
+          assertMsg "Quantity has to be less or equal than price." $ price <= sum ((.asset.quantity) <$> assetDeposits)
+          let depositCidsWithData = zip assetDepositCids assetDeposits
+              (normalCbdc, everyEarmarkedCbdc) = partition (\(_, d) -> isNone d.asset.earmark) depositCidsWithData
+          (earmarkedSpent, earmarkedResult) <-
+            case economicSectorCertificate of
+              Some certCid ->
+                payWithEarmarkedAsMuchAsPossible landlordAccountId price certCid everyEarmarkedCbdc
+              _ ->
+                pure (0.0, None)
+          normalResult <-
+            if earmarkedSpent < price
+            then do
+              let (normalCbdcCids, _) = unzip normalCbdc
+                  accountId = getAccountId normalCbdc
+              resultCbdc <- exerciseByKey @AssetSettlementRule accountId AssetSettlement_Transfer with
+                receiverAccountId = landlordAccountId
+                depositCids =  normalCbdcCids
+                amount = Some (price - earmarkedSpent)
+              pure $ Some resultCbdc
+            else
+              pure None
+          paid <- create LastPaidRentInvoice with rentInvoice = this
+          pure (paid, optionalToList normalResult <> optionalToList earmarkedResult)
+
+template LastPaidRentInvoice
+  with
+    rentInvoice : RentInvoice
+  where
+    signatory rentInvoice.landlord, rentInvoice.renter
+    key (rentInvoice.landlord, rentInvoice.renter): (Party, Party)
+    maintainer key._1
+
+    controller rentInvoice.landlord can
+      LastPaidRentInvoice_Archive : ()
+        do
+          pure ()
+
+template LandlordsAssociationRole
+  with
+    landlordsAssociation : Party
+  where
+    signatory landlordsAssociation
+
+    controller landlordsAssociation can
+      Invite_Landlord : ContractId LandlordRoleInvitation
+        with
+          landlord : Party
+        do
+          create LandlordRoleInvitation with ..
+
+template LandlordRoleInvitation
+  with
+    landlordsAssociation : Party
+    landlord : Party
+  where
+    signatory landlordsAssociation
+
+    controller landlord can
+      LandlordRoleInvitation_Accept : ContractId LandlordRole
+        with
+          landlordAccountId : Id
+        do
+          create LandlordRole with ..
+
+      LandlordRoleInvitation_Reject : ()
+        do
+          pure ()
+
+getAccountId : [(ContractId AssetDeposit, AssetDeposit)] -> Id
+getAccountId deposits =
+  let (_, headDeposit)::_ = deposits in
+  headDeposit.account.id
+
+payWithEarmarkedAsMuchAsPossible
+     : Id
+    -> Decimal
+    -> ContractId DistributedEconomicSectorCertificate
+    -> [(ContractId AssetDeposit, AssetDeposit)]
+    -> Update (Decimal, Optional (ContractId AssetDeposit))
+payWithEarmarkedAsMuchAsPossible landlordAccountId price certCid everyEarmarkedCbdc = do
+  cert <- fetch certCid
+  let earmarkedCbdc =
+        Prelude.filter (\(_, d) -> d.asset.earmark == Some cert.sector) everyEarmarkedCbdc
+  case earmarkedCbdc of
+    [] -> pure (0.0, None)
+    _ -> pay cert earmarkedCbdc
+ where
+  pay cert earmarkedCbdc = do
+    let accountId = getAccountId earmarkedCbdc
+    forA_ earmarkedCbdc \(assetDepositCid, assetDeposit) ->
+      assertMsg "Asset deposit has to be signed by Certificate provider." $
+        Set.member cert.centralBank assetDeposit.asset.id.signatories
+    let earmarkedSumQuantity = sum $ map (\(_, d) -> d.asset.quantity) earmarkedCbdc
+        earmarkedNeededQuantity = min price earmarkedSumQuantity
+    resultCbdc <- exerciseByKey @AssetSettlementRule accountId AssetSettlement_Earmarked_Transfer with
+      receiverAccountId = landlordAccountId
+      depositCids = fst <$> earmarkedCbdc
+      amount = Some earmarkedNeededQuantity
+      certificateCid = certCid
+    pure (earmarkedNeededQuantity, Some resultCbdc)

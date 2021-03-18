@@ -1,0 +1,157 @@
+--
+-- Copyright (c) 2021, Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+--
+
+module Testing.Tests.Finance where
+
+import Daml.Script
+import DA.Assert
+import DA.List.Total
+
+import DA.Finance.Asset
+import qualified DA.NonEmpty as NE
+import DA.Optional
+import qualified DA.Traversable as Traversable
+
+template UpdateWrapper
+  with
+    party : Party
+  where
+    signatory party
+    controller party can
+      Call_SplitMergeSum : ContractId AssetDeposit
+        with sum: NeededDepositSum
+        do
+          splitMergeNewAssetFromNeededDepositSum sum
+      Call_SplitMergeFor : ContractId AssetDeposit
+        with
+          depositCids : [ContractId AssetDeposit]
+          deposits : [AssetDeposit]
+          neededQuantity : Decimal
+        do
+          splitMergeNewAssetFromAssetsForQuantity depositCids deposits neededQuantity ""
+
+testAssetDepositSplitKeepsTheExpectedOrder : Script ()
+testAssetDepositSplitKeepsTheExpectedOrder = do
+  let quantity = 100.0
+      neededAmount = 10.0
+      remainder = quantity - neededAmount
+
+  someone <- allocateParty "Anyone"
+  (cid1, _) <- createAssetDepositAs someone quantity
+
+  splitResult <- someone `submit`
+    exerciseCmd cid1 AssetDeposit_Split with quantities = NE.singleton neededAmount
+  splitResult <- getDataForSplitResultCids someone splitResult
+
+  2 === length splitResult
+  let [item1, item2] = splitResult
+  neededAmount === item1.asset.quantity
+  remainder === item2.asset.quantity
+
+testAssetDepositSplitKeepsTheExpectedOrderIfNoRemainder : Script ()
+testAssetDepositSplitKeepsTheExpectedOrderIfNoRemainder = do
+  let quantity = 100.0
+
+  someone <- allocateParty "Anyone"
+  (cid1, _) <- createAssetDepositAs someone quantity
+
+  splitResult <- someone `submit`
+    exerciseCmd cid1 AssetDeposit_Split with quantities = NE.singleton quantity
+  splitResult <- getDataForSplitResultCids someone splitResult
+
+  1 === length splitResult
+  let [item1] = splitResult
+  quantity === item1.asset.quantity
+
+testAssetDepositSplitKeepsTheExpectedOrderInComplexCase : Script ()
+testAssetDepositSplitKeepsTheExpectedOrderInComplexCase = do
+  let quantity = 100.0
+      neededAmount1 = 10.0
+      neededAmount2 = 20.0
+      remainder = quantity - neededAmount1 - neededAmount2
+
+  someone <- allocateParty "Anyone"
+  (cid1, _) <- createAssetDepositAs someone quantity
+
+  splitResult <- someone `submit`
+    exerciseCmd cid1 AssetDeposit_Split with
+      quantities = fromSome $ NE.nonEmpty [neededAmount1, neededAmount2]
+  splitResult <- getDataForSplitResultCids someone splitResult
+
+  3 === length splitResult
+  let [item1, item2, item3] = splitResult
+  neededAmount1 === item1.asset.quantity
+  neededAmount2 === item2.asset.quantity
+  remainder === item3.asset.quantity
+
+testSplitMergeSum_whenNoFractional : Script ()
+testSplitMergeSum_whenNoFractional = do
+  someone <- allocateParty "Anyone"
+  (cid1, _) <- createAssetDepositAs someone 10.0
+  (cid2, _) <- createAssetDepositAs someone 10.0
+  (cid3, _) <- createAssetDepositAs someone 10.0
+  cid <- someone `submit` createAndExerciseCmd
+    UpdateWrapper with party = someone
+    Call_SplitMergeSum with sum = NeededDepositSum (-1.0) [cid1, cid2, cid3] None
+  [(_, assetDeposit)] <- query @AssetDeposit someone
+  assetDeposit.asset.quantity === 30.0
+
+testSplitMergeSum_withFractional : Script ()
+testSplitMergeSum_withFractional = do
+  someone <- allocateParty "Anyone"
+  (cid1, _) <- createAssetDepositAs someone 10.0
+  (cid2, _) <- createAssetDepositAs someone 10.0
+  (cid3, _) <- createAssetDepositAs someone 10.0
+  cid <- someone `submit` createAndExerciseCmd
+    UpdateWrapper with party = someone
+    Call_SplitMergeSum with sum = NeededDepositSum (-1.0) [cid1, cid2] (Some (1.0, cid3))
+  [(_, asset1), (_, asset2)] <- query @AssetDeposit someone
+  let [otherFractionQuantity, mergedQuantity] =
+        sort [asset1.asset.quantity, asset2.asset.quantity]
+  mergedQuantity === 21.0
+  otherFractionQuantity === 9.0
+
+testSplitMergeFor_withFractional : Script ()
+testSplitMergeFor_withFractional = do
+  someone <- allocateParty "Anyone"
+  (cid1, asset1) <- createAssetDepositAs someone 10.0
+  (cid2, asset2) <- createAssetDepositAs someone 10.0
+  (cid3, asset3) <- createAssetDepositAs someone 10.0
+  cid <- someone `submit` createAndExerciseCmd
+    UpdateWrapper with party = someone
+    Call_SplitMergeFor with
+      depositCids = [cid1, cid2, cid3]
+      deposits = [asset1, asset2, asset3]
+      neededQuantity = 21.0
+  [(_, asset1), (_, asset2)] <- query @AssetDeposit someone
+  let [otherFractionQuantity, mergedQuantity] =
+        sort [asset1.asset.quantity, asset2.asset.quantity]
+  mergedQuantity === 21.0
+  otherFractionQuantity === 9.0
+
+testSplitMergeFor_notEnough : Script ()
+testSplitMergeFor_notEnough = do
+  someone <- allocateParty "Anyone"
+  (cid1, asset1) <- createAssetDepositAs someone 10.0
+  someone `submitMustFail` createAndExerciseCmd
+    UpdateWrapper with party = someone
+    Call_SplitMergeFor with
+      depositCids = [cid1]
+      deposits = [asset1]
+      neededQuantity = 21.0
+
+getDataForSplitResultCids
+  : (Template a, IsParties p)
+  => p -> NE.NonEmpty (ContractId a) -> Script [a]
+getDataForSplitResultCids someone splitResult =
+  NE.toList <$> getDataForResultCids someone splitResult
+
+getDataForResultCids
+  : (Traversable.Traversable t, Template b, IsParties p)
+  => p -> t (ContractId b) -> Script (t b)
+getDataForResultCids someone result =
+    Traversable.mapA
+      (fmap fromSome . queryContractId someone)
+        result

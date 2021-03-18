@@ -1,0 +1,181 @@
+--
+-- Copyright (c) 2021, Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+--
+
+module Banking.Role.Bank where
+
+import DA.Assert
+import DA.Next.Set as Set
+import DA.Finance.Asset
+import DA.Finance.Asset.Settlement
+import DA.Finance.Process.AssetExtraction
+import DA.Finance.Process.AssetInjection
+import DA.Finance.Trade.Dvp
+import DA.Finance.Trade.SettlementInstruction
+import DA.Finance.Trade.Dvp.Settlement
+import DA.Finance.Types
+import DA.Finance.Trade.DvpProposal
+import DA.Lib.Types.Sector (Sector)
+import DA.List (sort)
+
+template BankRole
+  with
+    centralBank : Party
+    bank : Party
+    cashLabel: Text
+    account : Account
+  where
+    signatory centralBank, bank
+    ensure account.id.signatories == Set.fromList [centralBank, bank]
+
+    controller centralBank can
+      nonconsuming DoCbdcInjection: (ContractId AssetDeposit, ContractId AssetInjectionNotification)
+        with
+          quantity : Decimal
+        do
+          let asset = getAsset quantity None $ getCashId centralBank cashLabel
+          let deposit = AssetDeposit with observers = Set.empty, ..
+          depositCid <- exerciseByKey @AssetSettlementRule deposit.account.id AssetSettlement_Credit with asset = deposit.asset, ctrl = deposit.account.provider
+          notificationCid <- create AssetInjectionNotification with ..
+
+          pure (depositCid, notificationCid)
+
+    controller bank can
+      nonconsuming RequestCbdcInjection: ContractId AssetInjectionRequest
+        with
+          quantity : Decimal
+        do
+          let asset = getAsset quantity None $ getCashId centralBank cashLabel
+          let deposit = AssetDeposit with observers = Set.empty, ..
+          create AssetInjectionRequest with ..
+
+      nonconsuming RequestCbdcExtraction: ContractId AssetExtractionRequest
+        with
+          depositCid : ContractId AssetDeposit
+        do
+          deposit <- fetch depositCid
+          deposit.account === account
+          deposit.asset === getAsset deposit.asset.quantity None (getCashId centralBank cashLabel)
+
+          create AssetExtractionRequest with account = deposit.account, ..
+
+      nonconsuming RequestPvp : ContractId DvpProposal
+        with
+          quantityToSend : Decimal
+          receiver : Party
+          incomingCashId : Id
+          incomingCashQuantity : Decimal
+          ownAccountForIncoming : Account
+        do
+          (keyCounter, _) <- exerciseByKey @UniqueIdGenerator (bank, account) Next
+          let masterAgreement = getDvpMasterAgreementBetween bank receiver
+              dvpSettlement = DvpSettlementRule with masterAgreement
+              ourCashId = getCashId centralBank cashLabel
+              dvp = getDvp masterAgreement bank receiver quantityToSend incomingCashQuantity ourCashId incomingCashId keyCounter
+
+          create DvpProposal with
+                  dvpSettlement
+                  dvp
+                  proposer = bank
+                  paymentAccounts = [account]
+                  deliveryAccounts = [ownAccountForIncoming]
+
+      nonconsuming AcceptPvp : (ContractId DvpSettlementRule, ContractId Dvp, ContractId SettlementInstruction, ContractId SettlementInstruction)
+        with
+          pvpRequestCid : ContractId DvpProposal
+          ownAccountForIncoming : Account
+        do
+          (dvpSettlementCid, dvpCid, [paySettleCid, delSettleCid]) <-
+              exercise pvpRequestCid DvpProposal_Accept with
+                  otherPaymentAccounts = [ownAccountForIncoming]
+                  otherDeliveryAccounts = [account]
+          return (dvpSettlementCid, dvpCid, paySettleCid, delSettleCid)
+
+template UniqueIdGenerator
+  with
+    bank : Party
+    account : Account
+    counter : Int
+  where
+    signatory bank
+    key (bank, account): (Party, Account)
+    maintainer key._1
+
+    controller bank can
+      Next : (Int, ContractId UniqueIdGenerator)
+        do
+          cid <- create this with counter = counter + 1
+          pure (counter, cid)
+
+template BankRoleInvite
+  with
+    centralBank : Party
+    bank : Party
+    accountId : Id
+    cashLabel : Text
+  where
+    signatory centralBank
+    ensure accountId.signatories == Set.fromList [centralBank, bank]
+
+    controller bank can
+      BankRoleInvite_Accept : ContractId BankRole
+        do
+          let account = Account with id = accountId, provider = centralBank, owner = bank
+          create AssetSettlementRule with
+            ctrls = Set.singleton centralBank
+            observers = Set.empty
+            account
+          create UniqueIdGenerator with counter = 0, ..
+          create BankRole with ..
+
+      BankRoleInvite_Reject : ()
+        do return ()
+
+getCashId : Party -> Text -> Id
+getCashId centralBank cashLabel =
+    Id with
+        signatories = Set.singleton centralBank
+        label = cashLabel
+        version = 0
+
+-- As only EUR-USD trades are allowed, specifying incomingCurrency is enough
+createPvpLabel : Party -> Party -> Decimal -> Decimal -> Text -> Int -> Text
+createPvpLabel sender receiver quantityToSend incomingCashQuantity incomingCurrency counter =
+  "Pvp: " <> partyToText sender <> " - " <> partyToText receiver <>
+    "-(" <> show quantityToSend <> "/" <> show incomingCashQuantity <>
+    " " <> show incomingCurrency <>
+    "-#" <> show counter <> ")"
+
+getAsset : Decimal -> Optional Sector -> Id -> Asset
+getAsset quantity earmark id =
+    Asset with
+        id
+        quantity
+        earmark
+
+getDvpMasterAgreementBetween : Party -> Party -> MasterAgreement
+getDvpMasterAgreementBetween party1 party2 = do
+    -- to allow reversing a previous pvp with a previous MA (see also ERA-915)
+    let [sorted1, sorted2] = sort [party1, party2]
+    MasterAgreement with
+        id = (Id (Set.fromList [party1, party2]) "DvpMasterAgreement" 1)
+        party1 = sorted1
+        party2 = sorted2
+
+getDvp : MasterAgreement -> Party -> Party -> Decimal -> Decimal -> Id -> Id -> Int -> Dvp
+getDvp masterAgreement sender receiver quantityToSend incomingCashQuantity outCashId incomingCashId counter =
+    Dvp with
+        masterAgreement = masterAgreement
+        tradeId = Id with
+          signatories = Set.empty
+          -- TODO create a unique Pvp label
+          label = createPvpLabel sender receiver quantityToSend incomingCashQuantity incomingCashId.label counter
+          version = 0
+        buyer = sender
+        status = SettlementStatus_Pending
+        settledAtTime = None
+        settlementDate = None
+        payments = [ getAsset quantityToSend None outCashId ]
+        deliveries = [ getAsset incomingCashQuantity None incomingCashId ]
+        observers = Set.empty

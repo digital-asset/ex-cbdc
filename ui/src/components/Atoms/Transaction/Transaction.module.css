@@ -1,0 +1,15 @@
+/**
+ * Copyright (c) 2021, Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+.transaction {
+    position: absolute;
+    top: 314px;
+    left: 554px;
+    width: 230px;
+    height: 150px;
+    background-size: contain;
+}
+.transactionImg{
+    width: 242px;
+}

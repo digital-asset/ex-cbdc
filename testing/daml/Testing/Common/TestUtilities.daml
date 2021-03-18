@@ -1,0 +1,22 @@
+--
+-- Copyright (c) 2021, Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+--
+
+
+module Testing.Common.TestUtilities where
+
+import DA.Finance.Types
+import DA.Next.Set
+import DA.Text
+import Prelude hiding (getParty)
+
+getId : [Party] -> Id
+getId signatories = getLabelledId signatories ""
+
+getLabelledId : [Party] -> Text -> Id
+getLabelledId signatories label =
+  Id with
+    signatories = fromList signatories
+    label = label <> intercalate "-" (map partyToText signatories)
+    version = 1

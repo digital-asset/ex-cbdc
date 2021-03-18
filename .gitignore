@@ -1,0 +1,15 @@
+.daml
+*.log
+target
+.idea
+.DS_Store
+daml.js
+ui/build
+.vscode
+canton-participants.json
+canton-parties.json
+canton-bankA.txt
+canton-credentials-config.json
+parties.json
+
+!src/main/scala/com/digitalasset/canton

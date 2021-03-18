@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+#
+# Copyright (c) 2021, Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+#
+
+# Periodically tries to reset the ledger. It will reset if
+# * parties are allocated, and,
+# * there is a contract ResetRequest with party = ResetAdmin
+# Reset means deleting every contract, and rerunning init script.
+
+if [ $# -lt 2 ]
+then
+    echo "Usage: $0 parties_json participant_config"
+    exit 1
+fi
+
+PARTY_FILE="$1"
+PARTICIPANT_CONFIG="$2"
+
+DAR=reset/.daml/dist/reset-1.0.0.dar
+
+set -e
+
+function run_script_with_input () {
+    daml script \
+    --dar "$DAR" \
+    --participant-config "$PARTICIPANT_CONFIG" \
+    --input-file "$PARTY_FILE" \
+    --script-name "$1"
+}
+
+while : ; do
+    run_script_with_input "DA.Reset.ResetImplementation:resetIfRequested"
+    sleep 3
+done

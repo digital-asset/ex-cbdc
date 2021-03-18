@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+#
+# Copyright (c) 2021, Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+#
+
+basedir=$(dirname "$0")
+config_directory=${1:-"$basedir/../../canton_deployment"}
+
+echo "Config directory: $config_directory"
+
+canton --config "$config_directory/topology.conf" --bootstrap "$config_directory/boot.canton"

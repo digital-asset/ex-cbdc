@@ -1,0 +1,246 @@
+--
+-- Copyright (c) 2021, Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+--
+
+module DA.Finance.Asset where
+
+import DA.Action
+import DA.Assert
+import DA.Next.Set
+import DA.Optional hiding (fromSomeNote)
+import DA.Finance.Types
+import DA.NonEmpty qualified as NE
+import qualified DA.Traversable as Traversable
+
+import DA.Finance.Utils
+
+import Daml.Script
+
+-- | Represents a deposit of an asset in an account. The `account.id` and `asset.id` fields
+-- can be used to link the contract to other contracts that provide further information
+-- such as the type of the asset or reference data for it. This allows new asset classes
+-- to be added without having to modify business processes that operate on generic
+-- asset deposits.
+template AssetDeposit
+  with
+    account : Account
+      -- ^ A deposit is allocated to an account and backed by the account.id.signatories.
+      -- Depending on the desired trust model this might be (i) both the provider and the
+      -- owner, (ii) just the provider or (iii) a third party agent.
+    asset : Asset
+      -- ^ Specifies the id and the amount of assets deposited. The asset.id.signatories
+      -- are the parties that publish reference data and hence the details for how to
+      -- lifecycle the asset.
+    observers : Set Party
+  where
+    signatory account.id.signatories
+    observer insert account.provider observers
+    ensure asset.quantity > 0.0
+
+    controller account.owner can
+      AssetDeposit_SetObservers : ContractId AssetDeposit
+        with newObservers : Set Party
+        do create this with observers = newObservers
+
+    controller account.owner can
+      AssetDeposit_Split : NE.NonEmpty (ContractId AssetDeposit)
+        -- ^ Splits an asset deposit according to the provided list of quantities.
+        with
+          quantities : NE.NonEmpty Decimal
+            -- ^ The quantities of the newly created asset deposits. The total quantity
+            -- needs to be smaller or equal than the current quantity. If it does not add up,
+            -- an asset deposit with the remainder is created.
+        do
+          let quantitySum = NE.foldl (+) 0.0 quantities
+              remainder = asset.quantity - quantitySum
+          assert $ quantitySum <= asset.quantity
+
+          let quantitiesAll =
+                if quantitySum == asset.quantity
+                then quantities
+                else NE.append quantities $ NE.singleton remainder
+          Traversable.mapA (\q -> create $ setQuantity q this) quantitiesAll
+
+      AssetDeposit_Merge : ContractId AssetDeposit
+        -- ^ Merges a list of asset deposits with the given one into one.
+        with
+          depositCids : [ContractId AssetDeposit]
+            -- ^ The asset deposits that will be consumed. All fields except for the quantity
+            -- need to match.
+        do
+          deposit <-
+            foldlA
+              (\acc cid -> do
+                c <- fetchAndArchive cid
+                c === setQuantity c.asset.quantity acc
+                return $ setQuantity (acc.asset.quantity + c.asset.quantity) acc
+              )
+            this
+            depositCids
+          create deposit
+
+setQuantity : Decimal -> AssetDeposit -> AssetDeposit
+setQuantity quantity assetDeposit =
+    assetDeposit with asset = assetDeposit.asset with quantity = quantity
+
+-- This function does not check whether all the AssetDeposits have the same Asset.
+splitMergeNewAssetFromAssetsForQuantity : [ContractId AssetDeposit] -> [AssetDeposit] -> Decimal -> Text -> Update (ContractId AssetDeposit)
+splitMergeNewAssetFromAssetsForQuantity depositCids deposits neededQuantity uniqueErrorMsg =
+  case takeNeededDepositsForQuantity neededQuantity depositCids deposits of
+    Sum neededDepositSum ->
+      splitMergeNewAssetFromNeededDepositSum neededDepositSum
+    NotEnough ->
+      error $ "Not enough AssetDeposits: more needed for quantity "
+                  <> show neededQuantity
+                  <> " (" <> uniqueErrorMsg <> ")."
+
+-- | HIDE
+splitMergeNewAssetFromNeededDepositSum: NeededDepositSum -> Update (ContractId AssetDeposit)
+splitMergeNewAssetFromNeededDepositSum NeededDepositSum{..} = do
+  maybeAssetDepositWithNeededAmount <-
+    Traversable.forA someOfItNeeded \(neededAmount, someOfItNeededCid) ->
+      NE.hd <$> exercise someOfItNeededCid AssetDeposit_Split with quantities = NE.singleton neededAmount
+  case optionalToList maybeAssetDepositWithNeededAmount ++ fullDepositsNeeded of
+    firstDepositCid :: restOfAssetDeposits -> do
+      exercise firstDepositCid AssetDeposit_Merge with depositCids = restOfAssetDeposits
+    [] ->
+      error "No asset deposit remained after calculating the needed amount."
+
+data NeededDeposits = NotEnough | Sum NeededDepositSum deriving (Eq)
+
+isEnough : NeededDeposits -> Bool
+isEnough = (/=) NotEnough
+
+getSum : NeededDeposits -> NeededDepositSum
+getSum (Sum r) = r
+getSum NotEnough = error "Result is not a sum: Not enough."
+
+data NeededDepositSum = NeededDepositSum
+  with
+    total : Decimal
+    fullDepositsNeeded : [(ContractId AssetDeposit)]
+    someOfItNeeded : Optional (Decimal, ContractId AssetDeposit)
+  deriving (Eq, Show)
+
+-- | HIDE
+takeNeededDepositsForQuantity : Decimal -> [ContractId AssetDeposit] -> [AssetDeposit] -> NeededDeposits
+takeNeededDepositsForQuantity neededQuantity depositCids deposits =
+    if resultDepositSum.total < neededQuantity then NotEnough else Sum resultDepositSum
+  where
+    availableDepositsWithCids = zip depositCids deposits
+    initialEmptyDepositSum = NeededDepositSum 0.0 [] None
+    resultDepositSum = foldl addNextDepositToSumIfNeeded initialEmptyDepositSum availableDepositsWithCids
+    addNextDepositToSumIfNeeded result@(NeededDepositSum currentTotal sumDeposits _) (cid, deposit) =
+      if currentTotal < neededQuantity
+      then
+        if neededQuantity < currentTotal + deposit.asset.quantity
+        then let requiredAmount = neededQuantity - currentTotal in
+              NeededDepositSum
+              (currentTotal + deposit.asset.quantity)
+              sumDeposits
+              (Some (requiredAmount, cid))
+        else NeededDepositSum
+              (currentTotal + deposit.asset.quantity)
+              (cid :: sumDeposits)
+              None
+      else result
+
+testGetListOfNeededDeposits_whenZeroIsNeeded : Script ()
+testGetListOfNeededDeposits_whenZeroIsNeeded = do
+  (cid1, assetDeposit1) <- createAssetDeposit 50.0
+  (cid2, assetDeposit2) <- createAssetDeposit 50.0
+  let result = takeNeededDepositsForQuantity 0.0 [cid1, cid2] [assetDeposit1, assetDeposit2]
+  assertMsg "Result is not none" $ isEnough result
+  assertMsg "Result is empty" $ isNone (getSum result).someOfItNeeded
+  assertMsg "Result is empty" $ Prelude.null $ (getSum result).fullDepositsNeeded
+  pure ()
+
+testGetListOfNeededDeposits_whenLessThanTheFirstIsNeeded : Script ()
+testGetListOfNeededDeposits_whenLessThanTheFirstIsNeeded = do
+  (cid1, assetDeposit1) <- createAssetDeposit 50.0
+  (cid2, assetDeposit2) <- createAssetDeposit 50.0
+  let result = takeNeededDepositsForQuantity 40.0 [cid1, cid2] [assetDeposit1, assetDeposit2]
+  assertMsg "Result is not none" $ isEnough result
+  assertMsg "Result is the first CID" $ (getSum result).someOfItNeeded == Some (40.0, cid1)
+  pure ()
+
+testGetListOfNeededDeposits_whenExactlyTheFirstIsNeeded : Script ()
+testGetListOfNeededDeposits_whenExactlyTheFirstIsNeeded = do
+  (cid1, assetDeposit1) <- createAssetDeposit 50.0
+  (cid2, assetDeposit2) <- createAssetDeposit 50.0
+  (cid3, assetDeposit3) <- createAssetDeposit 50.0
+  let result = takeNeededDepositsForQuantity 50.0 [cid1, cid2, cid3] [assetDeposit1, assetDeposit2, assetDeposit3]
+  assertMsg "Result is not none" $ isEnough result
+  assertMsg "There is no asset which is only partially needed" $ isNone (getSum result).someOfItNeeded
+  assertMsg "Result is the first CID" $ (getSum result).fullDepositsNeeded == [cid1]
+
+testGetListOfNeededDeposits_whenLessThanTheSecondIsNeeded : Script ()
+testGetListOfNeededDeposits_whenLessThanTheSecondIsNeeded = do
+  (cid1, assetDeposit1) <- createAssetDeposit 50.0
+  (cid2, assetDeposit2) <- createAssetDeposit 50.0
+  (cid3, assetDeposit3) <- createAssetDeposit 50.0
+  let result = takeNeededDepositsForQuantity 51.0 [cid1, cid2, cid3] [assetDeposit1, assetDeposit2, assetDeposit3]
+  assertMsg "Result is not none" $ isEnough result
+  assertMsg "Result is the first CID" $ (getSum result).fullDepositsNeeded == [cid1]
+  assertMsg "There is an asset which is only partially needed" $ (getSum result).someOfItNeeded == Some (1.0, cid2)
+
+testGetListOfNeededDeposits_whenExactlyTheFirstTwoAreNeeded : Script ()
+testGetListOfNeededDeposits_whenExactlyTheFirstTwoAreNeeded = do
+  (cid1, assetDeposit1) <- createAssetDeposit 50.0
+  (cid2, assetDeposit2) <- createAssetDeposit 50.0
+  (cid3, assetDeposit3) <- createAssetDeposit 50.0
+  let result = takeNeededDepositsForQuantity 100.0 [cid1, cid2, cid3] [assetDeposit1, assetDeposit2, assetDeposit3]
+  assertMsg "Result is not none" $ isEnough result
+  assertMsg "Result is the first two CIDs" $ (getSum result).fullDepositsNeeded == [cid2, cid1]
+  assertMsg "There is no asset which is only partially needed" $ isNone (getSum result).someOfItNeeded
+
+testGetListOfNeededDeposits_whenLessThanTheThirdIsNeeded : Script ()
+testGetListOfNeededDeposits_whenLessThanTheThirdIsNeeded = do
+  (cid1, assetDeposit1) <- createAssetDeposit 50.0
+  (cid2, assetDeposit2) <- createAssetDeposit 50.0
+  (cid3, assetDeposit3) <- createAssetDeposit 50.0
+  let result = takeNeededDepositsForQuantity 140.0 [cid1, cid2, cid3] [assetDeposit1, assetDeposit2, assetDeposit3]
+  assertMsg "Result is not none" $ isEnough result
+  assertMsg "Result is the first two CIDs" $ (getSum result).fullDepositsNeeded == [cid2, cid1]
+  assertMsg "There is an asset which is only partially needed" $ (getSum result).someOfItNeeded == Some (40.0, cid3)
+
+testGetListOfNeededDeposits_whenExactlyTheFirstThreeAreNeeded : Script ()
+testGetListOfNeededDeposits_whenExactlyTheFirstThreeAreNeeded = do
+  (cid1, assetDeposit1) <- createAssetDeposit 50.0
+  (cid2, assetDeposit2) <- createAssetDeposit 50.0
+  (cid3, assetDeposit3) <- createAssetDeposit 50.0
+  let result = takeNeededDepositsForQuantity 150.0 [cid1, cid2, cid3] [assetDeposit1, assetDeposit2, assetDeposit3]
+  assertMsg "Result is not none" $ isEnough result
+  assertMsg "Result is the first three CIDs" $ (getSum result).fullDepositsNeeded == [cid3, cid2, cid1]
+  assertMsg "There is no asset which is only partially needed" $ isNone (getSum result).someOfItNeeded
+
+testGetListOfNeededDeposits_whenTooMuchIsNeeded : Script ()
+testGetListOfNeededDeposits_whenTooMuchIsNeeded = do
+  (cid1, assetDeposit1) <- createAssetDeposit 50.0
+  (cid2, assetDeposit2) <- createAssetDeposit 50.0
+  (cid3, assetDeposit3) <- createAssetDeposit 50.0
+  let result = takeNeededDepositsForQuantity 200.0 [cid1, cid2, cid3] [assetDeposit1, assetDeposit2, assetDeposit3]
+  assertMsg "Result is None because too much is needed" $ not $ isEnough result
+  pure ()
+
+createAssetDeposit : Decimal -> Script (ContractId AssetDeposit, AssetDeposit)
+createAssetDeposit quantity = do
+  someone <- allocateParty "Anyone"
+  createAssetDepositAs someone quantity
+
+createAssetDepositAs : Party -> Decimal -> Script (ContractId AssetDeposit, AssetDeposit)
+createAssetDepositAs someone quantity = do
+  let someId = Id (DA.Next.Set.singleton someone) "Label" 1
+  cid <- someone `submit` createCmd AssetDeposit with
+    observers = empty
+    account = Account with
+      id = someId
+      provider = someone
+      owner = someone
+    asset = Asset with
+      quantity = quantity
+      id = someId
+      earmark = None
+  assetDeposit <- fromSome <$> queryContractId someone cid
+  pure (cid, assetDeposit)

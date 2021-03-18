@@ -1,0 +1,18 @@
+/**
+ * Copyright (c) 2021, Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+@import "./static/fonts/stylesheet.css";
+body {
+  margin: unset;
+  padding: unset;
+}
+* {
+  box-sizing: border-box;
+  font-family: Brown-Bold;
+}
+
+.rec-slider-container {
+  box-shadow: 0px 0px 25px #000;
+  border: 2px solid #64686d;
+}

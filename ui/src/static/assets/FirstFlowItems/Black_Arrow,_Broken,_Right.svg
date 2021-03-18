@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="11px" height="63px" viewBox="0 0 11 63" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Group 17</title>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" stroke-linecap="round">
+        <g id="UC-1-Slide-33" transform="translate(-715.000000, -375.000000)" stroke="#232F40" stroke-width="2">
+            <g id="Group-16" transform="translate(564.000000, 328.000000)">
+                <g id="Group-17" transform="translate(156.500000, 78.521696) scale(1, -1) translate(-156.500000, -78.521696) translate(152.000000, 48.521696)">
+                    <g id="Group-11" transform="translate(0.000000, 39.478304)">
+                        <line x1="4.49039853" y1="0.0650075071" x2="4.49039853" y2="17.5548628" id="Line-4"></line>
+                        <polyline id="Rectangle" transform="translate(4.500000, 15.612135) rotate(45.000000) translate(-4.500000, -15.612135) " points="7 13.1121345 7 18.1121345 2 18.1121345"></polyline>
+                    </g>
+                    <line x1="4.49" y1="0" x2="4.49" y2="21.5320564" id="Line-4"></line>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

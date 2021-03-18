@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="10px" height="7px" viewBox="0 0 10 7" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Rectangle</title>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" stroke-linecap="round">
+        <g id="Info-2" transform="translate(-1359.000000, -106.000000)" stroke="#A7F6FF" stroke-width="2">
+            <polyline id="Rectangle" transform="translate(1363.949747, 107.949747) rotate(45.000000) translate(-1363.949747, -107.949747) " points="1366.44975 105.449747 1366.44975 110.449747 1361.44975 110.449747"></polyline>
+        </g>
+    </g>
+</svg>

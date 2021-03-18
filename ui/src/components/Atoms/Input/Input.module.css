@@ -1,0 +1,38 @@
+/**
+ * Copyright (c) 2021, Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+.customContainerStyles{
+    position: relative;
+    /*width: auto;*/
+}
+
+.inputLabel {
+    margin-bottom: 6px;
+}
+.inputText {
+    font-size: 8px;
+    font-family: Brown-Bold;
+    letter-spacing: 0.09px;
+    color: #2d3e55;
+}
+.input {
+    position: relative;
+    margin: unset;
+    padding: unset;
+    padding-bottom: 2px;
+    display: block;
+    width: 100%;
+    border: 0;
+    border-bottom: 1px solid #232f40;;
+    outline: unset;
+    background: none;
+    padding-right: 30px;
+}
+._million{
+    margin: unset;
+    padding: unset;
+    position: absolute;
+    right: 0;
+    bottom: 2px;
+}

@@ -1,0 +1,120 @@
+
+// start all local instances defined in the configuration file
+nodes.local start
+
+landlordsAssociation.domains.connect_local(landlordDomain)
+alice.domains.connect_local(landlordDomain)
+
+alice.domains.connect_local(usfrbDomain)
+usfrb.domains.connect_local(usfrbDomain)
+bankA.domains.connect_local(usfrbDomain)
+bankB.domains.connect_local(usfrbDomain)
+ecb.domains.connect_local(usfrbDomain)
+landlordsAssociation.domains.connect_local(usfrbDomain)
+
+bankA.domains.connect_local(ecbDomain)
+bankB.domains.connect_local(ecbDomain)
+ecb.domains.connect_local(ecbDomain)
+
+// Wait until (some of) the participants connect to the domain.
+utils.retry_until_true() {
+    landlordsAssociation.domains.active("landlordDomain")
+}
+utils.retry_until_true() {
+    landlordsAssociation.domains.active("usfrbDomain")
+}
+utils.retry_until_true() {
+    ecb.domains.active("ecbDomain")
+}
+
+ecb.health.ping(usfrb)
+
+val landlordParty = landlordsAssociation.parties.enable("Landlord")
+val landlordsAssociationParty = landlordsAssociation.parties.enable("LandlordsAssociation")
+val demoAdminParty = landlordsAssociation.parties.enable("DemoAdmin")
+val aliceParty = alice.parties.enable("Alice")
+val usFRBParty = usfrb.parties.enable("USFRB")
+val bankAParty = bankA.parties.enable("BankA")
+val bankBParty = bankB.parties.enable("BankB")
+val ecbParty = ecb.parties.enable("ECB")
+
+import $ivy.`io.circe::circe-core:0.12.3`, $ivy.`io.circe::circe-generic:0.12.3`, io.circe._, io.circe.generic.auto._, io.circe.syntax._
+import better.files._
+import better.files.Dsl.SymbolicOperations
+
+case class LedgerApi(host: String, port: Int)
+case class Participants(defaultParticipant: LedgerApi, participants: Map[String, LedgerApi], party_participants: Map[String, String])
+
+def showPartyId(x: PartyId) = x.filterString
+
+def createParticipantsJson() = {
+  val partyIdsToParticipants = participants.all.flatMap(x =>
+    x.parties.list().map(p => (showPartyId(p.party), p.participants.head.participant.uid.toProtoPrimitive))
+  ).toMap
+  val participantsData = participants.local.map(p => (p.uid.toProtoPrimitive, LedgerApi(p.config.ledgerApi.address, p.config.ledgerApi.port))).toMap
+  val participantsJson = Participants(participantsData.head._2, participantsData, partyIdsToParticipants).asJson.spaces2
+
+  file"canton-participants.json" < participantsJson
+}
+
+def createPartiesJson() = {
+  val cantonParties = Map(
+    "landlord" -> landlordParty,
+    "landlordsAssociation" -> landlordsAssociationParty,
+    "demoAdmin" -> demoAdminParty,
+    "renter" -> aliceParty,
+    "usFRB" -> usFRBParty,
+    "bankA" -> bankAParty,
+    "bankB" -> bankBParty,
+    "ecb" -> ecbParty
+  ).mapValues(showPartyId)
+
+  file"canton-parties.json" < cantonParties.asJson.spaces2
+}
+
+def createBankATxt() = {
+  file"canton-bankA.txt" < showPartyId(bankAParty)
+}
+
+def jsonApiUrl(participant: com.digitalasset.canton.console.ParticipantReference) = {
+  val address = participant.config.clientLedgerApi.address
+  val ledgerPort = participant.config.clientLedgerApi.port
+  val jsonApiPort = ledgerPort + 2
+  s"http://$address:$jsonApiPort"
+}
+
+def createCredentialsConfigJson() = {
+  val parties = Map(
+    "Alice" -> (aliceParty, alice),
+    "Landlord" -> (landlordParty, landlordsAssociation),
+    "LandlordsAssociation" -> (landlordsAssociationParty, landlordsAssociation),
+    "USFRB" -> (usFRBParty, usfrb),
+    "ECB" -> (ecbParty, ecb),
+    "BankA" -> (bankAParty, bankA),
+    "BankB" -> (bankBParty, bankB),
+    "DemoAdmin" -> (demoAdminParty, landlordsAssociation)
+  ).mapValues { case (party, participant) =>
+    Map(
+      "partyId" -> showPartyId(party),
+      "host" -> jsonApiUrl(participant),
+      "token" -> "Dummy",
+      "ledgerId" -> participant.ledger_api.ledger_id
+    )
+  }
+
+  file"canton-credentials-config.json" < parties.asJson.spaces2
+}
+
+def uploadDarFiles() = {
+  val darFiles = file".".listRecursively.filter(_.extension == Some(".dar")).toList
+  darFiles.foreach { x =>
+    println(s"Uploading $x participants...")
+    participants.all.dars.upload(x.toString, true)
+  }
+}
+
+createParticipantsJson()
+createPartiesJson()
+createBankATxt()
+createCredentialsConfigJson()
+uploadDarFiles()

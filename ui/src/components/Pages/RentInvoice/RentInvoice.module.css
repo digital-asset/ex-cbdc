@@ -1,0 +1,192 @@
+/**
+ * Copyright (c) 2021, Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+.content {
+  position: relative;
+  margin: 0 auto;
+  width: 1366px;
+  height: 693px;
+  background-size: cover;
+  background-image: url("../../../static/assets/Elements/CustomerBackground.png");
+}
+/*.backgroundStyle{*/
+/*  !*width: 100vw;*!*/
+/*  position: fixed;*/
+/*  left: 0;*/
+/*  top:0;*/
+/*  right: 0;*/
+/*  bottom: 0;*/
+/*  !*height: 100vh;*!*/
+/*  border: solid red 1px;*/
+/*}*/
+.brightPoint {
+  position: absolute;
+  left: 869px;
+  top: 502px;
+}
+.blockDashed {
+  position: absolute;
+  left: 50%;
+  top: 120px;
+  z-index: 0;
+  transform: translateX(-50%);
+  width: 2px;
+  height: 100px;
+  color: red;
+  background-color: transparent;
+  background-image: url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' stroke='%2397F5FDFF' stroke-width='5' stroke-dasharray='5' stroke-dashoffset='100' stroke-linecap='butt'/%3e%3c/svg%3e");
+}
+.contentTitle {
+  position: absolute;
+  left: 60px;
+  top: 15px;
+  margin: unset;
+  color: #fff;
+  font-family: Brown-Regular;
+  font-weight: normal;
+  font-size: 36px;
+  letter-spacing: 2px;
+}
+
+.customerStyles {
+  position: absolute;
+  bottom: 183px;
+  right: 505px;
+}
+.damlLogo {
+  position: absolute;
+  top: 20px;
+}
+.ibmLogo {
+  position: absolute;
+  top: 150px;
+}
+.fabric {
+  position: absolute;
+  left: 150px;
+  top: 60px;
+}
+.threePointsRight {
+  position: absolute;
+  top: 50px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.rightLogosContainer {
+  position: absolute;
+  width: 250px;
+  height: 250px;
+  left: 990px;
+  top: 475px;
+  transform: scale(0.7);
+}
+
+.leftLogosContainer {
+  position: absolute;
+  width: 250px;
+  height: 250px;
+  left: 100px;
+  bottom: -20px;
+  /*border: solid green 1px;*/
+  transform: scale(0.8);
+}
+
+.sqlLogo {
+  position: absolute;
+  left: 60px;
+  bottom: 105px;
+}
+.leftDamlLogo {
+  position: absolute;
+  left: 180px;
+  top: 45px;
+}
+.threePointsLeft {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 50px;
+}
+.azureLogo {
+  position: relative;
+  top: 160px;
+  right: -60px;
+}
+.atomicLogo {
+  z-index: 10;
+  position: absolute;
+  left:50%;
+  transform: translateX(-50%);
+  top:167px;
+}
+
+.invoiceContainer {
+  position: absolute;
+  /*width: 300px;*/
+  height: 350px;
+  /*border: solid red 1px;*/
+  left: 530px;
+  top: 230px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.invoiceImage {
+  z-index: 10;
+  position: relative;
+  bottom: -30px;
+}
+.rentImage {
+  position: relative;
+  top: 0px;
+  margin-bottom: -6px;
+  z-index: 10;
+}
+.rightArrow {
+  position: absolute;
+  bottom: -145px;
+  left: 100px;
+}
+.leftArrow {
+  position: absolute;
+  right: 26px;
+  top: 90px;
+}
+/*.lastArrows {*/
+/*  position: absolute;*/
+/*  top: 90px;*/
+/*  left: -215px;*/
+/*}*/
+.certificateImg{
+  margin-right: 4px;
+  margin-left: 5px;
+  position: relative;
+  top:2px
+}
+.block {
+  width: 2px;
+  position: absolute;
+  top: 140px;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 100px;
+  /* dashed border */
+  background-image: url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' stroke='%23A7F6FFFF' stroke-width='4' stroke-dasharray='6%2c 14' stroke-dashoffset='0' stroke-linecap='square'/%3e%3c/svg%3e");
+}
+.hintContainer{
+  left: 840px;
+  transform: rotateY(180deg);
+}
+.hintContentContainer{
+  transform: scaleX(-1);
+  width: 350px;
+}
+.hintImageStyle{
+  transform: scaleX(-1);
+}
+.textHints{
+  font-weight: normal;
+  font-size: 12px;
+  font-family: Brown;
+}

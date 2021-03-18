@@ -1,0 +1,26 @@
+/**
+ * Copyright (c) 2021, Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+.routeWrapper {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100vw;
+  height: 100vh;
+}
+
+.routeWrapper > div {
+  position: absolute;
+
+}
+.appWrapper{
+  width: 100vw;
+  height: 100vh;
+  background: rgb(35,47,64);
+}
+.secondBackground{
+  background: rgb(29,43,62)
+}
+

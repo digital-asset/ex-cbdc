@@ -1,0 +1,396 @@
+--
+-- Copyright (c) 2021, Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+--
+
+module Testing.Tests.RentInvoice where
+
+
+import Banking.Role.CentralBank
+import Certificates.Sector.Economic
+import DA.Assert((===))
+import DA.Date qualified as Date
+import DA.Finance.Asset
+import DA.Finance.Asset.Settlement
+import DA.Finance.Types
+import DA.Lib.Types.Sector
+import DA.Next.Set
+import Daml.Script hiding (party)
+import Landlord.Landlord
+import DemoAdmin.Role.DemoAdmin
+import Testing.Common.Parties
+import Testing.Common.TestUtilities
+import Testing.Models.Parties
+import Testing.Tests.Finance
+
+rentInvoiceCanBePaidWithExactAmount : Script ()
+rentInvoiceCanBePaidWithExactAmount = script do
+  let issuedQuantity = 1000.0
+      invoicePrice = 1000.0
+  (renter, landlord, invoice, assetDepositCid)
+    <- rentInvoiceCanBePaidSetup issuedQuantity invoicePrice
+  -- Renter pays the rent invoice
+  (_, [resultCash]) <- renter `submit`
+    exerciseCmd invoice RentInvoice_Pay with assetDepositCids = [assetDepositCid]
+
+  -- The result is "just normal" CBDC
+  Some resultCash <- queryContractId landlord resultCash
+  resultCash.asset.earmark === None
+  resultCash.asset.quantity === invoicePrice
+
+rentInvoiceCanBePaidWthHigherAmount : Script ()
+rentInvoiceCanBePaidWthHigherAmount = script do
+  let issuedQuantity = 1500.0
+      invoicePrice = 1000.0
+  (renter, landlord, invoice, assetDepositCid)
+    <- rentInvoiceCanBePaidSetup issuedQuantity invoicePrice
+  -- Renter pays the rent invoice
+  (_, [resultCash]) <- renter `submit`
+    exerciseCmd invoice RentInvoice_Pay with assetDepositCids = [assetDepositCid]
+
+  -- The result is "just normal" CBDC
+  Some resultCash <- queryContractId landlord resultCash
+  resultCash.asset.earmark === None
+  resultCash.asset.quantity === invoicePrice
+
+rentInvoiceCannotBePaidWhenCBDCIsNotEnough : Script ()
+rentInvoiceCannotBePaidWhenCBDCIsNotEnough = script do
+  let issuedQuantity = 1000.0
+      invoicePrice = 2000.0
+  (renter, landlord, invoice, assetDepositCid)
+    <- rentInvoiceCanBePaidSetup issuedQuantity invoicePrice
+  -- Renter is unable to pay the rent invoice
+  renter `submitMustFail`
+    exerciseCmd invoice RentInvoice_Pay with assetDepositCids = [assetDepositCid]
+
+rentInvoiceCanBePaidWithMixedCBDCWhenEarmarkedIsNotEnoughOnItsOwn : Script ()
+rentInvoiceCanBePaidWithMixedCBDCWhenEarmarkedIsNotEnoughOnItsOwn = script do
+  let issuedSpecialQuantity = 900.0
+      issuedRegularQuantity = 600.0
+      invoicePrice = 1000.0
+  (renter, landlord, invoice, assetDepositCids)
+    <- rentInvoiceCanBePaidWithMixedCBDCSetup issuedSpecialQuantity issuedRegularQuantity invoicePrice
+
+  (_, [resultCash, resultCashFromEarmarked]) <- renter `submit`
+    exerciseCmd invoice RentInvoice_Pay with assetDepositCids = assetDepositCids
+
+  Some resultCash <- queryContractId landlord resultCash
+  Some resultCashFromEarmarked <- queryContractId landlord resultCashFromEarmarked
+  resultCash.asset.earmark === None
+  resultCashFromEarmarked.asset.earmark === None
+  resultCash.asset.quantity === invoicePrice - issuedSpecialQuantity
+  resultCashFromEarmarked.asset.quantity === issuedSpecialQuantity
+
+rentInvoiceCanBePaidWithMixedCBDCWhenEarmarkedIsEnough : Script ()
+rentInvoiceCanBePaidWithMixedCBDCWhenEarmarkedIsEnough = script do
+  let issuedSpecialQuantity = 1000.0
+      issuedRegularQuantity = 6000.0
+      invoicePrice = 1000.0
+  (renter, landlord, invoice, assetDepositCids)
+    <- rentInvoiceCanBePaidWithMixedCBDCSetup issuedSpecialQuantity issuedRegularQuantity invoicePrice
+
+  (_, [resultCashFromEarmarked]) <- renter `submit`
+    exerciseCmd invoice RentInvoice_Pay with assetDepositCids = assetDepositCids
+
+  Some resultCashFromEarmarked <- queryContractId landlord resultCashFromEarmarked
+  resultCashFromEarmarked.asset.earmark === None
+  resultCashFromEarmarked.asset.quantity === invoicePrice
+
+rentInvoiceCanBePaidWithMixedCBDCWhenEarmarkedIsMoreThanEnough : Script ()
+rentInvoiceCanBePaidWithMixedCBDCWhenEarmarkedIsMoreThanEnough = script do
+  let issuedSpecialQuantity = 1100.0
+      issuedRegularQuantity = 1200.0
+      invoicePrice = 1000.0
+  (renter, landlord, invoice, assetDepositCids)
+    <- rentInvoiceCanBePaidWithMixedCBDCSetup issuedSpecialQuantity issuedRegularQuantity invoicePrice
+
+  (_, [resultCashFromEarmarked]) <- renter `submit`
+    exerciseCmd invoice RentInvoice_Pay with assetDepositCids = assetDepositCids
+
+  Some resultCashFromEarmarked <- queryContractId landlord resultCashFromEarmarked
+  resultCashFromEarmarked.asset.earmark === None
+  resultCashFromEarmarked.asset.quantity === invoicePrice
+
+rentInvoiceCanBePaidWithNormal : Script ()
+rentInvoiceCanBePaidWithNormal = script do
+  let issuedRegularQuantity = 1200.0
+      invoicePrice = 1000.0
+
+  (parties@PartiesForTesting{..}, onboarding@Onboarding{..}) <- setupRoleHierarchy
+
+  invoice <- createInvoice parties onboarding invoicePrice
+
+  regularAssetDepositCid <- usFRB `submit`
+    exerciseCmd cbRole CreateCbdc with
+      quantity = issuedRegularQuantity
+      targetAccount = Some renterAccount
+
+  (_, [resultCashFromEarmarked]) <- renter `submit`
+    exerciseCmd invoice RentInvoice_Pay with assetDepositCids = [regularAssetDepositCid]
+
+  Some resultCashFromEarmarked <- queryContractId landlord resultCashFromEarmarked
+  resultCashFromEarmarked.asset.earmark === None
+  resultCashFromEarmarked.asset.quantity === invoicePrice
+
+rentInvoiceCannotBePaidWhenMixedCBDCIsNotEnough : Script ()
+rentInvoiceCannotBePaidWhenMixedCBDCIsNotEnough = script do
+  let issuedSpecialQuantity = 300.0
+      issuedRegularQuantity = 200.0
+      invoicePrice = 1000.0
+  (renter, landlord, invoice, assetDepositCids)
+    <- rentInvoiceCanBePaidWithMixedCBDCSetup issuedSpecialQuantity issuedRegularQuantity invoicePrice
+
+  renter `submitMustFail`
+    exerciseCmd invoice RentInvoice_Pay with assetDepositCids = assetDepositCids
+
+rentInvoiceCanBePaidWithVariousMixedCBDC : Script ()
+rentInvoiceCanBePaidWithVariousMixedCBDC = script do
+  let issuedSpecialQuantity1 = 550.0
+      issuedSpecialQuantity2 = 950.0
+      issuedRegularQuantity1 = 300.0
+      extraAmount            = 90.0
+      issuedRegularQuantity2 = 700.0 + extraAmount
+      invoicePrice = 2500.0
+  (parties@PartiesForTesting{..}, onboarding@Onboarding{..}) <- setupRoleHierarchy
+
+  invoice <- createInvoice parties onboarding invoicePrice
+
+  specialAssetDepositCid1 <- usFRB `submit`
+    exerciseCmd cbRole CreateSpecialCbdc with
+      quantity = issuedSpecialQuantity1
+      earmark = Housing
+      targetAccount = renterAccount
+  specialAssetDepositCid2 <- usFRB `submit`
+    exerciseCmd cbRole CreateSpecialCbdc with
+      quantity = issuedSpecialQuantity2
+      earmark = Housing
+      targetAccount = renterAccount
+
+  regularAssetDepositCid1 <- usFRB `submit`
+    exerciseCmd cbRole CreateCbdc with
+      quantity = issuedRegularQuantity1
+      targetAccount = Some renterAccount
+  regularAssetDepositCid2 <- usFRB `submit`
+    exerciseCmd cbRole CreateCbdc with
+      quantity = issuedRegularQuantity2
+      targetAccount = Some renterAccount
+
+  let mixedAssetCids =
+        [regularAssetDepositCid1, specialAssetDepositCid1,
+         specialAssetDepositCid2, regularAssetDepositCid2]
+
+  (_, result) <- renter `submit`
+    exerciseCmd invoice RentInvoice_Pay with assetDepositCids = mixedAssetCids
+
+  2 === length result
+  [normalResultCbdc, earmarkedResultCbdc] <- getDataForResultCids landlord result
+  None === normalResultCbdc.asset.earmark
+  issuedRegularQuantity1 + issuedRegularQuantity2 - extraAmount ===
+    normalResultCbdc.asset.quantity
+  None === earmarkedResultCbdc.asset.earmark
+  issuedSpecialQuantity1 + issuedSpecialQuantity2 ===
+    earmarkedResultCbdc.asset.quantity
+
+depositIsCorrectlyEarmarked : Script ()
+depositIsCorrectlyEarmarked = script do
+  let earmarkedDepositQuantity = 100.0
+      earmark = Housing
+  (parties@PartiesForTesting{..}, onboarding@Onboarding{..}) <- setupRoleHierarchy
+
+  assetDepositCid <- usFRB `submit`
+    exerciseCmd cbRole CreateSpecialCbdc with
+      quantity = earmarkedDepositQuantity
+      earmark = earmark
+      targetAccount = renterAccount
+
+  Some assetDeposit <- queryContractId usFRB assetDepositCid
+  assetDeposit.asset.earmark === Some earmark
+
+earmarkedCbdcCannotBeTransferred : Script ()
+earmarkedCbdcCannotBeTransferred = script do
+  let earmarkedDepositQuantity = 100.0
+  (parties@PartiesForTesting{..}, Onboarding{..}) <- setupRoleHierarchy
+
+  -- Inject earmarked deposit
+  actualTime <- getTime
+  assetDepositCid <- usFRB `submit`
+    exerciseCmd cbRole CreateSpecialCbdc with
+      quantity = earmarkedDepositQuantity
+      earmark = Housing
+      targetAccount = renterAccount
+
+  Some assetDeposit <- queryContractId renter assetDepositCid
+  renter `submitMustFail`
+    exerciseByKeyCmd @AssetSettlementRule
+      assetDeposit.account.id AssetSettlement_Transfer with
+        receiverAccountId = landlordAccount.id
+        depositCids = [assetDepositCid]
+        amount = None
+        ..
+
+earmarkedCbdcCannotBeDebited : Script ()
+earmarkedCbdcCannotBeDebited = script do
+  let earmarkedDepositQuantity = 500.0
+  (parties@PartiesForTesting{..}, Onboarding{..}) <- setupRoleHierarchy
+
+  -- Inject earmarked deposit
+  actualTime <- getTime
+  assetDepositCid <- usFRB `submit`
+    exerciseCmd cbRole CreateSpecialCbdc with
+      quantity = earmarkedDepositQuantity
+      earmark = Housing
+      targetAccount = renterAccount
+
+  Some assetDeposit <- queryContractId renter assetDepositCid
+  renter `submitMustFail`
+    exerciseByKeyCmd @AssetSettlementRule
+      assetDeposit.account.id AssetSettlement_Debit with
+        depositCid = assetDepositCid
+        ..
+
+lastPaidRentInvoiceCreatedWhenPaid : Script ()
+lastPaidRentInvoiceCreatedWhenPaid = script do
+  let price = 1000.0
+  (renter, landlord, invoice, assetDepositCid)
+    <- rentInvoiceCanBePaidSetup price price
+  Some actualInvoiceContract <- queryContractId renter invoice
+  (_, [resultCash]) <- renter `submit`
+    exerciseCmd invoice RentInvoice_Pay with assetDepositCids = [assetDepositCid]
+  [(_, last)] <- query @LastPaidRentInvoice landlord
+  last.rentInvoice === actualInvoiceContract
+
+lastPaidRentInvoiceRemovedWhenIssuingNewInvoice : Script ()
+lastPaidRentInvoiceRemovedWhenIssuingNewInvoice = script do
+  let price = 1000.0
+  (renter, landlord, invoice, assetDepositCid)
+    <- rentInvoiceCanBePaidSetup price price
+  renter `submit`
+    exerciseCmd invoice RentInvoice_Pay with assetDepositCids = [assetDepositCid]
+
+  [(distributedCertificateCid, _)] <- query @DistributedEconomicSectorCertificate landlord
+  [(landlordRole, _)] <- query @LandlordRole landlord
+  landlord `submit`
+    exerciseCmd landlordRole CreateRentInvoice with
+      economicSectorCertificate = Some distributedCertificateCid
+      date = Date.date 2020 Date.Feb 02
+      price
+      ..
+  last <- queryContractKey @LastPaidRentInvoice landlord (landlord, renter)
+  last === None
+
+data Onboarding = Onboarding with
+  cbRole : ContractId CentralBankRole
+  renterAccount : Account
+  landlordAccount : Account
+  landlordRole : ContractId LandlordRole
+
+createInvoice : PartiesForTesting -> Onboarding -> Decimal -> Script (ContractId RentInvoice)
+createInvoice parties onboarding invoicePrice = do
+  let Onboarding{..} = onboarding
+  let PartiesForTesting{..} = parties
+
+  -- Central Bank creates proposal of EconomicSectorCertificate
+  economicSectorCertificateCid <- usFRB `submit`
+    exerciseCmd cbRole CreateCertificate with
+      sector = Housing
+      ..
+
+  distributedCertificateCid <- landlordsAssociation `submit`
+    exerciseCmd economicSectorCertificateCid Distribute with
+      name = landlord
+
+  -- Create an invoice for renter
+  landlord `submit`
+    exerciseByKeyCmd @AssetSettlementRule
+      landlordAccount.id AssetSettlement_AddController with
+        ctrl = renter
+  landlord `submit`
+    exerciseCmd landlordRole CreateRentInvoice with
+      economicSectorCertificate = Some distributedCertificateCid
+      date = Date.date 2020 Date.Feb 02
+      price = invoicePrice
+      ..
+
+rentInvoiceCanBePaidSetup : Decimal -> Decimal -> Script (Party, Party, ContractId RentInvoice, ContractId AssetDeposit)
+rentInvoiceCanBePaidSetup issuedQuantity invoicePrice = script do
+  (parties@PartiesForTesting{..}, onboarding@Onboarding{..}) <- setupRoleHierarchy
+
+  invoice <- createInvoice parties onboarding invoicePrice
+
+  -- Inject earmarked deposit
+  assetDepositCid <- usFRB `submit`
+    exerciseCmd cbRole CreateSpecialCbdc with
+      quantity = issuedQuantity
+      earmark = Housing
+      targetAccount = renterAccount
+
+  pure (renter, landlord, invoice, assetDepositCid)
+
+rentInvoiceCanBePaidWithMixedCBDCSetup : Decimal -> Decimal -> Decimal -> Script (Party, Party, ContractId RentInvoice, [ContractId AssetDeposit])
+rentInvoiceCanBePaidWithMixedCBDCSetup issuedSpecialQuantity issuedRegularQuantity invoicePrice = script do
+  (parties@PartiesForTesting{..}, onboarding@Onboarding{..}) <- setupRoleHierarchy
+
+  invoice <- createInvoice parties onboarding invoicePrice
+
+  -- Inject earmarked deposit
+  assetDepositCid <- usFRB `submit`
+    exerciseCmd cbRole CreateSpecialCbdc with
+      quantity = issuedSpecialQuantity
+      earmark = Housing
+      targetAccount = renterAccount
+
+  regularAssetDepositCid <- usFRB `submit`
+    exerciseCmd cbRole CreateCbdc with
+      quantity = issuedRegularQuantity
+      targetAccount = Some renterAccount
+
+  pure (renter, landlord, invoice, [assetDepositCid, regularAssetDepositCid])
+
+setupRoleHierarchy : Script (PartiesForTesting, Onboarding)
+setupRoleHierarchy = script do
+  -- Participants set up parties
+  parties@PartiesForTesting{..} <- setupParties
+
+  -- DemoAdmin role
+  demoAdminRole <- demoAdmin `submit`
+    createCmd DemoAdminRole with demoAdmin
+
+  -- Central Bank role 1
+  cbRoleInv <- demoAdmin `submit`
+    exerciseCmd demoAdminRole AddCentralBank with
+      centralBank = usFRB
+      cashLabel = "EUR"
+  cbRole <- usFRB `submit`
+    exerciseCmd cbRoleInv CentralBankRoleInvite_Accept
+
+  -- Landlords association
+  landlordsAssociationRole <- landlordsAssociation `submit`
+    createCmd LandlordsAssociationRole with
+      ..
+
+  -- A landlord
+  landlordInvitation <- landlordsAssociation `submit`
+    exerciseCmd landlordsAssociationRole Invite_Landlord with ..
+
+  -- Create a landlord account at BankA
+  let landlordAccount = Account with id = getLabelledId [usFRB] "Landlord acc ", provider = usFRB, owner = landlord
+  usFRB `submit`
+    createCmd AssetSettlementRule with
+      account = landlordAccount
+      observers = empty
+      ctrls = fromList [landlord, usFRB]
+
+  -- Accept landlord role invitation
+  landlordRole <- landlord `submit`
+    exerciseCmd landlordInvitation LandlordRoleInvitation_Accept with
+      landlordAccountId = landlordAccount.id
+
+  -- Create a renter account at BankB
+  let renterAccount = Account with id = getLabelledId [usFRB] "Renter acc ", provider = usFRB, owner = renter
+  usFRB `submit`
+    createCmd AssetSettlementRule with
+      account = renterAccount
+      observers = empty
+      ctrls = fromList [renter, usFRB]
+
+  pure (parties, Onboarding with ..)

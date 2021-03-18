@@ -1,0 +1,358 @@
+--
+-- Copyright (c) 2021, Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+--
+
+module Testing.Tests.Pvp where
+import Banking.Role.Bank
+import Banking.Role.CentralBank
+import DA.Next.Set
+import DA.Finance.Types
+import DA.Finance.Asset
+import DA.Finance.Trade.DvpProposal
+import DA.Finance.Trade.Dvp.Settlement
+import DA.Finance.Asset.Settlement
+import DA.Finance.Process.AssetInjection
+import DA.Finance.Trade.SettlementInstruction
+import Daml.Script hiding (party)
+import DemoAdmin.Role.DemoAdmin
+import Testing.Models.Parties
+import Testing.Common.Parties
+import Testing.Common.TestUtilities
+import DA.Assert
+import DA.Action (void)
+
+eur : Text
+eur = "EUR"
+
+usd: Text
+usd = "USD"
+
+data RolesForTesting = RolesForTesting with
+  usFRBBankARole : ContractId BankRole
+  usFRBBankBRole : ContractId BankRole
+  ecbBankARole : ContractId BankRole
+  ecbBankBRole : ContractId BankRole
+
+
+-- fix ERA-914
+pvpCanBeRepeatedWithSameKeyWithoutDuplicateKeyError : Script ()
+pvpCanBeRepeatedWithSameKeyWithoutDuplicateKeyError = script do
+  let cash = 1000.0
+  (parties@PartiesForTesting{..}, roles@RolesForTesting{..}) <- setupRolesForPvp
+  injectCashByReqeust bankA usFRBBankARole usFRB cash
+  issueCash ecb ecbBankBRole cash
+  bankASendsUsdForEur parties roles
+  bankASendsUsdForEur parties roles
+
+
+pvpDemoWorkflowCanBeExecuted : Script()
+pvpDemoWorkflowCanBeExecuted = script do
+  let cashBankAAmount = 1000.0
+      cashBankBAmount = 999.0
+  (parties@PartiesForTesting{..}, RolesForTesting{..}) <- setupRolesForPvp
+
+  cashBankA <- injectCashByReqeust bankA usFRBBankARole usFRB cashBankAAmount
+  cashBankB <- issueCash ecb ecbBankBRole cashBankBAmount
+
+  DvpSettlement_Process_Result{..}
+    <- executePvp bankA usFRBBankARole cashBankAAmount ecb cashBankA
+                  bankB ecbBankBRole eur cashBankBAmount usFRB cashBankB
+
+  let [[newCashOfBankB]] = paymentDepositCids
+  Some cash <- queryContractId bankB newCashOfBankB
+  cash.asset.quantity === cashBankAAmount
+  cash.asset.id.label === usd
+
+  let [[newCashOfBankA]] = deliveryDepositCids
+  Some cash <- queryContractId bankA newCashOfBankA
+  cash.asset.quantity === cashBankBAmount
+  cash.asset.id.label === eur
+
+
+pvpReverseDemoWorkflowCanBeExecuted : Script()
+pvpReverseDemoWorkflowCanBeExecuted = script do
+  let cashBankAAmount = 1000.0
+      cashBankBAmount = 999.0
+  (parties@PartiesForTesting{..}, RolesForTesting{..}) <- setupRolesForPvp
+
+  cashBankA <- injectCashByReqeust bankA usFRBBankARole usFRB cashBankAAmount
+  cashBankB <- issueCash ecb ecbBankBRole cashBankBAmount
+
+  DvpSettlement_Process_Result{..}
+    <- executePvp bankB ecbBankBRole cashBankBAmount usFRB cashBankB
+                  bankA usFRBBankARole "USD" cashBankAAmount ecb cashBankA
+
+  let [[newCashOfBankB]] = deliveryDepositCids
+  Some cash <- queryContractId bankB newCashOfBankB
+  cash.asset.quantity === cashBankAAmount
+
+  let [[newCashOfBankA]] = paymentDepositCids
+  Some cash <- queryContractId bankA newCashOfBankA
+  cash.asset.quantity === cashBankBAmount
+
+
+pvpWorksWithLessThanTheWholeAmountOfIssuedCash : Script()
+pvpWorksWithLessThanTheWholeAmountOfIssuedCash = script do
+  let amount = 1000.0
+  (parties@PartiesForTesting{..}, roles@RolesForTesting{..}) <- setupRolesForPvp
+
+  injectCashByReqeust bankA usFRBBankARole usFRB amount
+  issueCash ecb ecbBankBRole amount
+
+  bankASendsUsdForEur parties roles
+
+  newCashOfBankB <- getSomeCashFor bankB usFRB
+  Some cash <- queryContractId bankB newCashOfBankB
+  cash.asset.quantity === 1.0
+
+  newCashOfBankA <- getSomeCashFor bankA ecb
+  Some cash <- queryContractId bankA newCashOfBankA
+  cash.asset.quantity === 1.0
+
+
+usingTheWrongAssetLabelForReceivedCashFailsThePvp : Script()
+usingTheWrongAssetLabelForReceivedCashFailsThePvp = script do
+  let cashBankAAmount = 1000.0
+      cashBankBAmount = 999.0
+      sentAmount = 60.0
+      otherAmount = 40.0
+      wrongLabel = "USD"
+  (parties@PartiesForTesting{..}, RolesForTesting{..}) <- setupRolesForPvp
+
+  cashBankA <- injectCashByReqeust bankA usFRBBankARole usFRB cashBankAAmount
+  cashBankB <- issueCash ecb ecbBankBRole cashBankBAmount
+
+  let assetIdToReceive = Id (singleton ecb) wrongLabel 0
+  (pvpProposalCid, bankAIncomingAccount)
+    <- requestPvp bankA usFRBBankARole sentAmount ecb
+                  bankB assetIdToReceive otherAmount usFRB
+  (_, _, _, delSettleCid) <- bankB `submit`
+    exerciseCmd ecbBankBRole AcceptPvp with
+      pvpRequestCid = pvpProposalCid
+      ownAccountForIncoming = bankAIncomingAccount
+
+  Some delivery <- queryContractId bankB delSettleCid
+  Some cashBankBData <- queryContractId bankB cashBankB
+  cashBankBData.asset.id.label === eur
+  delivery.asset.id.label === wrongLabel
+  bankB `submitMustFail`
+    exerciseCmd delSettleCid SettlementInstruction_AllocateNext with
+      depositCids = [cashBankB]
+      ctrl = bankB
+
+
+allocationFailsIfCashIsNotEnough : Script()
+allocationFailsIfCashIsNotEnough = script do
+  let cashBankAAmount = 1000.0
+      cashBankBAmount = 999.0
+      sentAmount = cashBankAAmount + 100.0
+      otherAmount = cashBankBAmount + 100.0
+  (parties@PartiesForTesting{..}, RolesForTesting{..}) <- setupRolesForPvp
+
+  cashBankA <- injectCashByReqeust bankA usFRBBankARole usFRB cashBankAAmount
+  cashBankB <- issueCash ecb ecbBankBRole cashBankBAmount
+
+  let assetIdToReceive = Id (singleton ecb) eur 0
+  (pvpProposalCid, bankAIncomingAccount)
+    <- requestPvp bankA usFRBBankARole sentAmount ecb
+                  bankB assetIdToReceive otherAmount usFRB
+  (_, _, _, delSettleCid) <- bankB `submit`
+    exerciseCmd ecbBankBRole AcceptPvp with
+      pvpRequestCid = pvpProposalCid
+      ownAccountForIncoming = bankAIncomingAccount
+
+  bankB `submitMustFail`
+    exerciseCmd delSettleCid SettlementInstruction_AllocateNext with
+      depositCids = [cashBankB]
+      ctrl = bankB
+
+
+-- ERA-915
+pvpCanBeReversed : Script()
+pvpCanBeReversed = script do
+  let amount = 1000.0
+  (parties@PartiesForTesting{..}, roles@RolesForTesting{..}) <- setupRolesForPvp
+
+  injectCashByReqeust bankA usFRBBankARole usFRB amount
+  issueCash ecb ecbBankBRole amount
+
+  bankBSendsEurForUsd parties roles
+  bankASendsEurForUsd parties roles
+
+
+-- ERA-915
+pvpSamePartyInitiatesReverse : Script()
+pvpSamePartyInitiatesReverse = script do
+  let amount = 1000.0
+  (parties@PartiesForTesting{..}, roles@RolesForTesting{..}) <- setupRolesForPvp
+
+  injectCashByReqeust bankA usFRBBankARole usFRB amount
+  issueCash ecb ecbBankBRole amount
+
+  bankASendsUsdForEur parties roles
+  bankASendsEurForUsd parties roles
+
+
+bankBSendsEurForUsd : PartiesForTesting -> RolesForTesting -> Script ()
+bankBSendsEurForUsd PartiesForTesting{..} RolesForTesting{..} = do
+  cashA <- getSomeCashFor bankA usFRB
+  cashB <- getSomeCashFor bankB ecb
+  void $ executePvp bankB ecbBankBRole 1.0 usFRB cashB
+                    bankA usFRBBankARole usd 1.0 ecb cashA
+
+bankBSendsUsdForEur : PartiesForTesting -> RolesForTesting -> Script ()
+bankBSendsUsdForEur PartiesForTesting{..} RolesForTesting{..} = do
+  cashA <- getSomeCashFor bankA ecb
+  cashB <- getSomeCashFor bankB usFRB
+  void $ executePvp bankB usFRBBankBRole 1.0 ecb cashB
+                    bankA ecbBankARole eur 1.0 usFRB cashA
+
+bankASendsEurForUsd : PartiesForTesting -> RolesForTesting -> Script ()
+bankASendsEurForUsd PartiesForTesting{..} RolesForTesting{..} = do
+  cashA <- getSomeCashFor bankA ecb
+  cashB <- getSomeCashFor bankB usFRB
+  void $executePvp bankA ecbBankARole 1.0 usFRB cashA
+                   bankB usFRBBankBRole usd 1.0 ecb cashB
+
+bankASendsUsdForEur : PartiesForTesting -> RolesForTesting -> Script ()
+bankASendsUsdForEur PartiesForTesting{..} RolesForTesting{..} = do
+  cashA <- getSomeCashFor bankA usFRB
+  cashB <- getSomeCashFor bankB ecb
+  void $ executePvp bankA usFRBBankARole 1.0 ecb cashA
+                    bankB ecbBankBRole eur 1.0 usFRB cashB
+
+getSomeCashFor : Party -> Party -> Script (ContractId AssetDeposit)
+getSomeCashFor bank cb = do
+  assets <- queryFilter @AssetDeposit bank (\cash -> cash.account.owner == bank && cash.account.provider == cb)
+  case assets of
+    (cash, _)::_ -> pure (cash)
+    _ -> abort $ "No cash of " <> show bank <> " from " <> show cb
+
+injectCashByReqeust : Party -> ContractId BankRole -> Party -> Decimal -> Script (ContractId AssetDeposit)
+injectCashByReqeust injectionRequestorBank bankRole injectionAcceptorCb quantity = script do
+  cbdcInjectionRequest <- injectionRequestorBank `submit`
+    exerciseCmd bankRole RequestCbdcInjection with
+      quantity = quantity
+  (cash1, _) <- injectionAcceptorCb `submit`
+    exerciseCmd cbdcInjectionRequest AssetInjectionRequest_Accept
+  pure cash1
+
+issueCash : Party -> ContractId BankRole -> Decimal -> Script (ContractId AssetDeposit)
+issueCash cb cbBankRole quantity = script do
+  (cash2, _) <- cb `submit`
+    exerciseCmd cbBankRole DoCbdcInjection with
+      quantity = quantity
+  pure cash2
+
+requestPvp : Party -> ContractId BankRole -> Decimal -> Party
+           -> Party -> Id -> Decimal -> Party
+           -> Script (ContractId DvpProposal, Account)
+requestPvp senderBank senderBankRole quantityToSend senderIncomingCB
+           receiverBank assetIdToReceive quantityToReceive receiverIncomingCB = script do
+  senderBank `submit`
+    exerciseByKeyCmd @AssetSettlementRule
+      senderIncomingAccount.id AssetSettlement_AddController with
+        ctrl = receiverBank
+  receiverBank `submit`
+    exerciseByKeyCmd @AssetSettlementRule
+      (getId [receiverIncomingCB, receiverBank]) AssetSettlement_AddController with
+        ctrl = senderBank
+  receiverBank `submit`
+    exerciseByKeyCmd @AssetSettlementRule
+      (getId [senderIncomingCB, receiverBank]) AssetSettlement_AddController with
+        ctrl = senderBank
+
+  pvpProposalCid
+    <- senderBank `submit` exerciseCmd senderBankRole RequestPvp
+          with
+            quantityToSend = quantityToSend
+            receiver = receiverBank
+            incomingCashId = assetIdToReceive
+            incomingCashQuantity = quantityToReceive
+            ownAccountForIncoming = senderIncomingAccount
+  pure (pvpProposalCid, receiverIncomingAccount)
+ where
+  senderIncomingAccount = accountOf senderBank senderIncomingCB
+  receiverIncomingAccount = accountOf receiverBank receiverIncomingCB
+
+executePvp : Party -> ContractId BankRole -> Decimal -> Party -> ContractId AssetDeposit
+           -> Party -> ContractId BankRole -> Text -> Decimal -> Party -> ContractId AssetDeposit
+           -> Script DvpSettlement_Process_Result
+executePvp
+    senderBank senderBankRole quantityToSend senderIncomingCB sentCash
+    receiverBank receiverBankRole assetLabelToReceive quantityToReceive receiverIncomingCB otherCash = script do
+  (pvpProposalCid, receiverIncomingAccount)
+    <- requestPvp senderBank senderBankRole quantityToSend senderIncomingCB
+                  receiverBank assetIdToReceive quantityToReceive receiverIncomingCB
+
+  (dvpSettlementCid, dvpCid, paySettleCid, delSettleCid) <- receiverBank `submit`
+    exerciseCmd receiverBankRole AcceptPvp with
+      pvpRequestCid = pvpProposalCid
+      ownAccountForIncoming = receiverIncomingAccount
+  paySettleCid <- senderBank `submit`
+    exerciseCmd paySettleCid SettlementInstruction_AllocateNext with
+      depositCids = [sentCash]
+      ctrl = senderBank
+  delSettleCid <- receiverBank `submit`
+    exerciseCmd delSettleCid SettlementInstruction_AllocateNext with
+      depositCids = [otherCash]
+      ctrl = receiverBank
+  senderBank `submit`
+    exerciseCmd dvpSettlementCid DvpSettlement_Process with
+      paymentInstructionCids = [paySettleCid]
+      deliveryInstructionCids = [delSettleCid]
+      ctrl = senderBank
+      ..
+ where
+  assetIdToReceive = Id (singleton senderIncomingCB) assetLabelToReceive 0
+
+setupRolesForPvp : Script (PartiesForTesting, RolesForTesting)
+setupRolesForPvp = do
+  parties@PartiesForTesting{..} <- setupParties
+
+  demoAdminRole <- demoAdmin `submit`
+    createCmd DemoAdminRole with demoAdmin
+  usFRBRoleInvite <- demoAdmin `submit`
+    exerciseCmd demoAdminRole AddCentralBank with
+      centralBank = usFRB
+      cashLabel = "USD"
+  usFRBRole <- usFRB `submit`
+    exerciseCmd usFRBRoleInvite CentralBankRoleInvite_Accept
+  usFRBBankAInvite <- usFRB `submit`
+    exerciseCmd usFRBRole InviteBank with
+      bank = bankA
+      accountId = getId [usFRB, bankA]
+  usFRBBankARole <- bankA `submit`
+    exerciseCmd usFRBBankAInvite BankRoleInvite_Accept
+  usFRBbankBInvite <- usFRB `submit`
+    exerciseCmd usFRBRole InviteBank with
+      bank = bankB
+      accountId = getId [usFRB, bankB]
+  usFRBBankBRole <- bankB `submit`
+    exerciseCmd usFRBbankBInvite BankRoleInvite_Accept
+
+  ecbRoleInvite <- demoAdmin `submit`
+    exerciseCmd demoAdminRole AddCentralBank with
+      centralBank = ecb
+      cashLabel = eur
+  ecbRole <- ecb `submit`
+    exerciseCmd ecbRoleInvite CentralBankRoleInvite_Accept
+  ecbBankAInvite <- ecb `submit`
+    exerciseCmd ecbRole InviteBank with
+      bank = bankA
+      accountId = getId [ecb, bankA]
+  ecbBankARole <- bankA `submit`
+    exerciseCmd ecbBankAInvite BankRoleInvite_Accept
+  ecbBankBInvite <- ecb `submit`
+    exerciseCmd ecbRole InviteBank with
+      bank = bankB
+      accountId = getId [ecb, bankB]
+  ecbBankBRole <- bankB `submit`
+    exerciseCmd ecbBankBInvite BankRoleInvite_Accept
+
+  pure (parties, RolesForTesting{..})
+
+accountOf : Party -> Party -> Account
+accountOf bank centralBank =
+ Account (getId [centralBank, bank]) centralBank bank

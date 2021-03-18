@@ -1,0 +1,55 @@
+--
+-- Copyright (c) 2021, Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+--
+
+module Testing.Triggers.AutoSettle where
+
+
+import Daml.Trigger
+import DA.Finance.Trade.Dvp
+import DA.Finance.Trade.SettlementInstruction
+import DA.Finance.Trade.Dvp.Settlement
+import DA.Optional
+import DA.Foldable hiding (all, elem)
+import DA.Action
+
+autoSettleTrigger : Trigger ()
+autoSettleTrigger = Trigger
+  { initialize = pure ()
+  , updateState = \_ -> pure ()
+  , rule = autoSettleRule
+  , registeredTemplates = RegisteredTemplates [
+      registeredTemplate @DvpSettlementRule,
+      registeredTemplate @Dvp,
+      registeredTemplate @SettlementInstruction
+    ]
+  , heartbeat = None
+  }
+
+autoSettleRule : Party -> TriggerA () ()
+autoSettleRule party = do
+    allSettlementRules <- query @DvpSettlementRule
+    allSettlementInstructions <- query @SettlementInstruction
+    allDvps <- query @Dvp
+    forA_ allDvps $ \(dvpCid, dvp) -> do
+      when (dvp.status == SettlementStatus_Instructed) $ do
+        let settlementInstructionsForThisDvp =
+              filter (\(_, si) -> dvp.tradeId == si.tradeId) allSettlementInstructions
+            settlementRuleForThisDvp =
+              listToOptional $ filter (\(_, sr) -> dvp.masterAgreement == sr.masterAgreement) allSettlementRules
+        whenSome settlementRuleForThisDvp $ \(settlementRuleCid, _) ->
+          when (isAllAllocated settlementInstructionsForThisDvp) $ do
+            let payments = getMatchingSettlementInstructions settlementInstructionsForThisDvp dvp.payments
+                deliveries = getMatchingSettlementInstructions settlementInstructionsForThisDvp dvp.deliveries
+            dedupExercise settlementRuleCid DvpSettlement_Process with
+              paymentInstructionCids = map fst payments
+              deliveryInstructionCids = map fst deliveries
+              dvpCid = dvpCid
+              ctrl = party
+  where
+    isAllAllocated settlementInstructions =
+      all (\(_, si) -> all hasDeposit si.steps) settlementInstructions
+    hasDeposit step = isSome step.depositCid
+    getMatchingSettlementInstructions settlementInstructions dvpStepList =
+      filter (\(_, s) -> s.asset `elem` dvpStepList) settlementInstructions

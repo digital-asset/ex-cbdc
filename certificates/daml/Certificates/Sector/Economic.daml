@@ -1,0 +1,52 @@
+--
+-- Copyright (c) 2021, Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+--
+
+module Certificates.Sector.Economic where
+
+import DA.Lib.Types.Sector
+import DA.Next.Set
+
+template EconomicSectorCertificate
+  with
+    centralBank : Party
+    landlordsAssociation : Party
+    sector : Sector
+  where
+    signatory centralBank
+    observer landlordsAssociation
+
+    controller landlordsAssociation can
+      nonconsuming Distribute : ContractId DistributedEconomicSectorCertificate
+        with
+          name : Party
+        do
+          create DistributedEconomicSectorCertificate with
+            owner = name
+            observers = empty
+            ..
+
+template DistributedEconomicSectorCertificate
+  with
+    centralBank : Party
+    landlordsAssociation : Party
+    owner : Party
+    sector : Sector
+    observers : Set Party
+  where
+    signatory centralBank, landlordsAssociation
+    observer observers, owner
+
+    controller landlordsAssociation can
+      DistributedEconomicSectorCertificate_Revoke : ()
+        do
+          pure ()
+
+    controller owner can
+      AddObserver : ContractId DistributedEconomicSectorCertificate
+        with
+          newObserver : Party
+        do
+          create this with
+            observers = insert newObserver observers

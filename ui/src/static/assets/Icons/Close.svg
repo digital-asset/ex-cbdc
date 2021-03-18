@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="33px" height="33px" viewBox="0 0 33 33" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Group 10</title>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" stroke-linecap="round">
+        <g id="Modal-Design" transform="translate(-1133.000000, -80.000000)" stroke="#A7F6FF" stroke-width="3">
+            <g id="Group-10" transform="translate(1149.500000, 96.500000) rotate(45.000000) translate(-1149.500000, -96.500000) translate(1139.000000, 86.000000)">
+                <line x1="10.5" y1="0.5" x2="10.5" y2="20.5" id="Line-13"></line>
+                <line x1="10.5" y1="0.5" x2="10.5" y2="20.5" id="Line-13" transform="translate(10.500000, 10.500000) rotate(90.000000) translate(-10.500000, -10.500000) "></line>
+            </g>
+        </g>
+    </g>
+</svg>

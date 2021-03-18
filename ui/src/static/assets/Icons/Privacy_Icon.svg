@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="46px" height="46px" viewBox="0 0 46 46" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Group 15</title>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Slide-27" transform="translate(-1146.000000, -34.000000)">
+            <g id="Group-15" transform="translate(1148.000000, 36.000000)">
+                <g id="Group-13">
+                    <circle id="Oval" stroke="#FFFFFF" stroke-width="3" fill="#232F40" cx="21" cy="21" r="21"></circle>
+                    <rect id="Rectangle" fill="#FFFFFF" x="12" y="17" width="19" height="15" rx="2"></rect>
+                    <path d="M16,15.8259047 C16,11.159238 17.8333333,8.8259047 21.5,8.8259047 C25.1666667,8.8259047 27,11.159238 27,15.8259047" id="Line-6" stroke="#FFFFFF" stroke-width="3" stroke-linecap="square"></path>
+                </g>
+                <polyline id="Rectangle" stroke="#232F40" stroke-width="2" stroke-linecap="round" transform="translate(21.247499, 23.663991) rotate(39.000000) translate(-21.247499, -23.663991) " points="22.7474994 20.1639915 22.7474994 27.1639915 19.7474994 27.1639915"></polyline>
+            </g>
+        </g>
+    </g>
+</svg>

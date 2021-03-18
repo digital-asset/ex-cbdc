@@ -1,0 +1,23 @@
+--
+-- Copyright (c) 2021, Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+--
+
+module Test.DA.Reset.FullReset where
+
+import Daml.Script
+
+import DA.Reset.Reset
+import DA.Reset.ResetImplementation
+
+import Testing.Common.Parties
+
+
+test_fullReset: Script()
+test_fullReset = do
+  parties <- setupParties
+  initLedgerAfterReset parties
+  let resetAdmin = getResetAdmin parties
+  submit resetAdmin do
+    createCmd ResetRequest with party = resetAdmin
+  resetIfRequested parties

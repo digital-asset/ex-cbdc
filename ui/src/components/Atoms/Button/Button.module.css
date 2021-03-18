@@ -1,0 +1,40 @@
+/**
+ * Copyright (c) 2021, Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+.button {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 6px 16px;
+    margin: 0;
+    min-width: 93px;
+    outline: 0;
+    border: 0;
+    border-radius: 0;
+    background-color: #a7f6ff;
+    font-weight: bold;
+    letter-spacing: 0.09px;
+    font-family: 'Brown-Regular';
+    font-size: 8px;
+    color: #28364a;
+    cursor: pointer;
+    white-space: nowrap;
+    box-sizing: border-box;
+    user-select: none;
+    -moz-appearance: none;
+    text-decoration: none;
+    -webkit-appearance: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: background-color 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+}
+
+.button:hover:not(:disabled) {
+    background-color: #65d3df;
+}
+
+.button:disabled {
+    color: rgba(40, 54, 74, 0.4);
+    background-color: rgba(167, 246, 255, 0.51);
+}

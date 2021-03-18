@@ -1,0 +1,18 @@
+--
+-- Copyright (c) 2021, Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+--
+
+module Testing.Tests.Banking where
+
+import Daml.Script
+import DA.Assert
+import Banking.Role.Bank (getDvpMasterAgreementBetween)
+
+testDvpMasterAgreementDoesNotDependOnRolesBuyerAndSeller : Script ()
+testDvpMasterAgreementDoesNotDependOnRolesBuyerAndSeller = do
+  buyer <- allocateParty "Buyer"
+  seller <- allocateParty "Seller"
+  let normal = getDvpMasterAgreementBetween buyer seller
+  let reverse = getDvpMasterAgreementBetween seller buyer
+  normal === reverse

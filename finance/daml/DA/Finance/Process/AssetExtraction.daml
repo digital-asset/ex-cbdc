@@ -1,0 +1,49 @@
+--
+-- Copyright (c) 2021, Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+--
+
+module DA.Finance.Process.AssetExtraction where
+
+import DA.Assert
+import DA.Finance.Asset
+import DA.Finance.Types
+import DA.Next.Set as Set
+
+template AssetExtractionRequest
+  with
+    account : Account
+    depositCid : ContractId AssetDeposit
+  where
+    signatory account.id.signatories
+    ensure account.id.signatories == Set.fromList [account.provider, account.owner]
+
+    controller account.provider can
+      AssetExtractionRequest_Accept : ContractId AssetExtractionNotification
+        do
+          deposit <- fetch depositCid
+          deposit.account === account
+
+          archive depositCid
+
+          create AssetExtractionNotification with ..
+
+      AssetExtractionRequest_Reject : ContractId AssetExtractionFailure
+        do
+          deposit <- fetch depositCid
+          deposit.account === account
+
+          create AssetExtractionFailure with ..
+
+template AssetExtractionNotification
+  with
+    deposit: AssetDeposit
+  where
+    signatory deposit.account.id.signatories
+
+template AssetExtractionFailure
+  with
+    deposit: AssetDeposit
+  where
+    signatory deposit.account.id.signatories
+
