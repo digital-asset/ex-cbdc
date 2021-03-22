@@ -134,13 +134,13 @@ jobs:
           command: |
             # Pip detector gives NullPointerException after installing pipenv, let's exclude
             bash <(curl -s https://raw.githubusercontent.com/DACH-NY/security-blackduck/master/synopsys-detect) \
-            ci-build digitalasset_ex-cbdc master \
+            ci-build digitalasset_ex-cbdc main \
             --logging.level.com.synopsys.integration=DEBUG \
             --detect.excluded.detector.types=pip \
             --detect.notices.report=true \
             --detect.timeout=3600
       - run:
-          command: cp digitalasset_ex_cbdc_master_Black_Duck_Notices_Report.txt NOTICE
+          command: cp digitalasset_ex_cbdc_main_Black_Duck_Notices_Report.txt NOTICE
       - persist_to_workspace:
           root: .
           paths:
