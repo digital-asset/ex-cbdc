@@ -47,8 +47,8 @@ const Customer: React.FC<UserProps>= (props) => {
   const certs = useStreamQueries(DistributedEconomicSectorCertificate, () => [{ owner: party }], []).contracts;
   const rentInvoice = useStreamQueries(RentInvoice);
 
-  function assertProperRoles(landlordRoles: readonly CreateEvent<LandlordRole, undefined, "d5b6258a16b1a63a531acc297bc93dca9bf5f355854e753f88800de3959efe73:Landlord.Landlord:LandlordRole">[],
-    cert: CreateEvent<DistributedEconomicSectorCertificate, undefined, "7fba35159897987072b8e7fbb43f4a450c137d185b7cf9adf1c4858171943a31:Certificates.Sector.Economic:DistributedEconomicSectorCertificate"> | undefined) {
+  function assertProperRoles(landlordRoles: readonly CreateEvent<LandlordRole>[],
+    cert: CreateEvent<DistributedEconomicSectorCertificate> | undefined) {
     if (landlordRoles.length !== 1) {
       throw new Error("Error, we should have exactly one Landlord Role per landlord.");
     }
