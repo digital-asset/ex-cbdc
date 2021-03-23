@@ -12,7 +12,7 @@ import DA.Finance.Asset
 import DA.Finance.Types
 import DA.Finance.Asset.Settlement
 import DA.Lib.Types.Sector
-import DA.Next.Set as Set
+import DA.Set as Set
 import DA.Optional
 
 template CentralBankRole

@@ -13,7 +13,7 @@ import DA.List
 import DA.Foldable (forA_)
 
 import Certificates.Sector.Economic
-import DA.Next.Set as Set
+import DA.Set as Set
 import DA.Optional
 import Prelude hiding (forA)
 import DA.Traversable

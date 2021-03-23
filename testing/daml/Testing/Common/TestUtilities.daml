@@ -6,7 +6,7 @@
 module Testing.Common.TestUtilities where
 
 import DA.Finance.Types
-import DA.Next.Set
+import DA.Set
 import DA.Text
 import Prelude hiding (getParty)
 

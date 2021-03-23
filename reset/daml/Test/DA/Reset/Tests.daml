@@ -10,7 +10,7 @@ module Test.DA.Reset.Tests where
 import Daml.Script
 import DA.Foldable hiding (elem)
 import DA.Assert
-import DA.Next.Set qualified as Set
+import DA.Set qualified as Set
 
 import DA.Reset.Reset
 import DA.Reset.ResetImplementation

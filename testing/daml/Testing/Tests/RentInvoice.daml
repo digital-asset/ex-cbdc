@@ -13,7 +13,7 @@ import DA.Finance.Asset
 import DA.Finance.Asset.Settlement
 import DA.Finance.Types
 import DA.Lib.Types.Sector
-import DA.Next.Set
+import DA.Set
 import Daml.Script hiding (party)
 import Landlord.Landlord
 import DemoAdmin.Role.DemoAdmin

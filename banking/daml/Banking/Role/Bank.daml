@@ -6,7 +6,7 @@
 module Banking.Role.Bank where
 
 import DA.Assert
-import DA.Next.Set as Set
+import DA.Set as Set
 import DA.Finance.Asset
 import DA.Finance.Asset.Settlement
 import DA.Finance.Process.AssetExtraction

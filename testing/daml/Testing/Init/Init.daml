@@ -15,7 +15,7 @@ import Testing.Common.Parties
 import Testing.Common.TestUtilities
 import Certificates.Sector.Economic
 import DA.Lib.Types.Sector
-import DA.Next.Set
+import DA.Set
 import DA.Time
 import DA.Date as Date
 import DA.Assert
