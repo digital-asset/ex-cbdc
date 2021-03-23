@@ -31,7 +31,7 @@ commands:
     steps:
       - slack/status:
           fail_only: true
-          only_for_branches: master
+          only_for_branches: main
           webhook: '${SLACK_WEBHOOK}'
 
 jobs:
@@ -134,13 +134,13 @@ jobs:
           command: |
             # Pip detector gives NullPointerException after installing pipenv, let's exclude
             bash <(curl -s https://raw.githubusercontent.com/DACH-NY/security-blackduck/master/synopsys-detect) \
-            ci-build digitalasset_ex-cbdc master \
+            ci-build digitalasset_ex-cbdc main \
             --logging.level.com.synopsys.integration=DEBUG \
             --detect.excluded.detector.types=pip \
             --detect.notices.report=true \
             --detect.timeout=3600
       - run:
-          command: cp digitalasset_ex_cbdc_master_Black_Duck_Notices_Report.txt NOTICE
+          command: cp digitalasset_ex_cbdc_main_Black_Duck_Notices_Report.txt NOTICE
       - persist_to_workspace:
           root: .
           paths:
@@ -175,7 +175,7 @@ workflows:
           filters:
             branches:
               only:
-                - master
+                - main
     jobs:
       - daml_test:
           daml_sdk_version: "1.10.0"
