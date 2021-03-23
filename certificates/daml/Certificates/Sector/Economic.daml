@@ -6,7 +6,7 @@
 module Certificates.Sector.Economic where
 
 import DA.Lib.Types.Sector
-import DA.Next.Set
+import DA.Set
 
 template EconomicSectorCertificate
   with
