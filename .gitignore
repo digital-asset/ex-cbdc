@@ -1,7 +1,6 @@
 .daml
 *.log
 target
-.idea
 .DS_Store
 daml.js
 ui/build
@@ -13,3 +12,7 @@ canton-credentials-config.json
 parties.json
 
 !src/main/scala/com/digitalasset/canton
+
+# IntelliJ
+.idea
+*.iml
