@@ -6,7 +6,7 @@
 module DA.Finance.Trade.SettlementInstruction where
 
 import DA.Either
-import DA.Next.Set
+import DA.Set
 import DA.Optional hiding (fromSomeNote)
 import DA.Finance.Asset
 import DA.Finance.Asset.Settlement

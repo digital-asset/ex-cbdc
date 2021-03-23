@@ -7,7 +7,7 @@ module DA.Finance.Process.AssetInjection where
 
 import DA.Finance.Asset
 import DA.Finance.Asset.Settlement
-import DA.Next.Set as Set
+import DA.Set as Set
 
 template AssetInjectionRequest
   with

@@ -8,9 +8,6 @@ module DA.Finance.Utils where
 import DA.Date
 import DA.List as List
 import DA.List.Total as TotalList
-import DA.Next.Map
-import DA.Next.Set as Set
-import DA.Text as Text
 
 import DA.Finance.Types
 
@@ -19,22 +16,6 @@ instance Semigroup Decimal where
 
 instance Monoid Decimal where
   mempty = 0.0
-
-instance MapKey a => MapKey (Set a) where
-  keyToText s = "Set(" <> Text.intercalate ";" (map keyToText $ Set.toList s) <> ")"
-  keyFromText = Set.fromList . map keyFromText . splitOn ";" . Text.dropPrefix "Set(" . Text.dropSuffix ")"
-
-instance MapKey Id where
-  keyToText Id{..} = keyToText signatories <> "-" <> label <> "-" <> keyToText version
-  keyFromText text =
-    let [signatoriesText, label, versionText] = splitOn "-" text
-        signatories = keyFromText signatoriesText
-        version = keyFromText versionText
-    in Id with ..
-
-instance (MapKey a, MapKey b) => MapKey (a, b) where
-  keyToText (x, y) = "Tuple(" <> keyToText x <> "," <> keyToText y <> ")"
-  keyFromText = (\[x, y] -> (keyFromText x, keyFromText y)) . splitOn "," . Text.dropPrefix "Tuple(" . Text.dropSuffix ")"
 
 -- | Fetches a contract, archives it and returns its value.
 fetchAndArchive : Template a => ContractId a -> Update a

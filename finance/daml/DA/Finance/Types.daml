@@ -6,7 +6,7 @@
 module DA.Finance.Types where
 
 import DA.Lib.Types.Sector
-import DA.Next.Set as Set
+import DA.Set as Set
 import DA.Text
 import DA.Optional (isNone, isSome)
 import Prelude hiding (id)

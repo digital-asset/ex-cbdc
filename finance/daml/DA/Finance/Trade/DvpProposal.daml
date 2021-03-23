@@ -9,7 +9,7 @@ import DA.Finance.Trade.SettlementInstruction
 import DA.Finance.Trade.Dvp.Settlement
 import DA.Finance.Trade.Dvp
 import DA.Finance.Types
-import DA.Next.Set as Set
+import DA.Set as Set
 
 template DvpProposal
   with

@@ -8,7 +8,7 @@ module DA.Finance.Process.AssetExtraction where
 import DA.Assert
 import DA.Finance.Asset
 import DA.Finance.Types
-import DA.Next.Set as Set
+import DA.Set as Set
 
 template AssetExtractionRequest
   with

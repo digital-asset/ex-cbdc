@@ -9,7 +9,7 @@ module DA.Finance.Trade.Dvp
   )
   where
 
-import DA.Next.Set hiding (null)
+import DA.Set hiding (null)
 
 import DA.Finance.Trade.Types
 import DA.Finance.Types
