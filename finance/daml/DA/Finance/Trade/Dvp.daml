@@ -3,8 +3,6 @@
 -- SPDX-License-Identifier: Apache-2.0
 --
 
-{-# OPTIONS -Wno-deprecations #-}
-
 module DA.Finance.Trade.Dvp
   ( module DA.Finance.Trade.Dvp
   , module DA.Finance.Trade.Types
