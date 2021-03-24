@@ -90,8 +90,8 @@ const CentralBank = (props: { alice: PartyId, landlord: PartyId, isCustomer: any
     }
   };
 
-  function assertProperRoles(cbRole: readonly CreateEvent<CentralBankRole, undefined, "ae7438370392410369d31ec0371e1b5ec1dddde1da739d25da5daef028e5ddb8:Banking.Role.CentralBank:CentralBankRole">[],
-    aliceAccount: CreateEvent<AssetSettlementRule, unknown, string> | undefined) {
+  function assertProperRoles(cbRole: readonly CreateEvent<CentralBankRole>[],
+    aliceAccount: CreateEvent<AssetSettlementRule> | undefined) {
     if (cbRole.length !== 1) {
       throw new Error("Need exactly one Central Bank role per Central Bank.")
     }

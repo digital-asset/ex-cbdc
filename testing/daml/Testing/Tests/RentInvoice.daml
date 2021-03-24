@@ -3,8 +3,9 @@
 -- SPDX-License-Identifier: Apache-2.0
 --
 
-module Testing.Tests.RentInvoice where
+{-# OPTIONS -Wno-deprecations #-}
 
+module Testing.Tests.RentInvoice where
 
 import Banking.Role.CentralBank
 import Certificates.Sector.Economic
