@@ -11,6 +11,11 @@ import { BankRole } from "@daml.js/banking-1.0.0/lib/Banking/Role/Bank";
 import { AssetSettlementRule } from "@daml.js/finance-1.0.0/lib/DA/Finance/Asset/Settlement";
 import Ledger, { CreateEvent } from "@daml/ledger";
 import { emptyMap } from "@daml/types";
+import { PartyId } from "../models/CredentialsType";
+
+function singleton(elem: PartyId) {
+    return {map: emptyMap<string, {}>().set(elem.asString(), {})};
+}
 
 export const handleProposePvp = async(setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
     setIsError: React.Dispatch<React.SetStateAction<boolean>>,
@@ -57,7 +62,7 @@ export const handleProposePvp = async(setIsLoading: React.Dispatch<React.SetStat
             receiver: receiverPartyId,
             incomingCashQuantity: incomingCashQuantity,
         })
-        const signatories = {map: emptyMap<string, {}>().set(incomingCb.asString(), {})}
+        const signatories = singleton(incomingCb)
         await ledger.exercise(BankRole.RequestPvp, ourBankRole?.contractId, {
             quantityToSend: quantityToSend,
             incomingCashId: { label: buyCashLabel, signatories: signatories, version: "0" },
