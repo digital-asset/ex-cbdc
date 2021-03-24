@@ -192,6 +192,8 @@ const Bank: React.FC<CommercialBankData> = (props) => {
                             disabled={!inputBuyAmount || !inputSellAmount}
                         />
                     )}
+                {isError &&
+                <div className={`${styles.bankError} ${styles._error}`}/>}
             </div>
         ]
         function getDisplayName(partyId: PartyId): string {
