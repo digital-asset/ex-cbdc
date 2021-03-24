@@ -56,7 +56,7 @@ const CentralBankFirstFlow = (props: { displayName: string }) => {
             setIsError(false)
             const cbdc = assets.contracts;
             const value = inputValue.concat("000000")
-            await ledger.exerciseByKey(AssetSettlementRule.AssetSettlement_Transfer, cbRoleKey, {
+            await ledger.exerciseByKey(AssetSettlementRule.AssetSettlement_Transfer, cbRoleKey!, {
                 receiverAccountId: receiverAccountId!,
                 amount: value,
                 depositCids: cbdc.map(i=>i.contractId)
