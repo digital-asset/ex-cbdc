@@ -3,12 +3,10 @@
 -- SPDX-License-Identifier: Apache-2.0
 --
 
-{-# OPTIONS -Wno-deprecations #-}
-
 module DA.Finance.Asset.Settlement where
 
 import DA.Assert
-import DA.Next.Set as Set
+import DA.Set as Set
 import DA.Optional
 import DA.Foldable (forA_)
 

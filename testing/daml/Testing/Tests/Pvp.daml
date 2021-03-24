@@ -3,13 +3,11 @@
 -- SPDX-License-Identifier: Apache-2.0
 --
 
-{-# OPTIONS -Wno-deprecations #-}
-
 module Testing.Tests.Pvp where
 
 import Banking.Role.Bank
 import Banking.Role.CentralBank
-import DA.Next.Set
+import DA.Set
 import DA.Finance.Types
 import DA.Finance.Asset
 import DA.Finance.Trade.DvpProposal

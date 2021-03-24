@@ -3,7 +3,9 @@
 -- SPDX-License-Identifier: Apache-2.0
 --
 
-
+-- TODO: No deprecations option can be removed and fixed accordingly after SDK 1.12.
+-- See: https://discuss.daml.com/t/using-da-map-for-triggers/2326/4
+{-# OPTIONS -Wno-deprecations #-}
 module Testing.Tests.Triggers.TriggerTestUtils where
 
 import DA.Next.Map qualified as Maps

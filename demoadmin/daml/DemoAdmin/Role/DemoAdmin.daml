@@ -3,13 +3,11 @@
 -- SPDX-License-Identifier: Apache-2.0
 --
 
-{-# OPTIONS -Wno-deprecations #-}
-
 module DemoAdmin.Role.DemoAdmin where
 
 import Banking.Role.CentralBank
 import DA.Finance.Types
-import DA.Next.Set qualified as Set
+import DA.Set qualified as Set
 
 template DemoAdminRole
   with

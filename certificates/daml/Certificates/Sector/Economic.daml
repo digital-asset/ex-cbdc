@@ -3,12 +3,10 @@
 -- SPDX-License-Identifier: Apache-2.0
 --
 
-{-# OPTIONS -Wno-deprecations #-}
-
 module Certificates.Sector.Economic where
 
 import DA.Lib.Types.Sector
-import DA.Next.Set
+import DA.Set
 
 template EconomicSectorCertificate
   with

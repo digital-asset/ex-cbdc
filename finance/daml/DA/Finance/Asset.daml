@@ -3,13 +3,11 @@
 -- SPDX-License-Identifier: Apache-2.0
 --
 
-{-# OPTIONS -Wno-deprecations #-}
-
 module DA.Finance.Asset where
 
 import DA.Action
 import DA.Assert
-import DA.Next.Set
+import DA.Set
 import DA.Optional hiding (fromSomeNote)
 import DA.Finance.Types
 import DA.NonEmpty qualified as NE
@@ -233,7 +231,7 @@ createAssetDeposit quantity = do
 
 createAssetDepositAs : Party -> Decimal -> Script (ContractId AssetDeposit, AssetDeposit)
 createAssetDepositAs someone quantity = do
-  let someId = Id (DA.Next.Set.singleton someone) "Label" 1
+  let someId = Id (DA.Set.singleton someone) "Label" 1
   cid <- someone `submit` createCmd AssetDeposit with
     observers = empty
     account = Account with
