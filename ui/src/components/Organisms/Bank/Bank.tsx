@@ -129,7 +129,7 @@ const Bank: React.FC<CommercialBankData> = (props) => {
         handleAcceptPvpProposal(setIsLoading, setIsError, pvpProposals, ourAssetSettlements, ourBankRoles, BankRole, ledger)
     }
     function handleCreatePvp() {
-        handleProposePvp(setIsLoading, setIsError, displayName, inputBuyAmount, inputBuyCurrency, inputSellAmount, ourAssetSettlements, ourBankRoles, ledger, BankRole)
+        handleProposePvp(setIsLoading, setIsError, displayName, inputBuyAmount, inputBuyCurrency, inputSellAmount, ourAssetSettlements, ourBankRoles, ledger)
         setInputBuyAmount("")
         setInputSellAmount("")
     }

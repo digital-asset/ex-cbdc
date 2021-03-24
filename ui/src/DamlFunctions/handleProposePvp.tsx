@@ -7,15 +7,18 @@ import {Central, Commercial} from "../models/Banks";
 import {getPartyId} from "../Credentials";
 import {Currency} from "../models/Curency";
 import _ from "lodash";
+import { BankRole } from "@daml.js/banking-1.0.0/lib/Banking/Role/Bank";
+import { AssetSettlementRule } from "@daml.js/finance-1.0.0/lib/DA/Finance/Asset/Settlement";
+import Ledger, { CreateEvent } from "@daml/ledger";
+import { emptyMap } from "@daml/types";
 
 export const handleProposePvp = async(setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
     setIsError: React.Dispatch<React.SetStateAction<boolean>>,
     displayName: string,
-    inputBuyAmount, inputBuyCurrency, inputSellAmount,
-    ourAssetSettlements,
-    ourBankRoles,
-    ledger,
-    BankRole):Promise<any> => {
+    inputBuyAmount: string, inputBuyCurrency: string, inputSellAmount: string,
+    ourAssetSettlements: readonly CreateEvent<AssetSettlementRule>[],
+    ourBankRoles: readonly CreateEvent<BankRole>[],
+    ledger: Ledger):Promise<any> => {
 
     try{
         setIsLoading(true)
@@ -54,10 +57,10 @@ export const handleProposePvp = async(setIsLoading: React.Dispatch<React.SetStat
             receiver: receiverPartyId,
             incomingCashQuantity: incomingCashQuantity,
         })
-        // @ts-ignore
+        const signatories = {map: emptyMap<string, {}>().set(incomingCb.asString(), {})}
         await ledger.exercise(BankRole.RequestPvp, ourBankRole?.contractId, {
             quantityToSend: quantityToSend,
-            incomingCashId: { label: buyCashLabel, signatories: { textMap: { [incomingCb.asString()]: {} } }, version: "0" },
+            incomingCashId: { label: buyCashLabel, signatories: signatories, version: "0" },
             ownAccountForIncoming: ownAccountForIncoming,
             receiver: receiverPartyId.asString(),
             incomingCashQuantity: incomingCashQuantity,
