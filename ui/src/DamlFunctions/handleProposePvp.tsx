@@ -10,10 +10,11 @@ import _ from "lodash";
 import { BankRole } from "@daml.js/banking-1.0.0/lib/Banking/Role/Bank";
 import { AssetSettlementRule } from "@daml.js/finance-1.0.0/lib/DA/Finance/Asset/Settlement";
 import Ledger, { CreateEvent } from "@daml/ledger";
+import * as damlTypes from '@daml/types';
 import { emptyMap } from "@daml/types";
 import { PartyId } from "../models/CredentialsType";
 
-function singleton(elem: PartyId) {
+function singleton(elem: PartyId): {map: damlTypes.Map<string, {}>} {
     return {map: emptyMap<string, {}>().set(elem.asString(), {})};
 }
 
