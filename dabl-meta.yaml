@@ -1,0 +1,15 @@
+#
+# Copyright (c) 2021, Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+#
+
+catalog:
+  name: ex-cbdc
+  version: 1.0.0
+  short_description: CBDC Example Application
+  description: Reference Application: Central Bank Digital Currency (CBDC)
+  author: Digital Asset (Switzerland) GmbH
+  url: https://github.com/digital-asset/ex-cbdc
+  license: Apache-2.0
+  tags: [ dabl-sample-app, application ]
+  icon_file: cbdc-demo.png

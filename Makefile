@@ -51,3 +51,11 @@ dabl: dabl-ui
 
 dabl-ui: build
 	$(MAKE) -C ui dabl-ui LEDGER_ID=$(LEDGER_ID)
+
+DAR_FILES=$(shell find . -type f -name "*.dar")
+
+package: dabl
+	ddit build \
+	  --force \
+	  --skip-dar-build \
+	  --subdeployment $(DAR_FILES) ui/cbdc-ui.zip

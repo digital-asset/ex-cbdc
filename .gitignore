@@ -16,3 +16,5 @@ parties.json
 # IntelliJ
 .idea
 *.iml
+
+*.dit
