@@ -54,7 +54,7 @@ dabl-ui: build
 
 DAR_FILES=$(shell find . -type f -name "*.dar")
 
-package: dabl
+dabl-package: dabl
 	ddit build \
 	  --force \
 	  --skip-dar-build \
