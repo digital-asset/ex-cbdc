@@ -50,11 +50,12 @@ reset-damltest: reset-damldir
 dabl: dabl-ui
 
 dabl-ui: build
-	$(MAKE) -C ui dabl-ui LEDGER_ID=$(LEDGER_ID)
+	$(MAKE) -C ui dabl-package LEDGER_ID=$(LEDGER_ID)
 
 DAR_FILES=$(shell find . -type f -name "*.dar")
 
-dabl-package: dabl
+dit-package:
+	$(MAKE) -C ui cbdc-ui.zip LEDGER_ID="dummy-dit"
 	ddit build \
 	  --force \
 	  --skip-dar-build \
