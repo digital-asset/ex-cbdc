@@ -6,7 +6,8 @@
 import {encode} from 'jwt-simple';
 import {preloadedCredentialsMap, httpBaseUrl, isLocal, ledgerId} from './config';
 import {Credentials, PartyId} from './models/CredentialsType';
-import { PartyDetails, convertPartiesJson } from "@daml/hub-react"
+import { PartyDetails, convertPartiesJson, DablPartiesInput } from "@daml/hub-react"
+import React from 'react';
 
 const APPLICATION_ID: string = 'cbdc';
 
@@ -15,26 +16,26 @@ const APPLICATION_ID: string = 'cbdc';
 // see https://docs.daml.com/app-dev/authentication.html.
 const SECRET_KEY: string = 'secret';
 
-function computeToken(partyId: string, ledgerId: string): string {
+function computeToken(partyId: PartyId, ledgerId: string): string {
   const payload = {
     "https://daml.com/ledger-api": {
       "ledgerId": ledgerId,
       "applicationId": APPLICATION_ID,
-      "actAs": [partyId]
+      "actAs": [partyId.asString()]
     }
   };
   return encode(payload, SECRET_KEY, 'HS256');
 }
 
 export const getPartyId = (displayName: string): PartyId => {
-  return PartyId.from(getDetails(displayName).partyId);
+  return getDetails(displayName).partyId;
 }
 
 export const computeCredentials = (displayName: string): Credentials => {
   const { partyId, token, ledgerId } = getDetails(displayName);
 
   return {
-    partyId: PartyId.from(partyId),
+    partyId: partyId,
     token: isLocal ? computeToken(partyId, ledgerId) : token,
     ledgerId,
     httpBaseUrl: process.env.NODE_ENV === "production"
@@ -44,7 +45,7 @@ export const computeCredentials = (displayName: string): Credentials => {
 }
 
 type InternalPartyDetails = {
-  partyId : string,
+  partyId : PartyId,
   token : string,
   ledgerId : string,
 }
@@ -55,19 +56,17 @@ const getDetails = (displayName : string): InternalPartyDetails => {
     uploadedCredentialsMap === undefined ?
     preloadedCredentialsMap :
     uploadedCredentialsMap;
-  const {party, partyId, token, ledgerId } = credentialsMap.find(p => p.partyName === displayName)!;
-  // Either of those fields exists. This is for backward compatibility.
-  const partyIdentifier = party || partyId;
-  return { partyId: partyIdentifier, token, ledgerId }
+  const {party, token, ledgerId } = credentialsMap.find(p => p.partyName === displayName)!;
+  return { partyId: PartyId.from(party), token, ledgerId }
 }
 
 const PARTIES_STORAGE_KEY = 'imported_parties';
 
-export function storeParties(parties: PartyDetails[]): void {
+function storeParties(parties: PartyDetails[]): void {
     localStorage.setItem(PARTIES_STORAGE_KEY, JSON.stringify(parties));
 }
 
-export function retrieveParties(validateParties: boolean = true): PartyDetails[] | undefined {
+function retrieveParties(validateParties: boolean = true): PartyDetails[] | undefined {
     const partiesJson = localStorage.getItem(PARTIES_STORAGE_KEY);
 
     if (!partiesJson) {
@@ -88,3 +87,11 @@ export function retrieveParties(validateParties: boolean = true): PartyDetails[]
     return parties;
 }
 
+export function ReloadPartiesButton() {
+  return (
+    <DablPartiesInput
+      ledgerId={ledgerId}
+      onError={error => console.log(error)}
+      onLoad={(parties) => storeParties(parties)}
+    />);
+}

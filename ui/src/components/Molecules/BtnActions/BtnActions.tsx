@@ -13,9 +13,7 @@ import styles from './BtnActions.module.css'
 import {TextButton} from "../../Atoms/TextButton/TextButton";
 import {dropdownTypes} from "../../App";
 import activePath from "../../../static/assets/NewIcons/Check_Icon_for_Dropdown.svg";
-import { DablPartiesInput, PartyDetails } from "@daml/hub-react"
-import { ledgerId } from '../../../config';
-import { storeParties } from '../../../Credentials';
+import { ReloadPartiesButton } from '../../../Credentials';
 
 type Button = {
     text: string,
@@ -76,22 +74,12 @@ const BtnActions: React.FC<BtnActionsProps> = (props) => {
             }
     };
 
-    const handleLoad = async (parties: PartyDetails[]) => {
-        // setParties(parties)
-        // setSelectedPartyId(parties[0]?.party || "")
-        storeParties(parties)
-    }
-
     return (
         <div className={`${styles.actions}`}>
             {buttons.map(
                 button =>
                   "LOAD PARTY FILE" === button.text
-                  ? <DablPartiesInput
-                        ledgerId={ledgerId}
-                        onError={error => console.log(error)}
-                        onLoad={handleLoad}
-                    />
+                  ? <ReloadPartiesButton/>
                   : <TextButton
                         textBtnIconStyle={`${isDropdownShown && button.text==="SECTIONS"?styles._activeDropdown:null}`}
                         key={Math.random()}
