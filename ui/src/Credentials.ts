@@ -4,8 +4,9 @@
 ///
 
 import {encode} from 'jwt-simple';
-import {credentialsMap, httpBaseUrl, isLocal} from './config';
+import {preloadedCredentialsMap, httpBaseUrl, isLocal, ledgerId} from './config';
 import {Credentials, PartyId} from './models/CredentialsType';
+import { PartyDetails, convertPartiesJson } from "@daml/hub-react"
 
 const APPLICATION_ID: string = 'cbdc';
 
@@ -26,11 +27,11 @@ function computeToken(partyId: string, ledgerId: string): string {
 }
 
 export const getPartyId = (displayName: string): PartyId => {
-  return PartyId.from(credentialsMap[displayName].partyId);
+  return PartyId.from(getDetails(displayName).partyId);
 }
 
 export const computeCredentials = (displayName: string): Credentials => {
-  const {partyId, token, ledgerId} = credentialsMap[displayName];
+  const { partyId, token, ledgerId } = getDetails(displayName);
 
   return {
     partyId: PartyId.from(partyId),
@@ -41,3 +42,49 @@ export const computeCredentials = (displayName: string): Credentials => {
       : `${httpBaseUrl}${displayName}/`
   };
 }
+
+type InternalPartyDetails = {
+  partyId : string,
+  token : string,
+  ledgerId : string,
+}
+
+const getDetails = (displayName : string): InternalPartyDetails => {
+  const uploadedCredentialsMap = retrieveParties();
+  const credentialsMap =
+    uploadedCredentialsMap === undefined ?
+    preloadedCredentialsMap :
+    uploadedCredentialsMap;
+  const {party, partyId, token, ledgerId } = credentialsMap.find(p => p.partyName === displayName)!;
+  // Either of those fields exists. This is for backward compatibility.
+  const partyIdentifier = party || partyId;
+  return { partyId: partyIdentifier, token, ledgerId }
+}
+
+const PARTIES_STORAGE_KEY = 'imported_parties';
+
+export function storeParties(parties: PartyDetails[]): void {
+    localStorage.setItem(PARTIES_STORAGE_KEY, JSON.stringify(parties));
+}
+
+export function retrieveParties(validateParties: boolean = true): PartyDetails[] | undefined {
+    const partiesJson = localStorage.getItem(PARTIES_STORAGE_KEY);
+
+    if (!partiesJson) {
+        return undefined;
+    }
+
+    const [ parties, error ] = convertPartiesJson(partiesJson, ledgerId, validateParties);
+
+    if (error) {
+        console.warn("Tried to load an invalid parties file from cache.", error);
+
+        if (validateParties) {
+            localStorage.removeItem(PARTIES_STORAGE_KEY);
+            return undefined;
+        }
+    }
+
+    return parties;
+}
+

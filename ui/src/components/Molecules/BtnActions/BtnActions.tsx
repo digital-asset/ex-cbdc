@@ -13,6 +13,9 @@ import styles from './BtnActions.module.css'
 import {TextButton} from "../../Atoms/TextButton/TextButton";
 import {dropdownTypes} from "../../App";
 import activePath from "../../../static/assets/NewIcons/Check_Icon_for_Dropdown.svg";
+import { DablPartiesInput, PartyDetails } from "@daml/hub-react"
+import { ledgerId } from '../../../config';
+import { storeParties } from '../../../Credentials';
 
 type Button = {
     text: string,
@@ -73,9 +76,28 @@ const BtnActions: React.FC<BtnActionsProps> = (props) => {
             }
     };
 
+    const handleLoad = async (parties: PartyDetails[]) => {
+        // setParties(parties)
+        // setSelectedPartyId(parties[0]?.party || "")
+        storeParties(parties)
+    }
+
     return (
         <div className={`${styles.actions}`}>
-            {buttons.map(button=><TextButton textBtnIconStyle={`${isDropdownShown && button.text==="SECTIONS"?styles._activeDropdown:null}`} key={Math.random()} text={button.text} icon={button.icon?button.icon:null} handleAction={button.text==="RELOAD"?handleLedgerReset:handleToggleDropdown}/>)}
+            {buttons.map(
+                button =>
+                  "LOAD PARTY FILE" === button.text
+                  ? <DablPartiesInput
+                        ledgerId={ledgerId}
+                        onError={error => console.log(error)}
+                        onLoad={handleLoad}
+                    />
+                  : <TextButton
+                        textBtnIconStyle={`${isDropdownShown && button.text==="SECTIONS"?styles._activeDropdown:null}`}
+                        key={Math.random()}
+                        text={button.text}
+                        icon={button.icon?button.icon:null}
+                        handleAction={ button.text === "RELOAD" ? handleLedgerReset : handleToggleDropdown }/>)}
             {isDropdownShown && <div className={styles.dropdownContainer}>
                 {dropdownList.map(button => <TextButton textBtnContainerStyle={`${styles.dropdownItem} ${button.active?styles._dropdownActiveContainer:null}`} key={Math.random()}
                                                         textBtnTextStyle={`${button.active?styles._dropdownActiveIcon:null}`}

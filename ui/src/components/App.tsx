@@ -54,7 +54,8 @@ const App: React.FC = () => {
 
     const buttons = [
         {text:'SECTIONS', icon:newDropdownArrow},
-        {text: "RELOAD", icon:reloadIcon}
+        {text: "RELOAD", icon:reloadIcon},
+        {text: "LOAD PARTY FILE"}
     ]
     const locationList = [
         {text:'Cross Border Transactions', icon:sectionIcon, location:"/", active:false},

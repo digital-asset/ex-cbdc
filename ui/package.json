@@ -13,6 +13,7 @@
     "@daml/ledger": "^1.11.1",
     "@daml/react": "^1.11.1",
     "@daml/types": "^1.11.1",
+    "@daml/hub-react": "0.1.0",
     "@types/react-router-dom": "^5.1.6",
     "dotenv": "^8.2.0",
     "jwt-simple": "^0.5.6",
