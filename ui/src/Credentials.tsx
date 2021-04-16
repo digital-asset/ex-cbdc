@@ -76,12 +76,7 @@ function retrieveParties(validateParties: boolean = true): PartyDetails[] | unde
     const [ parties, error ] = convertPartiesJson(partiesJson, ledgerId, validateParties);
 
     if (error) {
-        console.warn("Tried to load an invalid parties file from cache.", error);
-
-        if (validateParties) {
-            localStorage.removeItem(PARTIES_STORAGE_KEY);
-            return undefined;
-        }
+      throw new Error(error);
     }
 
     return parties;
@@ -91,7 +86,7 @@ export function ReloadPartiesButton() {
   return (
     <DablPartiesInput
       ledgerId={ledgerId}
-      onError={error => console.log(error)}
+      onError={error => { throw new Error(error) }}
       onLoad={(parties) => storeParties(parties)}
     />);
 }
