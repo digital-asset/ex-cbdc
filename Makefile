@@ -54,9 +54,10 @@ dabl-ui: build
 
 DAR_FILES=$(shell find . -type f -name "*.dar")
 
-dit-package:
+dit-package: build
 	$(MAKE) -C ui cbdc-ui.zip LEDGER_ID="dummy-dit"
+	ls .
 	ddit build \
 	  --force \
 	  --skip-dar-build \
-	  --subdeployment $(DAR_FILES) ui/cbdc-ui.zip
+	  --subdeployment $(DAR_FILES) ui/cbdc-ui.zip cbdc-demo.png
