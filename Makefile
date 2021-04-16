@@ -56,7 +56,6 @@ DAR_FILES=$(shell find . -type f -name "*.dar")
 
 dit-package: build
 	$(MAKE) -C ui cbdc-ui.zip LEDGER_ID="dummy-dit"
-	ls .
 	ddit build \
 	  --force \
 	  --skip-dar-build \
