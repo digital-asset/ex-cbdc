@@ -7,7 +7,7 @@
 -->
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd https://oss.sonatype.org/content/repositories/snapshots/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.digitalasset.refapps</groupId>
+    <groupId>com.daml.product</groupId>
     <artifactId>cbdc-demo</artifactId>
     <version>1.0.0</version>
     <properties>
