@@ -27,8 +27,12 @@ export const ledgerId: string =
 
 export const httpBaseUrl: string =
     hostname.includes('projectdabl')
-  ? `https://api.${hostname}/data/${ledgerId}/`
+  ? `https://api.${getDablHostname(hostname)}/data/${ledgerId}/`
   : assertIsDefined(process.env.REACT_APP_HTTP_BASE_URL, "REACT_APP_HTTP_BASE_URL is not defined.");
+
+function getDablHostname(hostname: string): string {
+    return hostname.split('.').slice(1).join('.');
+}
 
 function assertIsDefined(str: string | undefined, errorMessage: string): string {
     if (str === undefined) {
