@@ -39,7 +39,7 @@ cp reset/.daml/dist/reset-1.0.0.dar \
 
 for file in deploy/*
 do
-  dablc -j workspace upload deploy/"$file"
+  dablc -j workspace upload "$file"
 done
 
 DAR_SHA=$(dablc -j workspace install reset-1.0.0.dar "$LEDGER_ID" | jq -r '.artifact_hash')
