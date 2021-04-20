@@ -17,7 +17,6 @@ PROJECT_NAME=Cbdc$STAMP
 
 LEDGER_NAME=cbdc
 
-# The 'jq -r' removes the superfluous quotes for our variables.
 PROJECT_ID=`dablc -j project ensure ${PROJECT_NAME} | jq -r '.project_id'`
 LEDGER_ID=`dablc -j ledger create ${PROJECT_ID} ${LEDGER_NAME} | jq -r '.ledger_id'`
 
