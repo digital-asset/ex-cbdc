@@ -87,7 +87,7 @@ jobs:
           command: |
             > ui/parties.json echo '[{"ledgerId": "","owner": "","party": "","partyName": "","token": ""}]'
             cp default_participant_config.cfg ui/participants.json
-            make dabl LEDGER_ID=some_ledger_id
+            make daml-hub-package LEDGER_ID=some_ledger_id
       - run:
           name: Npm test
           command: |

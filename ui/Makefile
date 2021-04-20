@@ -49,16 +49,20 @@ $(UI_INSTALL_ARTIFACT): package.json package-lock.json $(JS_CODEGEN_ARTIFACT)
 eslint: npminstall
 	npm run-script lint -- --max-warnings 0
 
-dabl-ui: cbdc-ui.zip
+daml-hub-package: dabl-parties.json cbdc-ui.zip
 
 UI_SRC=$(shell find src/ -type f)
 
-cbdc-ui.zip: $(UI_INSTALL_ARTIFACT) $(UI_SRC)
+src/credentials-config.json: participants.json
 	./generateDablCredentialsMapJson.py $(LEDGER_ID) > src/credentials-config.json
+
+dabl-parties.json: participants.json
+	./generateDablPartiesJson.py participants.json > dabl-parties.json
+
+cbdc-ui.zip: src/credentials-config.json $(UI_INSTALL_ARTIFACT) $(UI_SRC)
 	REACT_APP_LEDGER_ID=$(LEDGER_ID) \
     REACT_APP_HTTP_BASE_URL="https://api.projectdabl.com/data/$(LEDGER_ID)/" \
     REACT_APP_IS_LOCAL=false \
     npm run build
 	git checkout -- src/credentials-config.json
 	zip --quiet -r cbdc-ui.zip build
-	./generateDablPartiesJson.py participants.json > dabl-parties.json

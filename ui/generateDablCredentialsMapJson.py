@@ -15,17 +15,21 @@ if len(sys.argv) < 2:
 ledger_id = sys.argv[1]
 ledger_api_url = "https://api.projectdabl.com/data/{}".format(ledger_id)
 
+def invert(dictionary):
+    return {v: k for k, v in dictionary.items()}
 
-def get_credentials(party):
-    return party["partyName"], {
-        "partyId": party["party"],
-        "host": ledger_api_url,
-        "token": party["token"],
-        "ledgerId": party["ledgerId"]
+def get_credentials(party, parties, partyIds):
+    return party, {
+        "partyId": partyIds[party],
+        "host": parties[party]["host"],
+        "token": parties[party]["access_token"],
+        "ledgerId": ledger_id
     }
 
 
-with open("parties.json") as parties_json:
-    parties = json.load(parties_json)
-    credentials = dict(get_credentials(party) for party in parties)
+with open("participants.json") as participants_json:
+    participants = json.load(participants_json)
+    parties = participants["participants"]
+    partyIds = invert(participants["party_participants"])
+    credentials = dict(get_credentials(party, parties, partyIds) for party in parties)
     print(json.dumps(credentials))

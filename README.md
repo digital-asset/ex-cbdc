@@ -104,7 +104,7 @@ To reset the application:
 4. Download the `parties.json` from the users tab to the [ui] folder
 5. Build the DABL version of the project
    ```shell
-   make dabl LEDGER_ID=[Ledger ID]
+   make daml-hub-package LEDGER_ID=[Ledger ID]
    ```
 
     The ledger ID can be found on the ledger settings.
