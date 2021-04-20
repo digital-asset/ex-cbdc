@@ -37,7 +37,7 @@ cp reset/.daml/dist/reset-1.0.0.dar \
    ./ui/cbdc-ui.zip \
    deploy
 
-for file in `ls deploy/`
+for file in deploy/*
 do
   dablc -j workspace upload deploy/"$file"
 done
