@@ -65,4 +65,5 @@ cbdc-ui.zip: src/credentials-config.json $(UI_INSTALL_ARTIFACT) $(UI_SRC)
     REACT_APP_IS_LOCAL=false \
     npm run build
 	git checkout -- src/credentials-config.json
+	rm -f cbdc-ui.zip
 	zip --quiet -r cbdc-ui.zip build
