@@ -4,6 +4,9 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
+# To deploy, set your token (dablc token XYZ...)
+# and execute the script: scripts/dabl_deploy.sh
+
 set -ex
 
 # Daml Script returns an error if called "too early".
