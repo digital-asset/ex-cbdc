@@ -51,7 +51,7 @@ def createParticipantsJson() = {
   val partyIdsToParticipants = participants.all.flatMap(x =>
     x.parties.list().map(p => (showPartyId(p.party), p.participants.head.participant.uid.toProtoPrimitive))
   ).toMap
-  val participantsData = participants.local.map(p => (p.uid.toProtoPrimitive, LedgerApi(p.config.ledgerApi.address, p.config.ledgerApi.port))).toMap
+  val participantsData = participants.local.map(p => (p.uid.toProtoPrimitive, LedgerApi(p.config.ledgerApi.address, p.config.ledgerApi.port.unwrap))).toMap
   val participantsJson = Participants(participantsData.head._2, participantsData, partyIdsToParticipants).asJson.spaces2
 
   file"canton-participants.json" < participantsJson
