@@ -47,7 +47,5 @@ reset-damltest: reset-damldir
 %-damltest:
 	$(MAKE) -C $* test
 
-dabl: dabl-ui
-
-dabl-ui: build
-	$(MAKE) -C ui dabl-ui LEDGER_ID=$(LEDGER_ID)
+daml-hub-package: build
+	$(MAKE) -C ui daml-hub-package LEDGER_ID=$(LEDGER_ID)

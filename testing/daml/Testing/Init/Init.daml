@@ -64,83 +64,83 @@ initDemo parties@PartiesForTesting{..} = script do
 
   let task = "Create demoAdmin role"
   started task
-  demoAdminRole <- demoAdmin `singleSubmit`
+  demoAdminRole <- demoAdmin `submit`
     createCmd DemoAdminRole with demoAdmin
   finished task
 
   let task = "Create USD FRB role"
   started task
-  usFRBRoleInvite <- demoAdmin `singleSubmit`
+  usFRBRoleInvite <- demoAdmin `submit`
     exerciseCmd demoAdminRole AddCentralBank with
       centralBank = usFRB
       cashLabel = "USD"
   usFRBRoleInvite <- synchronize usFRB usFRBRoleInvite
-  usFRBRole <- usFRB `singleSubmit`
+  usFRBRole <- usFRB `submit`
     exerciseCmd usFRBRoleInvite CentralBankRoleInvite_Accept
   finished task
 
   let task = "FRB invites BankA"
   started task
-  usFRBBankAInvite <- usFRB `singleSubmit`
+  usFRBBankAInvite <- usFRB `submit`
     exerciseCmd usFRBRole InviteBank with
       bank = bankA
       accountId = getId [usFRB, bankA]
 
   usFRBBankAInvite <- synchronize bankA usFRBBankAInvite
-  usFRBBankARole <- bankA `singleSubmit`
+  usFRBBankARole <- bankA `submit`
     exerciseCmd usFRBBankAInvite BankRoleInvite_Accept
   finished task
 
   let task = "FRB invites BankB"
   started task
-  usFRBbankBInvite <- usFRB `singleSubmit`
+  usFRBbankBInvite <- usFRB `submit`
     exerciseCmd usFRBRole InviteBank with
       bank = bankB
       accountId = getId [usFRB, bankB]
 
   usFRBbankBInvite <- synchronize bankB usFRBbankBInvite
-  usFRBBankBRole <- bankB `singleSubmit`
+  usFRBBankBRole <- bankB `submit`
     exerciseCmd usFRBbankBInvite BankRoleInvite_Accept
   finished task
 
   let task = "Create EUR ECB role"
   started task
-  ecbRoleInvite <- demoAdmin `singleSubmit`
+  ecbRoleInvite <- demoAdmin `submit`
     exerciseCmd demoAdminRole AddCentralBank with
       centralBank = ecb
       cashLabel = "EUR"
   ecbRoleInvite <- synchronize ecb ecbRoleInvite
-  ecbRole <- ecb `singleSubmit`
+  ecbRole <- ecb `submit`
     exerciseCmd ecbRoleInvite CentralBankRoleInvite_Accept
   finished task
 
   let task = "ECB invites BankA"
   started task
-  ecbBankAInvite <- ecb `singleSubmit`
+  ecbBankAInvite <- ecb `submit`
     exerciseCmd ecbRole InviteBank with
       bank = bankA
       accountId = getId [ecb, bankA]
 
   ecbBankAInvite <- synchronize bankA ecbBankAInvite
-  ecbBankARole <- bankA `singleSubmit`
+  ecbBankARole <- bankA `submit`
     exerciseCmd ecbBankAInvite BankRoleInvite_Accept
   finished task
 
   let task = "ECB invites BankB"
   started task
-  ecbBankBInvite <- ecb `singleSubmit`
+  ecbBankBInvite <- ecb `submit`
     exerciseCmd ecbRole InviteBank with
       bank = bankB
       accountId = getId [ecb, bankB]
 
   ecbBankBInvite <- synchronize bankB ecbBankBInvite
-  ecbBankBRole <- bankB `singleSubmit`
+  ecbBankBRole <- bankB `submit`
     exerciseCmd ecbBankBInvite BankRoleInvite_Accept
   finished task
 
   let task = "Issue USD to Federal Reserve Bank"
   started task
-  usdCbdc <- usFRB `singleSubmit`
+  usdCbdc <- usFRB `submit`
     exerciseCmd usFRBRole CreateCbdc with
       quantity = 900_000_000.0
       targetAccount = None
@@ -148,7 +148,7 @@ initDemo parties@PartiesForTesting{..} = script do
 
   let task = "Issue EUR to European Central Bank"
   started task
-  eurCbdc <- ecb `singleSubmit`
+  eurCbdc <- ecb `submit`
     exerciseCmd ecbRole CreateCbdc with
       quantity = 700_000_000.0
       targetAccount = None
@@ -159,23 +159,23 @@ initDemo parties@PartiesForTesting{..} = script do
   Some ecbBankARoleData <- queryContractId bankA ecbBankARole
   Some usFRBBankBRoleData <- queryContractId bankB usFRBBankBRole
   Some usFRBBankARoleData <- queryContractId bankA usFRBBankARole
-  bankA `singleSubmit`
+  bankA `submit`
     exerciseByKeyCmd @AssetSettlementRule
       ecbBankARoleData.account.id AssetSettlement_AddController with
         ctrl = bankB
 
-  bankA `singleSubmit`
+  bankA `submit`
     exerciseByKeyCmd @AssetSettlementRule
       usFRBBankARoleData.account.id AssetSettlement_AddController with
         ctrl = bankB
 
-  bankB `singleSubmit`
+  bankB `submit`
     exerciseByKeyCmd @AssetSettlementRule
       usFRBBankBRoleData.account.id AssetSettlement_AddController with
         ctrl = bankA
 
   Some ecbBankBRoleData <- queryContractId bankB ecbBankBRole
-  bankB `singleSubmit`
+  bankB `submit`
     exerciseByKeyCmd @AssetSettlementRule
       ecbBankBRoleData.account.id AssetSettlement_AddController with
         ctrl = bankA
@@ -191,13 +191,13 @@ initDemo parties@PartiesForTesting{..} = script do
           id = getLabelledId [usFRB] "Landlord acc "
           provider = usFRB
           owner = landlord
-  cid <- usFRB `singleSubmit`
+  cid <- usFRB `submit`
     createCmd AssetSettlementRule with
       account = landlordAccount
       observers = empty
       ctrls = fromList [landlord, usFRB]
   synchronize landlord cid
-  landlord `singleSubmit`
+  landlord `submit`
     exerciseByKeyCmd @AssetSettlementRule
       landlordAccount.id AssetSettlement_AddController with
         ctrl = renter
@@ -211,7 +211,7 @@ initDemo parties@PartiesForTesting{..} = script do
             id = getLabelledId [usFRB] "Renter acc "
             provider = usFRB
             owner = renter
-  usFRB `singleSubmit`
+  usFRB `submit`
     createCmd AssetSettlementRule with
       account = renterAccount
       observers = empty
@@ -220,17 +220,17 @@ initDemo parties@PartiesForTesting{..} = script do
 
   let task = "Landlords association"
   started task
-  landlordsAssociationRole <- landlordsAssociation `singleSubmit`
+  landlordsAssociationRole <- landlordsAssociation `submit`
     createCmd LandlordsAssociationRole with
       ..
   finished task
 
   let task = "A landlord"
   started task
-  landlordInvitation <- landlordsAssociation `singleSubmit`
+  landlordInvitation <- landlordsAssociation `submit`
     exerciseCmd landlordsAssociationRole Invite_Landlord with ..
   landlordInvitation <- synchronize landlord landlordInvitation
-  landlordRole <- landlord `singleSubmit`
+  landlordRole <- landlord `submit`
     exerciseCmd landlordInvitation LandlordRoleInvitation_Accept with
       landlordAccountId = landlordAccount.id
   finished task
@@ -238,13 +238,13 @@ initDemo parties@PartiesForTesting{..} = script do
   -- Certificate
   let task = "Central Bank creates proposal of EconomicSectorCertificate"
   started task
-  economicSectorCertificateCid <- usFRB `singleSubmit`
+  economicSectorCertificateCid <- usFRB `submit`
     exerciseCmd usFRBRole CreateCertificate with
       sector = Housing
       ..
 
   economicSectorCertificateCid <- synchronize landlordsAssociation economicSectorCertificateCid
-  distributedCert <- landlordsAssociation `singleSubmit`
+  distributedCert <- landlordsAssociation `submit`
     exerciseCmd economicSectorCertificateCid Distribute with
       name = landlord
 
@@ -258,7 +258,7 @@ transferFromCentralbankToBank cb bank amount = do
   (_, cbRole)::_ <- query @CentralBankRole cb
   (_, bankRole)::_ <- queryFilter @BankRole bank (\c -> c.centralBank == cb)
   cbdc <- firstContractId <$> queryFilter @AssetDeposit cb (\c -> c.account.owner == cb)
-  _ <- cb `singleSubmit`
+  _ <- cb `submit`
     exerciseByKeyCmd @AssetSettlementRule cbRole.account.id
       AssetSettlement_Transfer with
           receiverAccountId = bankRole.account.id
@@ -510,10 +510,6 @@ started message = debug $ "Started: " <> message
 
 finished : Action m => Text -> m ()
 finished message = debug $ "Finished: " <> message
-
--- TODO: 'submit' is broken in SDK 1.9.0 when used with the JSON API.
-singleSubmit : Party -> Commands a -> Script a
-singleSubmit party commands = submitMulti [party] [party] commands
 
 firstContractId : [(c, b)] -> c
 firstContractId = fst . head
