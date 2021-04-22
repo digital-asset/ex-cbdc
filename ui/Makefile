@@ -16,7 +16,7 @@ JS_CODEGEN_DIR=daml.js
 build: codegen npminstall eslint
 
 test: build
-	npm test -- --watchAll=false
+	npm test -- --watchAll=false --maxWorkers=1
 
 clean:
 	rm -rf $(JS_CODEGEN_DIR)
