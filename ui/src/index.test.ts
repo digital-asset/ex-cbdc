@@ -3,6 +3,7 @@
 
 import { ChildProcess, spawn, SpawnOptions } from 'child_process';
 import puppeteer, { Browser } from 'puppeteer';
+import { Page } from 'puppeteer';
 import waitOn from 'wait-on';
 
 
@@ -52,6 +53,26 @@ afterAll(async () => {
   }
 });
 
+async function getContent(page: Page, selector: string) {
+  await page.waitForSelector(selector);
+  return await page.$eval(selector, n => n.innerHTML);
+}
+
 test('dummy', async () => {
-  expect(1).toEqual(1);
+  const page = await newLandlordPage();
+//  await page.$$('.test-alice-balance-normal');
+//  const aliceBalanceNormal_ = await page.$$eval('.test-alice-balance-normal', balance => balance.map(e => e.innerHTML));
+  const aliceBalanceNormal = await getContent(page, '.test-alice-balance-normal');
+  expect(aliceBalanceNormal).toEqual("0 USD");
+  const aliceBalanceStimulus = await getContent(page, '.test-alice-balance-stimulus');
+  expect(aliceBalanceStimulus).toEqual("0 USD-S");
 });
+
+async function newLandlordPage(): Promise<Page> {
+  if (!browser) {
+    throw Error('Puppeteer browser has not been launched');
+  }
+  const page = await browser.newPage();
+  await page.goto(`http://localhost:${UI_PORT}/customer`);
+  return page;
+}

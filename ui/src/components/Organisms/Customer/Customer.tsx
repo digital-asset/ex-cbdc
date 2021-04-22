@@ -77,6 +77,7 @@ const Customer: React.FC<CustomerProps> = (props) => {
         disabled={rentInvoice.length !== 1 || isLoading}
       />]
 
+  const testClasses = ['test-alice-balance-normal', 'test-alice-balance-stimulus'];
   return (
     <div className={`${styles.bank} ${containerStyles}`}>
       <div className={styles.bankTop}>
@@ -98,7 +99,7 @@ const Customer: React.FC<CustomerProps> = (props) => {
         <h6 className={`${styles.bankText} ${styles._bottomTitle}`}>Bank Account</h6>
       </div>
       <div className={styles.bankList}>
-        {getBalances().map(el => <p className={`${styles.bankText} ${styles.bankListItem}`} key={el}>{el}</p>)}
+        {getBalances().map((el, index) => <p className={`${styles.bankText} ${styles.bankListItem} ${testClasses[index]}`} key={el}>{el}</p>)}
       </div>
       <div className={styles.bankTriangle} />
       {isError
