@@ -4,5 +4,4 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-cd ui || exit 1
-npm start
+cd ui && npm start
