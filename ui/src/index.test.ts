@@ -74,7 +74,7 @@ async function expectContent(page: Page, selector: string, content: string) {
 }
 
 async function issueStimulus(page: Page, amount: number) {
-  const restrictedStimulusDrowdown = await page.waitForXPath('button[text()="Restricted Stimulus"]');
+  const restrictedStimulusDrowdown = await page.waitForXPath('.//button[text()="Restricted Stimulus"]');
   await restrictedStimulusDrowdown?.click()
   const amountInput = await page.waitForSelector('.test-stimulus-amount');
   await amountInput?.click();
