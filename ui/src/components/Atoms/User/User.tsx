@@ -58,13 +58,13 @@ const Customer: React.FC<UserProps>= (props) => {
   }
 
   const bodyCreateRentInvoice = async (price): Promise<any> => {
+    try {
     const cert = _.first(certs);
     assertProperRoles(landlordRole, cert)
     setIsLoading(true);
     setIsError(false)
     const landlordRoleCid = _.first(landlordRole)!.contractId;
     const date = new Date().toJSON().slice(0,10).replace(/-/g,'-');
-    try {
     await ledger.exercise(LandlordRole.CreateRentInvoice, landlordRoleCid,
       {
         price,
