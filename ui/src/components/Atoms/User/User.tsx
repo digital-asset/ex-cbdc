@@ -92,19 +92,25 @@ const Customer: React.FC<UserProps>= (props) => {
         handleChangeShown()
         handleCleanState(true)
       }}
-      buttonStyle={styles.dropDownBtn}/>
+      buttonStyle={`${styles.dropDownBtn} test-create-invoice`}/>
     ]
 
     const submitButton = isLoading
     ? <Progress key="key" containerStyles={styles.dropdownSpinner} />
-    : <Button key="button-Recipient" label={"Submit"} onClick={()=> {
+    : <Button key="button-Recipient" label={"Submit"} buttonStyle='test-invoice-submit' onClick={()=> {
       bodyCreateRentInvoice(price)
     }}/>
 
     if(isShown){
       list.push(
         <Select key="select-Recipient" dropdownList={[]} noArrow={true} title={"Recipient:"} initialLabel={"Alice B."} selectContainerStyle={styles._selectStyle}/>,
-        <Input key="input-Recipient" inputContainerStyle={styles._inputStyle} label={"Amount(USD)"} value={price} onChange={setPrice}/>,
+        <Input
+          key="input-Recipient"
+          inputContainerStyle={styles._inputStyle}
+          inputStyle='test-invoice-amount'
+          label={"Amount(USD)"}
+          value={price}
+          onChange={setPrice}/>,
         submitButton)
     }
     return list
@@ -115,7 +121,7 @@ const Customer: React.FC<UserProps>= (props) => {
         <Dropdown
             onClick={toggleDropdown(!isDropdownOpen)}
             open={isDropdownOpen}
-            dropdownStyles={styles._userDropdown}
+            dropdownStyles={`${styles._userDropdown} test-landlords-dropdown`}
             dropdownListStyles={styles.dropdownListStyles}
             list={listForDropdown()}
         />

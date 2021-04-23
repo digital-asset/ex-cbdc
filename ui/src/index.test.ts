@@ -58,14 +58,45 @@ async function getContent(page: Page, selector: string) {
   return await page.$eval(selector, n => n.innerHTML);
 }
 
+async function issueStimulus(page: Page, amount: number) {
+  const restrictedStimulusDrowdown = await page.waitForXPath('button[text()=Restricted Stimulus]');
+  await restrictedStimulusDrowdown?.click()
+  const amountInput = await page.waitForSelector('.test-stimulus-amount');
+  await amountInput?.click();
+  await amountInput?.type(amount.toString());
+  const stimulusSubmit = await page.waitForSelector('.test-stimulus-submit');
+  await stimulusSubmit?.click();
+}
+
+async function issueInvoice(page: Page, amount: number) {
+  const landlordDrowdown = await page.waitForSelector('.test-landlord-dropdown');
+  await landlordDrowdown?.click()
+  const createInvoice = await page.waitForSelector('.test-create-invoice');
+  await createInvoice?.click()
+  const amountInput = await page.waitForSelector('.test-invoice-amount');
+  await amountInput?.click();
+  await amountInput?.type(amount.toString());
+  const invoiceSubmit = await page.waitForSelector('.test-invoice-submit');
+  await invoiceSubmit?.click();
+}
+
 test('dummy', async () => {
   const page = await newLandlordPage();
-//  await page.$$('.test-alice-balance-normal');
-//  const aliceBalanceNormal_ = await page.$$eval('.test-alice-balance-normal', balance => balance.map(e => e.innerHTML));
   const aliceBalanceNormal = await getContent(page, '.test-alice-balance-normal');
   expect(aliceBalanceNormal).toEqual("0 USD");
   const aliceBalanceStimulus = await getContent(page, '.test-alice-balance-stimulus');
   expect(aliceBalanceStimulus).toEqual("0 USD-S");
+
+  issueStimulus(page, 200)
+  const aliceBalanceStimulusFull = await getContent(page, '.test-alice-balance-stimulus');
+  expect(aliceBalanceStimulusFull).toEqual("200 USD-S");
+
+  issueInvoice(page, 50)
+
+  const aliceBalanceNormalFinal = await getContent(page, '.test-alice-balance-normal');
+  expect(aliceBalanceNormalFinal).toEqual("0 USD");
+  const aliceBalanceStimulusFinal = await getContent(page, '.test-alice-balance-stimulus');
+  expect(aliceBalanceStimulusFinal).toEqual("150 USD-S");
 });
 
 async function newLandlordPage(): Promise<Page> {
