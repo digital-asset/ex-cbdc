@@ -53,9 +53,24 @@ afterAll(async () => {
   }
 });
 
-async function getContent(page: Page, selector: string) {
-  await page.waitForSelector(selector);
-  return await page.$eval(selector, n => n.innerHTML);
+async function expectContent(page: Page, selector: string, content: string) {
+  try {
+    console.info({selector: selector, expectedContent: content})
+    await page.waitForSelector(selector);
+    console.info('found: ' + await page.$eval(selector, n => n.innerHTML))
+
+    await page.waitForFunction(
+      ([selector, content]) =>
+        document.querySelector(selector)?.innerHTML === content,
+      { },
+      [selector, content]
+    );
+
+    console.info('finished waiting')
+  } catch (e) {
+    // the timeout exception from waitForFunction does not give any details nor stacktrace
+    fail({selector: selector, expectedContent: content, error: e})
+  }
 }
 
 async function issueStimulus(page: Page, amount: number) {
@@ -82,21 +97,16 @@ async function issueInvoice(page: Page, amount: number) {
 
 test('dummy', async () => {
   const page = await newLandlordPage();
-  const aliceBalanceNormal = await getContent(page, '.test-alice-balance-normal');
-  expect(aliceBalanceNormal).toEqual("0 USD");
-  const aliceBalanceStimulus = await getContent(page, '.test-alice-balance-stimulus');
-  expect(aliceBalanceStimulus).toEqual("0 USD-S");
+  await expectContent(page, '.test-alice-balance-normal', '0 USD');
+  await expectContent(page, '.test-alice-balance-stimulus', '0 USD-S');
 
   issueStimulus(page, 200)
-  const aliceBalanceStimulusFull = await getContent(page, '.test-alice-balance-stimulus');
-  expect(aliceBalanceStimulusFull).toEqual("200 USD-S");
 
   issueInvoice(page, 50)
+  await expectContent(page, '.test-alice-balance-stimulus', '200 USD-S');
 
-  const aliceBalanceNormalFinal = await getContent(page, '.test-alice-balance-normal');
-  expect(aliceBalanceNormalFinal).toEqual("0 USD");
-  const aliceBalanceStimulusFinal = await getContent(page, '.test-alice-balance-stimulus');
-  expect(aliceBalanceStimulusFinal).toEqual("150 USD-S");
+  await expectContent(page, '.test-alice-balance-normal', '0 USD');
+  await expectContent(page, '.test-alice-balance-stimulus', '150 USD-S');
 });
 
 async function newLandlordPage(): Promise<Page> {
