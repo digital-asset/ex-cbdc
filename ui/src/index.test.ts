@@ -91,8 +91,10 @@ async function issueInvoice(page: Page, amount: number) {
 }
 
 async function payInvoice(page: Page) {
-  await page.click('.test-alice-dropdown');
-  await page.click('.test-alice-pay');
+  const aliceDrowdown = await page.waitForSelector('.test-alice-dropdown');
+  await aliceDrowdown?.click()
+  const paySubmit = await page.waitForSelector('.test-alice-pay');
+  await paySubmit?.click();
 }
 
 test('dummy', async () => {
