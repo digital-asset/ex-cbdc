@@ -85,6 +85,11 @@ async function issueInvoice(page: Page, amount: number) {
   await page.click('.test-invoice-submit');
 }
 
+async function payInvoice(page: Page) {
+  await page.click('.test-alice-dropdown');
+  await page.click('.test-alice-pay');
+}
+
 test('dummy', async () => {
   const page = await newLandlordPage();
   await expectContent(page, '.test-alice-balance-normal', '0 USD');
@@ -97,6 +102,8 @@ test('dummy', async () => {
   await expectContent(page, '.test-alice-balance-stimulus', '200 USD-S');
 
   issueInvoice(page, 50)
+
+  payInvoice(page)
 
   await expectContent(page, '.test-alice-balance-normal', '0 USD');
   await expectContent(page, '.test-alice-balance-stimulus', '150 USD-S');

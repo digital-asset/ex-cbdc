@@ -75,6 +75,7 @@ const Customer: React.FC<CustomerProps> = (props) => {
         label='Pay'
         onClick={bodyPayRentInvoice}
         disabled={rentInvoice.length !== 1 || isLoading}
+        buttonStyle='test-alice-pay'
       />]
 
   const testClasses = ['test-alice-balance-normal', 'test-alice-balance-stimulus'];
@@ -89,7 +90,7 @@ const Customer: React.FC<CustomerProps> = (props) => {
           <Dropdown
             onClick={toggleDropdown(!isDropdownOpen)}
             open={isDropdownOpen}
-            dropdownStyles={styles.dropdownStyles}
+            dropdownStyles={`${styles.dropdownStyles} test-alice-dropdown`}
             dropdownListStyles={styles.dropdownListStyles}
             list={payButton}
           />
