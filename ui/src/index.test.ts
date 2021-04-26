@@ -62,7 +62,7 @@ afterAll(async () => {
 });
 
 test('Alice pays rent with stimulus money', async () => {
-  await workaroundToOpenThePageBySomeRandomBrowser();
+  await workaroundByOpeningThePageBySomeRandomBrowser();
   const page = await newLandlordPage();
   await expectContent(page, '.test-alice-balance-normal', '0 USD');
   await expectContent(page, '.test-alice-balance-stimulus', '0 USD-S');
@@ -79,11 +79,14 @@ test('Alice pays rent with stimulus money', async () => {
   await expectContent(page, '.test-alice-balance-stimulus', '150 USD-S');
 }, 60_000);
 
-async function workaroundToOpenThePageBySomeRandomBrowser() {
+async function workaroundByOpeningThePageBySomeRandomBrowser() {
   // TODO remove
   // For unknown reason, the test fails unless any browser opens
   // the page http://localhost:3000/customer during the test.
   // Manually with Firefox or Chrome, or with this call:
+  await newLandlordPage();
+  // Well it still appears a bit flaky, but another one reduces flakiness even more.
+  // Apologies for investigating this!
   await newLandlordPage();
 }
 
