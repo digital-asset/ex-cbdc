@@ -55,23 +55,16 @@ afterAll(async () => {
 });
 
 async function expectContent(page: Page, selector: string, content: string) {
-  try {
-    console.info({selector: selector, expectedContent: content})
-    await page.waitForSelector(selector);
-    console.info('found: ' + await page.$eval(selector, n => n.innerHTML))
-
-    await page.waitForFunction(
-      ([selector, content]) =>
-        document.querySelector(selector)?.innerHTML === content,
-      { },
-      [selector, content]
-    );
-
-    console.info('finished waiting')
-  } catch (e) {
-    // the timeout exception from waitForFunction does not give any details nor stacktrace
-    fail({selector: selector, expectedContent: content, error: e})
-  }
+  console.info({selector: selector, expectedContent: content})
+  await page.waitForSelector(selector);
+  console.info('currently: ' + await page.$eval(selector, n => n.innerHTML))
+  await page.waitForFunction(
+    ([selector, content]) =>
+      document.querySelector(selector)?.innerHTML === content,
+    {},
+    [selector, content]
+  );
+  console.info('got expected content')
 }
 
 async function issueStimulus(page: Page, amount: number) {
