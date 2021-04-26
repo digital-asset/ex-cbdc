@@ -1,11 +1,10 @@
 // Copyright (c) 2021 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-import { ChildProcess, spawn, SpawnOptions } from 'child_process';
+import { ChildProcess, spawn, spawnSync, SpawnOptions } from 'child_process';
 import puppeteer, { Browser } from 'puppeteer';
 import { Page } from 'puppeteer';
 import waitOn from 'wait-on';
-
 
 const UI_PORT = 3000;
 const JSONAPI_PORT = 4000;
@@ -32,11 +31,13 @@ beforeAll(async () => {
   uiProc = spawn('npm', ['run-script', 'start'], { env, stdio: 'inherit', detached: true});
   // TODO ^^ make sure npm-cli.js is in the PATH, or just run npm???
 
+  spawnSync('launchers/populate', launcherOpts);
+
   await waitOn({resources: [`tcp:localhost:${JSONAPI_PORT}`]});
   await waitOn({resources: [`tcp:localhost:${UI_PORT}`]});
 
   browser = await puppeteer.launch();
-}, 80_000);
+}, 60_000);
 
 afterAll(async () => {
   if (sandboxProc) {
@@ -84,7 +85,8 @@ async function issueStimulus(page: Page, amount: number) {
 }
 
 async function issueInvoice(page: Page, amount: number) {
-  const landlordDrowdown = await page.waitForSelector('.test-landlord-dropdown');
+  // TODO write page.click instead
+  const landlordDrowdown = await page.waitForSelector('.test-landlords-dropdown');
   await landlordDrowdown?.click()
   const createInvoice = await page.waitForSelector('.test-create-invoice');
   await createInvoice?.click()
