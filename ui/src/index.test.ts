@@ -57,17 +57,36 @@ afterAll(async () => {
   }
 });
 
-async function expectContent(page: Page, selector: string, content: string) {
-  console.info({selector: selector, expectedContent: content})
-  await page.waitForSelector(selector);
-  console.info('currently: ' + await page.$eval(selector, n => n.innerHTML))
-  await page.waitForFunction(
-    ([selector, content]) =>
-      document.querySelector(selector)?.innerHTML === content,
-    {},
-    [selector, content]
-  );
-  console.info('got expected content')
+test('dummy', async () => {
+  const page = await newLandlordPage();
+  await expectContent(page, '.test-alice-balance-normal', '0 USD');
+  await expectContent(page, '.test-alice-balance-stimulus', '0 USD-S');
+
+  issueStimulus(page, 200)
+  // TODO is reload useful / necessary? see also comments below about the workaround
+  await page.reload({ waitUntil: ["networkidle0", "domcontentloaded"] });
+  // TODO this workaround appears to pass this test:
+  // 1. start npm test
+  // open http://localhost:3000/customer in a real browser during npm start is loading
+  // refresh the page http://localhost:3000/customer during the Daml Script execution
+  await expectContent(page, '.test-alice-balance-stimulus', '200 USD-S');
+
+  issueInvoice(page, 50)
+
+  payInvoice(page)
+
+  await expectContent(page, '.test-alice-balance-normal', '0 USD');
+  await expectContent(page, '.test-alice-balance-stimulus', '150 USD-S');
+}, 60_000);
+
+async function newLandlordPage(): Promise<Page> {
+  if (!browser) {
+    throw Error('Puppeteer browser has not been launched');
+  }
+  const page = await browser.newPage();
+  await page.setDefaultNavigationTimeout(60 * 1000);
+  await page.goto(`http://localhost:${UI_PORT}/customer`);
+  return page;
 }
 
 async function issueStimulus(page: Page, amount: number) {
@@ -99,34 +118,15 @@ async function payInvoice(page: Page) {
   await paySubmit!.click();
 }
 
-test('dummy', async () => {
-  const page = await newLandlordPage();
-  await expectContent(page, '.test-alice-balance-normal', '0 USD');
-  await expectContent(page, '.test-alice-balance-stimulus', '0 USD-S');
-
-  issueStimulus(page, 200)
-  // TODO is reload useful / necessary? see also comments below about the workaround
-  await page.reload({ waitUntil: ["networkidle0", "domcontentloaded"] });
-  // TODO this workaround appears to pass this test:
-  // 1. start npm test
-  // open http://localhost:3000/customer in a real browser during npm start is loading
-  // refresh the page http://localhost:3000/customer during the Daml Script execution
-  await expectContent(page, '.test-alice-balance-stimulus', '200 USD-S');
-
-  issueInvoice(page, 50)
-
-  payInvoice(page)
-
-  await expectContent(page, '.test-alice-balance-normal', '0 USD');
-  await expectContent(page, '.test-alice-balance-stimulus', '150 USD-S');
-}, 60_000);
-
-async function newLandlordPage(): Promise<Page> {
-  if (!browser) {
-    throw Error('Puppeteer browser has not been launched');
-  }
-  const page = await browser.newPage();
-  await page.setDefaultNavigationTimeout(60 * 1000);
-  await page.goto(`http://localhost:${UI_PORT}/customer`);
-  return page;
+async function expectContent(page: Page, selector: string, content: string) {
+  console.info({selector: selector, expectedContent: content})
+  await page.waitForSelector(selector);
+  console.info('currently: ' + await page.$eval(selector, n => n.innerHTML))
+  await page.waitForFunction(
+    ([selector, content]) =>
+      document.querySelector(selector)?.innerHTML === content,
+    {},
+    [selector, content]
+  );
+  console.info('got expected content')
 }
