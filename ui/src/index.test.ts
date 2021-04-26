@@ -44,14 +44,14 @@ function spawnUI() {
 }
 
 afterAll(async () => {
-  if (sandboxProc) {
-    process.kill(-sandboxProc.pid)
+  if (uiProc) {
+    process.kill(-uiProc.pid)
   }
   if (jsonapiProc) {
     process.kill(-jsonapiProc.pid)
   }
-  if (uiProc) {
-    process.kill(-uiProc.pid)
+  if (sandboxProc) {
+    process.kill(-sandboxProc.pid)
   }
   if (browser) {
     // TODO there are chrome processes hanging after this
@@ -94,6 +94,7 @@ async function newLandlordPage(): Promise<Page> {
 }
 
 async function issueStimulus(page: Page, amount: number) {
+  console.log("Issuing stimulus...")
   const restrictedStimulusDrowdown = await page.waitForXPath('.//button[text()="Restricted Stimulus"]');
   await restrictedStimulusDrowdown!.click()
   const amountInput = await page.waitForSelector('.test-stimulus-amount');
@@ -104,6 +105,7 @@ async function issueStimulus(page: Page, amount: number) {
 }
 
 async function issueInvoice(page: Page, amount: number) {
+  console.log("Issuing invoice...")
   const landlordDrowdown = await page.waitForSelector('.test-landlords-dropdown');
   await landlordDrowdown!.click()
   const createInvoice = await page.waitForSelector('.test-create-invoice');
@@ -116,6 +118,7 @@ async function issueInvoice(page: Page, amount: number) {
 }
 
 async function payInvoice(page: Page) {
+  console.log("Paying invoice...")
   const aliceDrowdown = await page.waitForSelector('.test-alice-dropdown');
   await aliceDrowdown!.click()
   const paySubmit = await page.waitForSelector('.test-alice-pay');
