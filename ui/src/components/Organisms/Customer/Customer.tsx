@@ -14,6 +14,8 @@ import { useLedger, useParty, useStreamQueries } from '@daml/react';
 import { AssetDeposit } from '@daml.js/finance-1.0.0/lib/DA/Finance/Asset';
 import { RentInvoice } from "@daml.js/landlord-1.0.0/lib/Landlord/Landlord";
 import Progress from "../../Atoms/Progress";
+import { getBalance, getBalances } from '../CentralBankSecondFlow/getBalances';
+import { PartyId } from '../../../models/CredentialsType';
 
 type CustomerProps = {
   name: string,
@@ -35,15 +37,6 @@ const Customer: React.FC<CustomerProps> = (props) => {
   const party = useParty()
   const assets = useStreamQueries(AssetDeposit, () => [{ account: { owner: party } }], []);
   const ledger = useLedger();
-  const amountOfMoney =(arr:any)=>{
-    return arr.reduce((acc, contract) => acc + _.parseInt(contract.payload.asset.quantity), 0);
-  }
-
-  function getBalances() {
-    const money = assets.contracts.filter(contract=>contract.payload.asset.earmark===null)
-    const moneySpecial = assets.contracts.filter(contract=>contract.payload.asset.earmark)
-    return [`${amountOfMoney(money)} USD`, `${amountOfMoney(moneySpecial)} USD-S`]
-  }
 
   const toggleDropdown = (value: boolean) => () => setIsDropdownOpen(value);
 
@@ -78,7 +71,9 @@ const Customer: React.FC<CustomerProps> = (props) => {
         buttonStyle='test-alice-pay'
       />]
 
-  const [balanceUsd, balanceUsd_S] = getBalances();
+  const [balancesUsd, balancesUsd_S] = getBalances(assets.contracts);
+  const {value: balanceUsd} = getBalance(balancesUsd, PartyId.from(party), (num) => `${num} USD`, '')
+  const {value: balanceUsd_S} = getBalance(balancesUsd_S, PartyId.from(party), (num) => `${num} USD-S`, '')
   return (
     <div className={`${styles.bank} ${containerStyles}`}>
       <div className={styles.bankTop}>
