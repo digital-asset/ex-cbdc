@@ -61,7 +61,7 @@ afterAll(async () => {
   }
 });
 
-test('dummy', async () => {
+test('Alice pays rent with stimulus money', async () => {
   const page = await newLandlordPage();
   await expectContent(page, '.test-alice-balance-normal', '0 USD');
   await expectContent(page, '.test-alice-balance-stimulus', '0 USD-S');
