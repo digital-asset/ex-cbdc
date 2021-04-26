@@ -11,7 +11,7 @@ orbs:
 executors:
   daml-executor:
     docker:
-      - image: cimg/openjdk:16.0-browser
+      - image: cimg/openjdk:16.0-browsers
 
 commands:
   install_sdk:
