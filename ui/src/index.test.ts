@@ -57,7 +57,7 @@ afterAll(async () => {
     // TODO there are chrome processes hanging after this
     // occasionally java and node too, so I start the test by
     // killall chrome java node ; make test
-    browser.close();
+    await browser.close();
   }
 });
 
@@ -67,13 +67,13 @@ test('Alice pays rent with stimulus money', async () => {
   await expectContent(page, '.test-alice-balance-normal', '0 USD');
   await expectContent(page, '.test-alice-balance-stimulus', '0 USD-S');
 
-  issueStimulus(page, 200)
+  await issueStimulus(page, 200)
 
   await expectContent(page, '.test-alice-balance-stimulus', '200 USD-S');
 
-  issueInvoice(page, 50)
+  await issueInvoice(page, 50)
 
-  payInvoice(page)
+  await payInvoice(page)
 
   await expectContent(page, '.test-alice-balance-normal', '0 USD');
   await expectContent(page, '.test-alice-balance-stimulus', '150 USD-S');
