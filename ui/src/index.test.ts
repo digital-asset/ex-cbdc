@@ -72,31 +72,31 @@ async function expectContent(page: Page, selector: string, content: string) {
 
 async function issueStimulus(page: Page, amount: number) {
   const restrictedStimulusDrowdown = await page.waitForXPath('.//button[text()="Restricted Stimulus"]');
-  await restrictedStimulusDrowdown?.click()
+  await restrictedStimulusDrowdown!.click()
   const amountInput = await page.waitForSelector('.test-stimulus-amount');
-  await amountInput?.click();
-  await amountInput?.type(amount.toString());
+  await amountInput!.click();
+  await amountInput!.type(amount.toString());
   const stimulusSubmit = await page.waitForSelector('.test-stimulus-submit');
-  await stimulusSubmit?.click();
+  await stimulusSubmit!.click();
 }
 
 async function issueInvoice(page: Page, amount: number) {
   const landlordDrowdown = await page.waitForSelector('.test-landlords-dropdown');
-  await landlordDrowdown?.click()
+  await landlordDrowdown!.click()
   const createInvoice = await page.waitForSelector('.test-create-invoice');
-  await createInvoice?.click()
+  await createInvoice!.click()
   const amountInput = await page.waitForSelector('.test-invoice-amount');
-  await amountInput?.click();
-  await amountInput?.type(amount.toString());
+  await amountInput!.click();
+  await amountInput!.type(amount.toString());
   const invoiceSubmit = await page.waitForSelector('.test-invoice-submit');
-  await invoiceSubmit?.click();
+  await invoiceSubmit!.click();
 }
 
 async function payInvoice(page: Page) {
   const aliceDrowdown = await page.waitForSelector('.test-alice-dropdown');
-  await aliceDrowdown?.click()
+  await aliceDrowdown!.click()
   const paySubmit = await page.waitForSelector('.test-alice-pay');
-  await paySubmit?.click();
+  await paySubmit!.click();
 }
 
 test('dummy', async () => {
