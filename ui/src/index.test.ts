@@ -102,8 +102,8 @@ async function newLandlordPage(): Promise<Page> {
 
 async function issueStimulus(page: Page, amount: number) {
   console.log("Issuing stimulus...")
-  const restrictedStimulusDrowdown = await page.waitForXPath('.//button[text()="Restricted Stimulus"]');
-  await restrictedStimulusDrowdown!.click()
+  const restrictedStimulusDropdown = await page.waitForXPath('.//button[text()="Restricted Stimulus"]');
+  await restrictedStimulusDropdown!.click()
   const amountInput = await page.waitForSelector('.test-stimulus-amount');
   await amountInput!.click();
   await amountInput!.type(amount.toString());
@@ -113,8 +113,8 @@ async function issueStimulus(page: Page, amount: number) {
 
 async function issueInvoice(page: Page, amount: number) {
   console.log("Issuing invoice...")
-  const landlordDrowdown = await page.waitForSelector('.test-landlords-dropdown');
-  await landlordDrowdown!.click()
+  const landlordDropdown = await page.waitForSelector('.test-landlords-dropdown');
+  await landlordDropdown!.click()
   const createInvoice = await page.waitForSelector('.test-create-invoice');
   await createInvoice!.click()
   const amountInput = await page.waitForSelector('.test-invoice-amount');
@@ -126,8 +126,8 @@ async function issueInvoice(page: Page, amount: number) {
 
 async function payInvoice(page: Page) {
   console.log("Paying invoice...")
-  const aliceDrowdown = await page.waitForSelector('.test-alice-dropdown');
-  await aliceDrowdown!.click()
+  const aliceDropdown = await page.waitForSelector('.test-alice-dropdown');
+  await aliceDropdown!.click()
   const paySubmit = await page.waitForSelector('.test-alice-pay:not([disabled])');
   await paySubmit!.click();
 }
