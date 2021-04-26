@@ -78,7 +78,7 @@ const Customer: React.FC<CustomerProps> = (props) => {
         buttonStyle='test-alice-pay'
       />]
 
-  const testClasses = ['test-alice-balance-normal', 'test-alice-balance-stimulus'];
+  const [balanceUsd, balanceUsd_S] = getBalances();
   return (
     <div className={`${styles.bank} ${containerStyles}`}>
       <div className={styles.bankTop}>
@@ -100,7 +100,8 @@ const Customer: React.FC<CustomerProps> = (props) => {
         <h6 className={`${styles.bankText} ${styles._bottomTitle}`}>Bank Account</h6>
       </div>
       <div className={styles.bankList}>
-        {getBalances().map((el, index) => <p className={`${styles.bankText} ${styles.bankListItem} ${testClasses[index]}`} key={el}>{el}</p>)}
+        <p className={`${styles.bankText} ${styles.bankListItem} test-alice-balance-normal`}>{balanceUsd}</p>
+        <p className={`${styles.bankText} ${styles.bankListItem} test-alice-balance-stimulus`}>{balanceUsd_S}</p>
       </div>
       <div className={styles.bankTriangle} />
       {isError
