@@ -11,8 +11,8 @@ import { useParty, useStreamQueries } from "@daml/react";
 import { BankCustomer } from "../../../models/Banks";
 import { AssetDeposit } from "@daml.js/finance-1.0.0/lib/DA/Finance/Asset";
 import User from "../../Atoms/User";
-import _ from "lodash";
 import { PartyId } from "../../../models/CredentialsType";
+import { getBalances } from "../CentralBankSecondFlow/getBalances";
 
 
 const mockList = [
@@ -48,7 +48,8 @@ export const LandLordAssociation: React.FC<LandLordAssociationProps> = (props) =
   const [activePerson] = useState<Person | null>(null);
   // const handleChangeActive = (person: Person) => () => setActivePerson(person);
 
-  const money = assets.contracts.reduce((acc, contract) => acc + _.parseInt(contract.payload.asset.quantity), 0);
+  const [b] = getBalances(assets.contracts)
+  const money = b.length > 0 ? b[0].quantity : 0
 
   return (
     <div className={styles.bankContainer}>
