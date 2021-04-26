@@ -76,6 +76,11 @@ jobs:
       - restore_cache:
           keys:
             - daml-{{ checksum "daml.yaml" }}
+      - run:
+          name: Install libnss3 for Chrome
+          command: |
+            sudo apt-get update || sudo apt-get update
+            sudo apt install libnss3
       - install_sdk:
           version: << parameters.daml_sdk_version >>
       - run:
