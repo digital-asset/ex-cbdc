@@ -94,64 +94,35 @@ async function newLandlordPage(): Promise<Page> {
 }
 
 async function issueStimulus(page: Page, amount: number) {
-  console.log("stimulus issuance...")
-  page.waitForTimeout(1000);
+  console.log("Issuing stimulus...")
   const restrictedStimulusDrowdown = await page.waitForXPath('.//button[text()="Restricted Stimulus"]');
   await restrictedStimulusDrowdown!.click()
-  page.waitForTimeout(2000);
-  console.log("stimulus amount...")
   const amountInput = await page.waitForSelector('.test-stimulus-amount');
-  page.waitForTimeout(1000);
   await amountInput!.click();
   await amountInput!.type(amount.toString());
-  page.waitForTimeout(1000);
-  console.log("stimulus submit...")
   const stimulusSubmit = await page.waitForSelector('.test-stimulus-submit');
   await stimulusSubmit!.click();
-  console.log("stimulus done")
 }
 
 async function issueInvoice(page: Page, amount: number) {
-  console.log("invoice issuance...")
+  console.log("Issuing invoice...")
   const landlordDrowdown = await page.waitForSelector('.test-landlords-dropdown');
   await landlordDrowdown!.click()
-  page.waitForTimeout(1000);
-  console.debug('invoice: test-create-invoice...: ')
   const createInvoice = await page.waitForSelector('.test-create-invoice');
   await createInvoice!.click()
-  page.waitForTimeout(1000);
-  console.debug('invoice: test-invoice-amount...: ')
   const amountInput = await page.waitForSelector('.test-invoice-amount');
   await amountInput!.click();
   await amountInput!.type(amount.toString());
   const invoiceSubmit = await page.waitForSelector('.test-invoice-submit');
   await invoiceSubmit!.click();
-  console.log("invoice done")
 }
 
 async function payInvoice(page: Page) {
-  console.log("pay...")
+  console.log("Paying invoice...")
   const aliceDrowdown = await page.waitForSelector('.test-alice-dropdown');
-  // TODO remove waitForTimeout and debugs
-  console.debug('pay: test-alice-dropdown...: ')
-  console.debug('pay: test-alice-dropdown: ' + await page.$eval('.test-alice-dropdown', n => n.innerHTML))
   await aliceDrowdown!.click()
-  page.waitForTimeout(1000);
   const paySubmit = await page.waitForSelector('.test-alice-pay');
-  page.waitForTimeout(1000);
-  console.debug('pay: test-alice-pay...: ')
-  console.debug('pay: test-alice-pay: ' + await page.$eval('.test-alice-pay', n => n))
-  console.debug('pay: test-alice-pay handler: ' + paySubmit)
-  console.debug('pay: test-alice-pay props: ' + await paySubmit?.getProperties())
-  //console.debug('pay: test-alice-pay handler: ' + await paySubmit?.jsonValue())
-  console.debug('pay: test-alice-pay inner: ' + await page.$eval('.test-alice-pay', n => n.innerHTML))
   await paySubmit!.click();
-  console.log("pay: clicking again...")
-  await page.click('.test-alice-pay');
-  console.log("pay: and clicking again...")
-  const paySubmit2 = await page.waitForSelector('.test-alice-pay');
-  await paySubmit2!.click();
-  console.log("pay done")
 }
 
 async function expectContent(page: Page, selector: string, content: string) {
