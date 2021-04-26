@@ -96,19 +96,23 @@ test('dummy', async () => {
   await expectContent(page, '.test-alice-balance-stimulus', '0 USD-S');
 
   issueStimulus(page, 200)
+  // TODO is reload useful / necessary?
+  await page.reload({ waitUntil: ["networkidle0", "domcontentloaded"] });
+  // TODO fix, looking from a real browser during test make this pass:
+  await expectContent(page, '.test-alice-balance-stimulus', '200 USD-S');
 
   issueInvoice(page, 50)
-  await expectContent(page, '.test-alice-balance-stimulus', '200 USD-S');
 
   await expectContent(page, '.test-alice-balance-normal', '0 USD');
   await expectContent(page, '.test-alice-balance-stimulus', '150 USD-S');
-});
+}, 60_000);
 
 async function newLandlordPage(): Promise<Page> {
   if (!browser) {
     throw Error('Puppeteer browser has not been launched');
   }
   const page = await browser.newPage();
+  await page.setDefaultNavigationTimeout(60 * 1000);
   await page.goto(`http://localhost:${UI_PORT}/customer`);
   return page;
 }
