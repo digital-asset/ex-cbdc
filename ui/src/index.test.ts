@@ -68,12 +68,7 @@ test('Alice pays rent with stimulus money', async () => {
   await expectContent(page, '.test-alice-balance-stimulus', '0 USD-S');
 
   issueStimulus(page, 200)
-  // TODO is reload useful / necessary? see also comments below about the workaround
-  await page.reload({ waitUntil: ["networkidle0", "domcontentloaded"] });
-  // TODO this workaround appears to pass this test:
-  // 1. start npm test
-  // open http://localhost:3000/customer in a real browser during npm start is loading
-  // refresh the page http://localhost:3000/customer during the Daml Script execution
+
   await expectContent(page, '.test-alice-balance-stimulus', '200 USD-S');
 
   issueInvoice(page, 50)
