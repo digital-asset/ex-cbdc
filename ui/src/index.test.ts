@@ -130,14 +130,14 @@ async function payInvoice(page: Page) {
 }
 
 async function expectContent(page: Page, selector: string, content: string) {
-  console.info({selector: selector, expectedContent: content})
+  console.debug({selector: selector, expectedContent: content})
   await page.waitForSelector(selector);
-  console.info('currently: ' + await page.$eval(selector, n => n.innerHTML))
+  console.debug('currently: ' + await page.$eval(selector, n => n.innerHTML))
   await page.waitForFunction(
     ([selector, content]) =>
       document.querySelector(selector)?.innerHTML === content,
     {},
     [selector, content]
   );
-  console.info('got expected content')
+  console.debug('got expected content')
 }
