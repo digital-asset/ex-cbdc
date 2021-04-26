@@ -22,14 +22,7 @@ beforeAll(async () => {
   sandboxProc = spawn('launchers/sandbox', launcherOpts);
   jsonapiProc = spawn('launchers/jsonapi', launcherOpts);
 
-  // Disable automatically opening a browser using the env var described here:
-  // https://github.com/facebook/create-react-app/issues/873#issuecomment-266318338
-  const env = {...process.env, BROWSER: 'none'};
-  // Note(kill-npm-start): The `detached` flag starts the process in a new process group.
-  // This allows us to kill the process with all its descendents after the tests finish,
-  // following https://azimi.me/2014/12/31/kill-child_process-node-js.html.
-  uiProc = spawn('npm', ['run-script', 'start'], { env, stdio: 'inherit', detached: true});
-  // TODO ^^ make sure npm-cli.js is in the PATH, or just run npm???
+  uiProc = spawnUI();
 
   spawnSync('launchers/populate', launcherOpts);
 
@@ -38,6 +31,17 @@ beforeAll(async () => {
 
   browser = await puppeteer.launch();
 }, 60_000);
+
+function spawnUI() {
+  // Disable automatically opening a browser using the env var described here:
+  // https://github.com/facebook/create-react-app/issues/873#issuecomment-266318338
+  const env = {...process.env, BROWSER: 'none'};
+  // Note(kill-npm-start): The `detached` flag starts the process in a new process group.
+  // This allows us to kill the process with all its descendents after the tests finish,
+  // following https://azimi.me/2014/12/31/kill-child_process-node-js.html.
+  return spawn('npm', ['run-script', 'start'], { env, stdio: 'inherit', detached: true});
+  // TODO ^^ make sure npm-cli.js is in the PATH, or just run npm???
+}
 
 afterAll(async () => {
   if (sandboxProc) {
