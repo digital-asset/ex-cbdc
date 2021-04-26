@@ -4,5 +4,19 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
+PARTICIPANT_CONFIG=${1:-default_participant_config.cfg}
+
+function run_script() {
+  daml script \
+    --dar ./testing/.daml/dist/testing-1.0.0.dar \
+    --participant-config "${PARTICIPANT_CONFIG}" \
+    --script-name "${1}"
+}
+
+set -e
+
+echo "Market setup script: ${0} $PARTICIPANT_CONFIG"
+
 scripts/waitForLedger.sh localhost 6865
-scripts/allocateAndInit.sh "$1"
+
+run_script "Testing.Init.Init:allocateAndInitDemo"
