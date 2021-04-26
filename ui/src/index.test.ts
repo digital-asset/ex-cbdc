@@ -73,16 +73,21 @@ async function issueStimulus(page: Page, amount: number) {
   const amountInput = await page.waitForSelector('.test-stimulus-amount');
   await amountInput?.click();
   await amountInput?.type(amount.toString());
-  await page.click('.test-stimulus-submit');
+  const stimulusSubmit = await page.waitForSelector('.test-stimulus-submit');
+  await stimulusSubmit?.click();
 }
 
 async function issueInvoice(page: Page, amount: number) {
-  await page.click('.test-landlords-dropdown');
-  await page.click('.test-create-invoice');
+  // TODO write page.click instead
+  const landlordDrowdown = await page.waitForSelector('.test-landlords-dropdown');
+  await landlordDrowdown?.click()
+  const createInvoice = await page.waitForSelector('.test-create-invoice');
+  await createInvoice?.click()
   const amountInput = await page.waitForSelector('.test-invoice-amount');
   await amountInput?.click();
   await amountInput?.type(amount.toString());
-  await page.click('.test-invoice-submit');
+  const invoiceSubmit = await page.waitForSelector('.test-invoice-submit');
+  await invoiceSubmit?.click();
 }
 
 async function payInvoice(page: Page) {
