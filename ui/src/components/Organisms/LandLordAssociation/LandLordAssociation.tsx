@@ -46,7 +46,6 @@ export const LandLordAssociation: React.FC<LandLordAssociationProps> = (props) =
   const assets = useStreamQueries(AssetDeposit, () => [{ account: { owner: party } }], []);
 
   const [activePerson] = useState<Person | null>(null);
-  // const handleChangeActive = (person: Person) => () => setActivePerson(person);
 
   const [b] = getBalances(assets.contracts)
   const money = b.length > 0 ? b[0].quantity : 0
@@ -64,7 +63,6 @@ export const LandLordAssociation: React.FC<LandLordAssociationProps> = (props) =
         <div className={styles.bankList}>
           {personList.map(_person => (
             <div
-                // onClick={handleChangeActive(_person)}
                 key={_person.id}
                 className={`${styles.bankListItem} ${BankCustomer.AlphaProperties === _person.id && styles._active}`}>
               <p
