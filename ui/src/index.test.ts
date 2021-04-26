@@ -121,7 +121,7 @@ async function payInvoice(page: Page) {
   console.log("Paying invoice...")
   const aliceDrowdown = await page.waitForSelector('.test-alice-dropdown');
   await aliceDrowdown!.click()
-  const paySubmit = await page.waitForSelector('.test-alice-pay');
+  const paySubmit = await page.waitForSelector('.test-alice-pay:not([disabled])');
   await paySubmit!.click();
 }
 
