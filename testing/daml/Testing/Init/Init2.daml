@@ -1,0 +1,21 @@
+--
+-- Copyright (c) 2021, Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+--
+
+module Testing.Init.Init2 where
+
+import Daml.Script hiding (party)
+import Testing.Models.Parties
+import Testing.Init.Init
+
+initDemo2 : PartiesForTesting -> Script ()
+initDemo2 parties@PartiesForTesting{..} = script do
+
+  initDemo parties
+
+  let task = "Transfer some money to the banks"
+  started task
+  eurCbdc <- transferFromCentralbankToBank ecb bankB 85_000_000.0
+  usdCbdc <- transferFromCentralbankToBank usFRB bankA 100_000_000.0
+  finished task
