@@ -3,10 +3,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import React, {useState} from "react";
+import React from "react";
 import styles from "./LandLordAssociation.module.css";
 import LandLord from '../../../static/assets/Logos/Landlords.svg';
-import Arrow from '../../../static/assets/Icons/CloseDropdownLarge.svg';
 import { useParty, useStreamQueries } from "@daml/react";
 import { BankCustomer } from "../../../models/Banks";
 import { AssetDeposit } from "@daml.js/finance-1.0.0/lib/DA/Finance/Asset";
@@ -15,7 +14,7 @@ import { PartyId } from "../../../models/CredentialsType";
 import { getBalances } from "../CentralBankSecondFlow/getBalances";
 
 
-const mockList = [
+const personList = [
   { id: BankCustomer.AlphaProperties, name: "Alpha Properties, LLC", money: 0 },
   { id: '2', name: "Beta Properties, LLC", money: 0 },
   { id: '3', name: "Delta Properties, LLC", money: 0 },
@@ -23,29 +22,19 @@ const mockList = [
   { id: '5', name: "Gamma Properties, LLC", money: 0 },
 ]
 
-type Person = {
-  id: string,
-  name: string,
-  money: number | string,
-}
-
 type LandLordAssociationProps = {
-  personList?: Person[],
   renter: PartyId,
   handleCleanState: (boolean) => void
 }
 
 export const LandLordAssociation: React.FC<LandLordAssociationProps> = (props) => {
   const {
-    personList = mockList,
     renter,
     handleCleanState
   } = props;
 
   const party = useParty();
   const assets = useStreamQueries(AssetDeposit, () => [{ account: { owner: party } }], []);
-
-  const [activePerson] = useState<Person | null>(null);
 
   const [b] = getBalances(assets.contracts)
   const money = b.length > 0 ? b[0].quantity : 0
@@ -69,7 +58,6 @@ export const LandLordAssociation: React.FC<LandLordAssociationProps> = (props) =
                 className={`${styles.bankText} ${styles._personName}`}
               >
                 {_person.name}
-                {activePerson?.id === _person.id && <img src={Arrow} alt="arrow" className={styles.bankListImg} />}
               </p>
               {BankCustomer.AlphaProperties === _person.id && (
                 <User
