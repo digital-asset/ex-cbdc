@@ -50,6 +50,9 @@ afterAll(async () => {
     process.kill(-uiProc.pid)
   }
   if (browser) {
+    // TODO there are chrome processes hanging after this
+    // occasionally java and node too, so I start the test by
+    // killall chrome java node ; make test
     browser.close();
   }
 });
@@ -78,7 +81,6 @@ async function issueStimulus(page: Page, amount: number) {
 }
 
 async function issueInvoice(page: Page, amount: number) {
-  // TODO write page.click instead
   const landlordDrowdown = await page.waitForSelector('.test-landlords-dropdown');
   await landlordDrowdown?.click()
   const createInvoice = await page.waitForSelector('.test-create-invoice');
@@ -103,9 +105,12 @@ test('dummy', async () => {
   await expectContent(page, '.test-alice-balance-stimulus', '0 USD-S');
 
   issueStimulus(page, 200)
-  // TODO is reload useful / necessary?
+  // TODO is reload useful / necessary? see also comments below about the workaround
   await page.reload({ waitUntil: ["networkidle0", "domcontentloaded"] });
-  // TODO fix, looking from a real browser during test make this pass:
+  // TODO this workaround appears to pass this test:
+  // 1. start npm test
+  // open http://localhost:3000/customer in a real browser during npm start is loading
+  // refresh the page http://localhost:3000/customer during the Daml Script execution
   await expectContent(page, '.test-alice-balance-stimulus', '200 USD-S');
 
   issueInvoice(page, 50)
