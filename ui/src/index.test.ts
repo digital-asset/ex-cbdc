@@ -62,6 +62,7 @@ afterAll(async () => {
 });
 
 test('Alice pays rent with stimulus money', async () => {
+  await workaroundToOpenThePageBySomeRandomBrowser();
   const page = await newLandlordPage();
   await expectContent(page, '.test-alice-balance-normal', '0 USD');
   await expectContent(page, '.test-alice-balance-stimulus', '0 USD-S');
@@ -82,6 +83,14 @@ test('Alice pays rent with stimulus money', async () => {
   await expectContent(page, '.test-alice-balance-normal', '0 USD');
   await expectContent(page, '.test-alice-balance-stimulus', '150 USD-S');
 }, 60_000);
+
+async function workaroundToOpenThePageBySomeRandomBrowser() {
+  // TODO remove
+  // For unknown reason, the test fails unless any browser opens
+  // the page http://localhost:3000/customer during the test.
+  // Manually with Firefox or Chrome, or with this call:
+  await newLandlordPage();
+}
 
 async function newLandlordPage(): Promise<Page> {
   if (!browser) {
