@@ -11,7 +11,7 @@ orbs:
 executors:
   daml-executor:
     docker:
-      - image: cimg/openjdk:11.0-node
+      - image: cimg/openjdk:11.0-browser
 
 commands:
   install_sdk:
