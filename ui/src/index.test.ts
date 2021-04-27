@@ -62,7 +62,6 @@ afterAll(async () => {
 });
 
 test('Alice pays rent with stimulus money', async () => {
-  await workaroundByOpeningThePageBySomeRandomBrowser();
   const page = await newLandlordPage();
   await expectContent(page, '.test-alice-balance-normal', '0 USD');
   await expectContent(page, '.test-alice-balance-stimulus', '0 USD-S');
@@ -78,17 +77,6 @@ test('Alice pays rent with stimulus money', async () => {
   await expectContent(page, '.test-alice-balance-normal', '0 USD');
   await expectContent(page, '.test-alice-balance-stimulus', '150 USD-S');
 }, 60_000);
-
-async function workaroundByOpeningThePageBySomeRandomBrowser() {
-  // TODO remove
-  // For unknown reason, the test fails unless any browser opens
-  // the page http://localhost:3000/customer during the test.
-  // Manually with Firefox or Chrome, or with this call:
-  await newLandlordPage();
-  // Well it still appears a bit flaky, but another one reduces flakiness even more.
-  // Apologies for investigating this!
-  await newLandlordPage();
-}
 
 async function newLandlordPage(): Promise<Page> {
   if (!browser) {
@@ -107,7 +95,7 @@ async function issueStimulus(page: Page, amount: number) {
   const amountInput = await page.waitForSelector('.test-stimulus-amount');
   await amountInput!.click();
   await amountInput!.type(amount.toString());
-  const stimulusSubmit = await page.waitForSelector('.test-stimulus-submit');
+  const stimulusSubmit = await page.waitForSelector('.test-stimulus-submit:not([disabled])');
   await stimulusSubmit!.click();
 }
 

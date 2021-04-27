@@ -180,7 +180,7 @@ const CentralBank = (props: { alice: PartyId, landlord: PartyId, isCustomer: any
                 label='Submit'
                 onClick={isShowStimulus ? handleStimulus : transferMoney}
                 buttonStyle={`${styles.btnTransfer} ${isShowStimulus && styles.test} test-stimulus-submit`}
-                disabled={!(transferValue)}
+                disabled={!(transferValue) || usFRBRole.length !== 1}
             />
         )}
       </div>
