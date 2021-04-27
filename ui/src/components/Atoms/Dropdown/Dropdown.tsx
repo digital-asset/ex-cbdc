@@ -10,6 +10,7 @@ import { Styles } from '../../../models/Styles';
 
 type DropdownProps = {
     list: ReactNode[],
+    id?: string,
     open: boolean,
     noArrow?: boolean,
     onClick?: () => void,
@@ -21,6 +22,7 @@ type DropdownProps = {
 const Dropdown: React.FC<DropdownProps> = (props) => {
     const {
         list,
+        id,
         open,
         noArrow,
         onClick = () => {},
@@ -28,8 +30,9 @@ const Dropdown: React.FC<DropdownProps> = (props) => {
         dropdownIconStyles = '',
         dropdownListStyles = ''
     } = props;
+    const idprop = id ? {id: id} : {}
     return (
-        <div className={`${styles.dropdown} ${dropdownStyles}`}>
+        <div className={`${styles.dropdown} ${dropdownStyles}`} {...idprop}>
             {!noArrow && <img
                 className={`${dropdownIconStyles} ${styles.dropdownImage} ${open ? styles._open : ''}`}
                 onClick={onClick}

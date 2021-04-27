@@ -92,31 +92,31 @@ async function issueStimulus(page: Page, amount: number) {
   console.log("Issuing stimulus...")
   const restrictedStimulusDropdown = await page.waitForXPath('.//button[text()="Restricted Stimulus"]');
   await restrictedStimulusDropdown!.click()
-  const amountInput = await page.waitForSelector('.test-stimulus-amount');
+  const amountInput = await page.waitForSelector('#test-stimulus-amount');
   await amountInput!.click();
   await amountInput!.type(amount.toString());
-  const stimulusSubmit = await page.waitForSelector('.test-stimulus-submit:not([disabled])');
+  const stimulusSubmit = await page.waitForSelector('#test-stimulus-submit:not([disabled])');
   await stimulusSubmit!.click();
 }
 
 async function issueInvoice(page: Page, amount: number) {
   console.log("Issuing invoice...")
-  const landlordDropdown = await page.waitForSelector('.test-landlords-dropdown');
+  const landlordDropdown = await page.waitForSelector('#test-landlords-dropdown');
   await landlordDropdown!.click()
-  const createInvoice = await page.waitForSelector('.test-create-invoice');
+  const createInvoice = await page.waitForXPath('.//button[text()="Create invoice"]');
   await createInvoice!.click()
-  const amountInput = await page.waitForSelector('.test-invoice-amount');
+  const amountInput = await page.waitForSelector('#test-invoice-amount');
   await amountInput!.click();
   await amountInput!.type(amount.toString());
-  const invoiceSubmit = await page.waitForSelector('.test-invoice-submit');
+  const invoiceSubmit = await page.waitForSelector('#test-invoice-submit');
   await invoiceSubmit!.click();
 }
 
 async function payInvoice(page: Page) {
   console.log("Paying invoice...")
-  const aliceDropdown = await page.waitForSelector('.test-alice-dropdown');
+  const aliceDropdown = await page.waitForSelector('#test-alice-dropdown');
   await aliceDropdown!.click()
-  const paySubmit = await page.waitForSelector('.test-alice-pay:not([disabled])');
+  const paySubmit = await page.waitForSelector('#test-alice-pay:not([disabled])');
   await paySubmit!.click();
 }
 

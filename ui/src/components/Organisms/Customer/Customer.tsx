@@ -68,7 +68,7 @@ const Customer: React.FC<CustomerProps> = (props) => {
         label='Pay'
         onClick={bodyPayRentInvoice}
         disabled={rentInvoice.length !== 1 || isLoading}
-        buttonStyle='test-alice-pay'
+        id='test-alice-pay'
       />]
 
   const [balancesUsd, balancesUsd_S] = getBalances(assets.contracts);
@@ -85,9 +85,10 @@ const Customer: React.FC<CustomerProps> = (props) => {
           <Dropdown
             onClick={toggleDropdown(!isDropdownOpen)}
             open={isDropdownOpen}
-            dropdownStyles={`${styles.dropdownStyles} test-alice-dropdown`}
+            dropdownStyles={`${styles.dropdownStyles}`}
             dropdownListStyles={styles.dropdownListStyles}
             list={payButton}
+            id='test-alice-dropdown'
           />
         )}
       </div>

@@ -92,12 +92,12 @@ const Customer: React.FC<UserProps>= (props) => {
         handleChangeShown()
         handleCleanState(true)
       }}
-      buttonStyle={`${styles.dropDownBtn} test-create-invoice`}/>
+      buttonStyle={`${styles.dropDownBtn}`}/>
     ]
 
     const submitButton = isLoading
     ? <Progress key="key" containerStyles={styles.dropdownSpinner} />
-    : <Button key="button-Recipient" label={"Submit"} buttonStyle='test-invoice-submit' onClick={()=> {
+    : <Button key="button-Recipient" label={"Submit"} id='test-invoice-submit' onClick={()=> {
       bodyCreateRentInvoice(price)
     }}/>
 
@@ -107,7 +107,7 @@ const Customer: React.FC<UserProps>= (props) => {
         <Input
           key="input-Recipient"
           inputContainerStyle={styles._inputStyle}
-          inputStyle='test-invoice-amount'
+          id='test-invoice-amount'
           label={"Amount(USD)"}
           value={price}
           onChange={setPrice}/>,
@@ -121,9 +121,10 @@ const Customer: React.FC<UserProps>= (props) => {
         <Dropdown
             onClick={toggleDropdown(!isDropdownOpen)}
             open={isDropdownOpen}
-            dropdownStyles={`${styles._userDropdown} test-landlords-dropdown`}
+            dropdownStyles={`${styles._userDropdown}`}
             dropdownListStyles={styles.dropdownListStyles}
             list={listForDropdown()}
+            id='test-landlords-dropdown'
         />
       <div className={`${styles.bankTop} ${styles._userBankTop}`}>
         <div className={styles.bankImgContainer}>
