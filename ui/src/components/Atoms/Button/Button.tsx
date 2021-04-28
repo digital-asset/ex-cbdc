@@ -9,6 +9,7 @@ import { Styles } from '../../../models/Styles';
 
 type ButtonProps = {
     label: string,
+    id?: string,
     disabled?: boolean,
     onClick?: MouseEventHandler<HTMLButtonElement>,
     buttonStyle?: Styles

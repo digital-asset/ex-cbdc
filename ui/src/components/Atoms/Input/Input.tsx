@@ -10,6 +10,7 @@ import NumberFormat from 'react-number-format';
 
 type InputProps = {
     label?: string,
+    id?: string,
     value: string,
     onChange: (value: string) => void,
     inputContainerStyle?: Styles,
@@ -20,6 +21,7 @@ type InputProps = {
 const Input: React.FC<InputProps> = (props) => {
     const {
         label,
+        id,
         inputStyle = '',
         inputContainerStyle = '',
         labelStyle = '',
@@ -28,6 +30,7 @@ const Input: React.FC<InputProps> = (props) => {
     } = props;
 
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => onChange(e.target.value);
+    const idprop = id ? {id: id} : {}
 
     return (
         <div className={`${inputContainerStyle} ${styles.customContainerStyles}`}>
@@ -38,6 +41,7 @@ const Input: React.FC<InputProps> = (props) => {
                 value={value}
                 onChange={handleChange}
                 className={`${styles.input} ${styles.inputText} ${inputStyle}`}
+                {...idprop}
             />
         </div>
     )

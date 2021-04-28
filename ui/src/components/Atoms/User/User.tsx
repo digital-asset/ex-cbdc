@@ -58,13 +58,13 @@ const Customer: React.FC<UserProps>= (props) => {
   }
 
   const bodyCreateRentInvoice = async (price): Promise<any> => {
+    try {
     const cert = _.first(certs);
     assertProperRoles(landlordRole, cert)
     setIsLoading(true);
     setIsError(false)
     const landlordRoleCid = _.first(landlordRole)!.contractId;
     const date = new Date().toJSON().slice(0,10).replace(/-/g,'-');
-    try {
     await ledger.exercise(LandlordRole.CreateRentInvoice, landlordRoleCid,
       {
         price,
@@ -92,19 +92,25 @@ const Customer: React.FC<UserProps>= (props) => {
         handleChangeShown()
         handleCleanState(true)
       }}
-      buttonStyle={styles.dropDownBtn}/>
+      buttonStyle={`${styles.dropDownBtn}`}/>
     ]
 
     const submitButton = isLoading
     ? <Progress key="key" containerStyles={styles.dropdownSpinner} />
-    : <Button key="button-Recipient" label={"Submit"} onClick={()=> {
+    : <Button key="button-Recipient" label={"Submit"} id='test-invoice-submit' onClick={()=> {
       bodyCreateRentInvoice(price)
     }}/>
 
     if(isShown){
       list.push(
         <Select key="select-Recipient" dropdownList={[]} noArrow={true} title={"Recipient:"} initialLabel={"Alice B."} selectContainerStyle={styles._selectStyle}/>,
-        <Input key="input-Recipient" inputContainerStyle={styles._inputStyle} label={"Amount(USD)"} value={price} onChange={setPrice}/>,
+        <Input
+          key="input-Recipient"
+          inputContainerStyle={styles._inputStyle}
+          id='test-invoice-amount'
+          label={"Amount(USD)"}
+          value={price}
+          onChange={setPrice}/>,
         submitButton)
     }
     return list
@@ -115,9 +121,10 @@ const Customer: React.FC<UserProps>= (props) => {
         <Dropdown
             onClick={toggleDropdown(!isDropdownOpen)}
             open={isDropdownOpen}
-            dropdownStyles={styles._userDropdown}
+            dropdownStyles={`${styles._userDropdown}`}
             dropdownListStyles={styles.dropdownListStyles}
             list={listForDropdown()}
+            id='test-landlords-dropdown'
         />
       <div className={`${styles.bankTop} ${styles._userBankTop}`}>
         <div className={styles.bankImgContainer}>

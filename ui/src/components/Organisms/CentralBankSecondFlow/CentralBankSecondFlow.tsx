@@ -172,6 +172,7 @@ const CentralBank = (props: { alice: PartyId, landlord: PartyId, isCustomer: any
         label={`Amount (${currency})`}
         value={transferValue}
         onChange={setTransferValue}
+        id='test-stimulus-amount'
       />,
       <div className={`${styles.btnTransferContainer} ${styles._inProgress}`} key='Transfer Button'>
         {isLoading ? <Progress /> : (
@@ -179,7 +180,8 @@ const CentralBank = (props: { alice: PartyId, landlord: PartyId, isCustomer: any
                 label='Submit'
                 onClick={isShowStimulus ? handleStimulus : transferMoney}
                 buttonStyle={`${styles.btnTransfer} ${isShowStimulus && styles.test}`}
-                disabled={!(transferValue)}
+                disabled={!(transferValue) || usFRBRole.length !== 1}
+                id='test-stimulus-submit'
             />
         )}
       </div>
