@@ -83,7 +83,6 @@ async function newLandlordPage(): Promise<Page> {
     throw Error('Puppeteer browser has not been launched');
   }
   const page = await browser.newPage();
-  page.setDefaultNavigationTimeout(60 * 1000);
   await page.goto(`http://localhost:${UI_PORT}/customer`);
   return page;
 }
