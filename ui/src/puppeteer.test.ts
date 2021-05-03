@@ -15,8 +15,6 @@ let uiProc: ChildProcess | undefined = undefined;
 
 let browser: Browser | undefined = undefined;
 
-// To reduce test times, we reuse the same processes between all the tests.
-// TODO restart them before every test
 beforeAll(async () => {
   // Note(kill-npm-start): The `detached` flag starts the process in a new process group.
   // This allows us to kill the process with all its descendents after the tests finish,
@@ -26,7 +24,7 @@ beforeAll(async () => {
   sandboxProc = spawn('launchers/sandbox', launcherOpts);
   jsonapiProc = spawn('launchers/jsonapi', launcherOpts);
   uiProc = spawnUI(launcherOpts);
-  spawnPopulate(launcherOpts);
+  spawnSyncPopulate(launcherOpts);
 
   await waitOn({resources: [`tcp:localhost:${JSONAPI_PORT}`]});
   await waitOn({resources: [`tcp:localhost:${UI_PORT}`]});
@@ -41,13 +39,14 @@ function spawnUI(opts: SpawnOptions) {
   return spawn('launchers/ui', { ...opts, env });
 }
 
-function spawnPopulate(opts: SpawnOptions) {
+function spawnSyncPopulate(opts: SpawnOptions) {
   const r = spawnSync('launchers/populate', opts);
   if (r.error) throw r.error
   if (r.status) throw Error('launchers/populate returned nonzero ' + r.status)
 }
 
 afterAll(async () => {
+  // TODO there may be still some hanging processes.
   if (uiProc) {
     process.kill(-uiProc.pid)
   }
@@ -58,9 +57,6 @@ afterAll(async () => {
     process.kill(-sandboxProc.pid)
   }
   if (browser) {
-    // TODO there are chrome processes hanging after this
-    // occasionally java and node too, so I start the test by
-    // killall chrome java node ; make test
     await browser.close();
   }
 });
