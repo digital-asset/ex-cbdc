@@ -96,8 +96,8 @@ const Customer: React.FC<CustomerProps> = (props) => {
         <h6 className={`${styles.bankText} ${styles._bottomTitle}`}>Bank Account</h6>
       </div>
       <div className={styles.bankList}>
-        <p className={`${styles.bankText} ${styles.bankListItem} test-alice-balance-normal`}>{balanceUsd}</p>
-        <p className={`${styles.bankText} ${styles.bankListItem} test-alice-balance-stimulus`}>{balanceUsd_S}</p>
+        <p className={`${styles.bankText} ${styles.bankListItem}`} id='test-alice-balance-normal'>{balanceUsd}</p>
+        <p className={`${styles.bankText} ${styles.bankListItem}`} id='test-alice-balance-stimulus'>{balanceUsd_S}</p>
       </div>
       <div className={styles.bankTriangle} />
       {isError
