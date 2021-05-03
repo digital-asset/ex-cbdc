@@ -27,8 +27,7 @@ beforeAll(async () => {
   sandboxProc = spawn('launchers/sandbox', launcherOpts);
   jsonapiProc = spawn('launchers/jsonapi', launcherOpts);
   uiProc = spawnUI(commonOpts);
-
-  spawnSync('launchers/populate', launcherOpts);
+  spawnPopulate(launcherOpts);
 
   await waitOn({resources: [`tcp:localhost:${JSONAPI_PORT}`]});
   await waitOn({resources: [`tcp:localhost:${UI_PORT}`]});
@@ -36,12 +35,18 @@ beforeAll(async () => {
   browser = await puppeteer.launch();
 }, 60_000);
 
-function spawnUI(launcherOpts: SpawnOptions) {
+function spawnUI(opts: SpawnOptions) {
   // Disable automatically opening a browser using the env var described here:
   // https://github.com/facebook/create-react-app/issues/873#issuecomment-266318338
   const env = {...process.env, BROWSER: 'none'};
-  return spawn('npm', ['run-script', 'start'], { ...launcherOpts, env });
+  return spawn('npm', ['run-script', 'start'], { ...opts, env });
   // TODO ^^ make sure npm-cli.js is in the PATH, or just run npm???
+}
+
+function spawnPopulate(opts: SpawnOptions) {
+  const r = spawnSync('launchers/populate', opts);
+  if (r.error) throw r.error
+  if (r.status) throw Error('launchers/populate returned nonzero ' + r.status)
 }
 
 afterAll(async () => {
