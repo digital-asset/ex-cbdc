@@ -63,19 +63,19 @@ afterAll(async () => {
 
 test('Alice pays rent with stimulus money', async () => {
   const page = await newLandlordPage();
-  await expectContent(page, '.test-alice-balance-normal', '0 USD');
-  await expectContent(page, '.test-alice-balance-stimulus', '0 USD-S');
+  await expectContent(page, '#test-alice-balance-normal', '0 USD');
+  await expectContent(page, '#test-alice-balance-stimulus', '0 USD-S');
 
   await issueStimulus(page, 200)
 
-  await expectContent(page, '.test-alice-balance-stimulus', '200 USD-S');
+  await expectContent(page, '#test-alice-balance-stimulus', '200 USD-S');
 
   await issueInvoice(page, 50)
 
   await payInvoice(page)
 
-  await expectContent(page, '.test-alice-balance-normal', '0 USD');
-  await expectContent(page, '.test-alice-balance-stimulus', '150 USD-S');
+  await expectContent(page, '#test-alice-balance-normal', '0 USD');
+  await expectContent(page, '#test-alice-balance-stimulus', '150 USD-S');
 }, 60_000);
 
 async function newLandlordPage(): Promise<Page> {
