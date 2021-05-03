@@ -21,12 +21,11 @@ beforeAll(async () => {
   // Note(kill-npm-start): The `detached` flag starts the process in a new process group.
   // This allows us to kill the process with all its descendents after the tests finish,
   // following https://azimi.me/2014/12/31/kill-child_process-node-js.html.
-  const commonOpts: SpawnOptions = { stdio: 'inherit', detached: true};
-  const launcherOpts = { ...commonOpts, cwd: '..'}
+  const launcherOpts: SpawnOptions = { stdio: 'inherit', detached: true, cwd: '..' };
 
   sandboxProc = spawn('launchers/sandbox', launcherOpts);
   jsonapiProc = spawn('launchers/jsonapi', launcherOpts);
-  uiProc = spawnUI(commonOpts);
+  uiProc = spawnUI(launcherOpts);
   spawnPopulate(launcherOpts);
 
   await waitOn({resources: [`tcp:localhost:${JSONAPI_PORT}`]});
@@ -39,8 +38,7 @@ function spawnUI(opts: SpawnOptions) {
   // Disable automatically opening a browser using the env var described here:
   // https://github.com/facebook/create-react-app/issues/873#issuecomment-266318338
   const env = {...process.env, BROWSER: 'none'};
-  return spawn('npm', ['run-script', 'start'], { ...opts, env });
-  // TODO ^^ make sure npm-cli.js is in the PATH, or just run npm???
+  return spawn('launchers/ui', { ...opts, env });
 }
 
 function spawnPopulate(opts: SpawnOptions) {
