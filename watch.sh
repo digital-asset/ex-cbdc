@@ -4,6 +4,9 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
+# TODO optionally use fswatch to further reduce CPU load
+# which is already negligable on an average developer box
+
 while true
 do
   sleep 1
