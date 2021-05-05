@@ -48,6 +48,10 @@ jobs:
       - install_sdk:
           version: << parameters.daml_sdk_version >>
       - run:
+          name: License check
+          command: |
+            mvn license:check
+      - run:
           name: Build Daml
           command: |
             make build-dars -j3
