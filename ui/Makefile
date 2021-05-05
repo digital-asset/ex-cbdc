@@ -13,9 +13,9 @@ DARS=../banking/.daml/dist/banking-1.0.0.dar\
 
 JS_CODEGEN_DIR=daml.js
 
-build: codegen npminstall eslint
+build: codegen npminstall
 
-test: build
+test: build eslint
 	npm test -- --watchAll=false
 
 clean:
