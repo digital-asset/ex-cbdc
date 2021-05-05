@@ -15,9 +15,6 @@ clean:
 check-license:
 	mvn license:check
 
-update-license:
-	mvn license:format
-
 build-dars: lib-damldir certificates-damldir finance-damldir banking-damldir demoadmin-damldir landlord-damldir testing-damldir triggers-damldir reset-damldir
 
 include scripts/dependencies.mk
