@@ -11,6 +11,7 @@ clean:
 	rm -rf */.daml/
 	rm -rf target/
 	$(MAKE) clean -C ui
+	$(RM) $(DAR_DEPENDENCY_GRAPH)
 
 check-license:
 	mvn license:check
@@ -20,7 +21,10 @@ update-license:
 
 build-dars: lib-damldir certificates-damldir finance-damldir banking-damldir demoadmin-damldir landlord-damldir testing-damldir triggers-damldir reset-damldir
 
-include scripts/dependencies.mk
+DAR_DEPENDENCY_GRAPH=dependencies.mk
+include $(DAR_DEPENDENCY_GRAPH)
+$(DAR_DEPENDENCY_GRAPH): $(shell find -name daml.yaml)
+	scripts/makeDeps.sh > $@
 
 %-damldir:
 	$(MAKE) -C $*
