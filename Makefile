@@ -21,6 +21,8 @@ update-license:
 
 build-dars: lib-damldir certificates-damldir finance-damldir banking-damldir demoadmin-damldir landlord-damldir testing-damldir triggers-damldir reset-damldir
 
+# re-builds and re-reads the dependency graph as needed
+# (see https://www.gnu.org/software/make/manual/html_node/Remaking-Makefiles.html)
 DAR_DEPENDENCY_GRAPH=dependencies.mk
 include $(DAR_DEPENDENCY_GRAPH)
 $(DAR_DEPENDENCY_GRAPH): $(shell find -name daml.yaml)
