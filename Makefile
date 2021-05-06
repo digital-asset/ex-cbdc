@@ -21,7 +21,7 @@ update-license:
 
 # e.g. banking certificates ...
 # supposing a flat directory structure for simplicity
-DAML_DIRS=$(shell echo */daml.yaml | sed s|/daml.yaml||g)
+DAML_DIRS=$(shell echo */daml.yaml | sed 's|/daml.yaml||g')
 
 # e.g. banking-damldir certificates-damldir ...
 PHONY_DAR_BUILD_TARGETS=$(DAML_DIRS:=-damldir)
