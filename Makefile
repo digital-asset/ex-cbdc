@@ -16,9 +16,6 @@ clean:
 check-license:
 	mvn license:check
 
-update-license:
-	mvn license:format
-
 # e.g. banking certificates ...
 # supposing a flat directory structure for simplicity
 DAML_DIRS=$(shell echo */daml.yaml | sed 's|/daml.yaml||g')
