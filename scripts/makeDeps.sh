@@ -4,14 +4,14 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-# Usage:  scripts/makeDeps.sh > scripts/dependencies.mk
+# Usage:  scripts/makeDeps.sh [Daml_project_dirs...] > scripts/dependencies.mk
 
 function darFileToMakeTarget() {
   sed "s|\.\./.*/.daml/dist/\(.*\)-1.0.0.dar|\1-damldir|"
 }
 
 echo "# This file was generated with: $0 $*"
-for i in lib certificates finance banking demoadmin landlord testing triggers reset
+for i in $*
 do
   echo -n "$i-damldir: "
   # Echoing a variable is needed, otherwise the output is wrong on macOS (missing the newline for empty dependencies).
