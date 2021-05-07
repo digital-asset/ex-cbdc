@@ -58,6 +58,7 @@ jobs:
             - daml-{{ checksum "daml.yaml" }}
       - install_sdk:
           version: << parameters.daml_sdk_version >>
+      - install_yq
       - run:
           name: License check
           command: |
