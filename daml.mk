@@ -1,3 +1,8 @@
+#
+# Copyright (c) 2021, Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+#
+
 comma := ,
 daml ?= daml
 rdars := $(shell scripts/getDamlProjects.sh)
