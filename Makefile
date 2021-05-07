@@ -10,6 +10,7 @@ test: test-dars test-ui check-license
 clean:
 	rm -rf */.daml/
 	rm -rf target/
+	rm -rf ui/daml.js
 	$(MAKE) clean -C ui
 
 check-license:

@@ -3,43 +3,23 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-DARS=../banking/.daml/dist/banking-1.0.0.dar\
-		 ../certificates/.daml/dist/certificates-1.0.0.dar\
-		 ../demoadmin/.daml/dist/demoadmin-1.0.0.dar\
-		 ../finance/.daml/dist/finance-1.0.0.dar\
-		 ../landlord/.daml/dist/landlord-1.0.0.dar\
-		 ../lib/.daml/dist/lib-1.0.0.dar\
-		 ../reset/.daml/dist/reset-1.0.0.dar
-
-JS_CODEGEN_DIR=daml.js
-
-build: codegen npminstall
+build: npminstall
 
 test: build eslint
 	npm test -- --watchAll=false
 
 clean:
-	rm -rf $(JS_CODEGEN_DIR)
 	rm -rf node_modules
 	rm -f cbdc-ui.zip
 	rm -rf build
 
-### JS Codegen ###
-
-JS_CODEGEN_ARTIFACT=$(JS_CODEGEN_DIR)/landlord-1.0.0/package.json
-
-codegen: $(JS_CODEGEN_ARTIFACT)
-
-$(JS_CODEGEN_ARTIFACT): $(DARS)
-	daml codegen js -o $(JS_CODEGEN_DIR) $^
-
-### UI Install ###
+JS_CODEGEN_ARTIFACT=daml.js/landlord-1.0.0/package.json
 
 UI_INSTALL_ARTIFACT=node_modules
 
 npminstall: $(UI_INSTALL_ARTIFACT)
 
-package-lock.json: $(JS_CODEGEN_ARTIFACT)
+package-lock.json: package.json
 	npm install
 
 $(UI_INSTALL_ARTIFACT): package.json package-lock.json $(JS_CODEGEN_ARTIFACT)
