@@ -11,6 +11,10 @@ jsdars := $(patsubst %$(comma)js,%,$(filter %$(comma)js,$(rdars)))
 project-root = $(patsubst %/.daml/dist,%,$(@D))
 phony-test-targets := $(patsubst %,%-phony-test-target,$(dars))
 
+ifneq ($(.SHELLSTATUS),0)
+  $(error shell command failed)
+endif
+
 .PHONY: build-dars
 build-dars: $(dars)
 
