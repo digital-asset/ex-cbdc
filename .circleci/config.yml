@@ -33,6 +33,17 @@ commands:
           fail_only: true
           only_for_branches: main
           webhook: '${SLACK_WEBHOOK}'
+  install_yq:
+    description: "Install yq"
+    steps:
+      - run:
+          name: Install pip3
+          command: |
+            sudo apt-get install python3-pip
+      - run:
+          name: Install yq with pip3
+          command: |
+            pip3 install yq
 
 jobs:
   daml_test:
@@ -87,6 +98,7 @@ jobs:
             sudo apt install libnss3
       - install_sdk:
           version: << parameters.daml_sdk_version >>
+      - install_yq
       - run:
           name: UI install dependencies
           command: |
