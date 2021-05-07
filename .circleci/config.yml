@@ -132,6 +132,7 @@ jobs:
             - m2
       - install_sdk:
           version: << parameters.daml_sdk_version >>
+      - install_yq
       - save_cache:
           paths:
             - ~/.m2
