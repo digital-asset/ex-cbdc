@@ -35,7 +35,6 @@
                         <exclude>**/Pipfile*</exclude>
                         <exclude>venv/**</exclude>
                         <exclude>**/*.txt</exclude>
-                        <exclude>dependencies.mk</exclude>
                     </excludes>
                     <mapping>
                         <daml>DOUBLEDASHES_STYLE</daml>

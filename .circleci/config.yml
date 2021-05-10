@@ -33,6 +33,27 @@ commands:
           fail_only: true
           only_for_branches: main
           webhook: '${SLACK_WEBHOOK}'
+  install_yq:
+    description: "Install yq"
+    steps:
+      - run:
+          name: Install pip3
+          command: |
+            sudo apt-get update || sudo apt-get update
+            sudo apt-get install python3-pip
+      - run:
+          name: Install yq with pip3
+          command: |
+            pip3 install yq
+  install_prerequisities:
+    description: "Install all prerequisities"
+    parameters:
+      daml_sdk_version:
+        type: string
+    steps:
+      - install_sdk:
+          version: << parameters.daml_sdk_version >>
+      - install_yq
 
 jobs:
   daml_test:
@@ -45,8 +66,8 @@ jobs:
       - restore_cache:
           keys:
             - daml-{{ checksum "daml.yaml" }}
-      - install_sdk:
-          version: << parameters.daml_sdk_version >>
+      - install_prerequisities:
+          daml_sdk_version: << parameters.daml_sdk_version >>
       - run:
           name: License check
           command: |
@@ -69,7 +90,6 @@ jobs:
           path: target/daml-test-reports
       - slack_notification
 
-
   ui_test:
     parameters:
       daml_sdk_version:
@@ -85,8 +105,8 @@ jobs:
           command: |
             sudo apt-get update || sudo apt-get update
             sudo apt install libnss3
-      - install_sdk:
-          version: << parameters.daml_sdk_version >>
+      - install_prerequisities:
+          daml_sdk_version: << parameters.daml_sdk_version >>
       - run:
           name: UI install dependencies
           command: |
@@ -118,8 +138,8 @@ jobs:
           keys:
             - m2-{{ checksum "pom.xml" }}-{{ checksum "daml.yaml" }}
             - m2
-      - install_sdk:
-          version: << parameters.daml_sdk_version >>
+      - install_prerequisities:
+          daml_sdk_version: << parameters.daml_sdk_version >>
       - save_cache:
           paths:
             - ~/.m2
