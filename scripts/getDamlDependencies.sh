@@ -7,7 +7,7 @@
 set -euo pipefail
 
 function getDependencyLinesWithProperErrorHandling() {
-  grep -E '^  - .*/.daml/dist/.*dar$' "$project_dir"/daml.yam
+  grep -E '^  - .*/.daml/dist/.*dar$' "$project_dir"/daml.yaml
   # grep returns 1 if no lines were selected, 2 on error :-(
   if [ $? = 2 ]
   then
