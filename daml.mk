@@ -27,7 +27,8 @@ ui/daml.js: $(jsdars)
 
 .PHONY: $(phony-test-targets)
 $(phony-test-targets): build-dars
-	$(daml) test --project-root $(project-root) --junit $(PWD)/target/$(@F).xml
+	@# TODO remove $(PWD)/ when resolved: https://github.com/digital-asset/daml/issues/9646
+	DAML_PROJECT=$(project-root) $(daml) test --junit $(PWD)/target/daml-test-reports/$(@F).xml
 
 .SECONDEXPANSION:
 $(dars): $$(shell scripts/getDamlDependencies.sh $$(project-root))
