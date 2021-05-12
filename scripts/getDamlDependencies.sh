@@ -20,7 +20,7 @@ function getDependencyLinesWithProperErrorHandling() {
 project_dir="$1"
 # yq would be more reliable, but 5-10x slower
 deps=$( getDependencyLinesWithProperErrorHandling | sed "s|^  - |$project_dir/|" )
-[ -n "$deps" ] && realpath -m --relative-to="${PWD}" ${deps}
+[ -n "${deps}" ] && realpath -m --relative-to="${PWD}" ${deps}
 
 # TODO - this should be using the source field from daml.yaml
 echo "$project_dir"/daml.yaml
