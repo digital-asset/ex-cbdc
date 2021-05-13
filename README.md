@@ -38,7 +38,7 @@ The demo shows how Daml supports core features of CBDC, addressing these key req
 - Node v14
 - [yq](https://pypi.org/project/yq/)
 - [jq](https://stedolan.github.io/jq/download/)
-- [realpath] (https://www.gnu.org/software/coreutils/)
+- [realpath](https://www.gnu.org/software/coreutils/)
 - Mvn (optional, for running the tests)
 
 ### Starting the App
