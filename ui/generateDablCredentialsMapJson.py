@@ -15,11 +15,14 @@ if len(sys.argv) < 2:
 ledger_id = sys.argv[1]
 ledger_api_url = "https://api.projectdabl.com/data/{}".format(ledger_id)
 
+
 def invert(dictionary):
     return {v: k for k, v in dictionary.items()}
 
+
 def capitalizeFirst(string):
     return string[0].upper() + string[1:]
+
 
 def get_credentials(party, parties, partyIds):
     return capitalizeFirst(party), {
