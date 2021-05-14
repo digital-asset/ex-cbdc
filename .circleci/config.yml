@@ -109,7 +109,7 @@ jobs:
           name: Python flake8
           command: |
             flake8 --max-line-length=120 $(find -name \*.py)
-       - run:
+      - run:
           name: Install libnss3 for Chrome
           command: |
             sudo apt-get update || sudo apt-get update
