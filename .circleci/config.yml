@@ -101,6 +101,15 @@ jobs:
           keys:
             - daml-{{ checksum "daml.yaml" }}
       - run:
+          name: Install flake8
+          command: |
+            sudo apt-get update || sudo apt-get update
+            sudo apt-get install flake8
+      - run:
+          name: Python flake8
+          command: |
+            flake8 --max-line-length=120 $(find -name \*.py)
+      - run:
           name: Install libnss3 for Chrome
           command: |
             sudo apt-get update || sudo apt-get update

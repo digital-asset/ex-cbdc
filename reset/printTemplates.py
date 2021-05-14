@@ -5,8 +5,9 @@
 #
 
 
-from textops import *
+from textops import cat, grep, find
 import re
+import sys
 
 
 # example line to parse into (package, module, template) triple:
