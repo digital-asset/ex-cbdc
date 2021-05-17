@@ -175,7 +175,7 @@ jobs:
             bash <(curl -s https://raw.githubusercontent.com/DACH-NY/security-blackduck/master/synopsys-detect) \
             ci-build digitalasset_ex-cbdc main \
             --logging.level.com.synopsys.integration=DEBUG \
-            --detect.python.python3=true \
+            --detect.python.path="$(which python3)" \
             --detect.pipenv.path="$(which pipenv)" \
             --detect.notices.report=true \
             --detect.timeout=3600
