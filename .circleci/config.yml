@@ -67,7 +67,7 @@ jobs:
       - restore_cache:
           keys:
             - daml-{{ checksum "daml.yaml" }}
-      - install_prerequisities:
+      - install_prerequisites:
           daml_sdk_version: << parameters.daml_sdk_version >>
       - run:
           name: License check
@@ -115,7 +115,7 @@ jobs:
           command: |
             sudo apt-get update || sudo apt-get update
             sudo apt install libnss3
-      - install_prerequisities:
+      - install_prerequisites:
           daml_sdk_version: << parameters.daml_sdk_version >>
       - run:
           name: UI install dependencies
@@ -148,7 +148,7 @@ jobs:
           keys:
             - m2-{{ checksum "pom.xml" }}-{{ checksum "daml.yaml" }}
             - m2
-      - install_prerequisities:
+      - install_prerequisites:
           daml_sdk_version: << parameters.daml_sdk_version >>
       - save_cache:
           paths:
