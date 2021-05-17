@@ -37,12 +37,13 @@ commands:
     description: "Install yq"
     steps:
       - run:
-          name: Install pip3
+          name: Install pipenv
           command: |
             sudo apt-get update || sudo apt-get update
             sudo apt-get install python3-pip
+            pip3 install pipenv
       - run:
-          name: Install yq with pip3
+          name: Install yq
           command: |
             pip3 install yq
   install_prerequisites:
@@ -174,6 +175,7 @@ jobs:
             bash <(curl -s https://raw.githubusercontent.com/DACH-NY/security-blackduck/master/synopsys-detect) \
             ci-build digitalasset_ex-cbdc main \
             --logging.level.com.synopsys.integration=DEBUG \
+            --detect.pipenv.path="$(which pipenv)" \
             --detect.notices.report=true \
             --detect.timeout=3600
       - run:
