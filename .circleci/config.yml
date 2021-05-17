@@ -45,8 +45,8 @@ commands:
           name: Install yq with pip3
           command: |
             pip3 install yq
-  install_prerequisities:
-    description: "Install all prerequisities"
+  install_prerequisites:
+    description: "Install all prerequisites"
     parameters:
       daml_sdk_version:
         type: string
