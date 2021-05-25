@@ -5,7 +5,8 @@
 
 build: npminstall
 
-test: build eslint
+test: build
+	npm run-script lint -- --max-warnings 0
 	npm test -- --watchAll=false
 
 clean:
@@ -25,9 +26,6 @@ package-lock.json: package.json
 $(UI_INSTALL_ARTIFACT): package.json package-lock.json $(JS_CODEGEN_ARTIFACT)
 	npm install
 	touch $(UI_INSTALL_ARTIFACT)
-
-eslint: npminstall
-	npm run-script lint -- --max-warnings 0
 
 daml-hub-package: dabl-parties.json cbdc-ui.zip
 
