@@ -24,8 +24,8 @@ export const handleAcceptPvpProposal = async (
     if (pvpProposal === undefined) {
       throw new Error("No PvP proposal.");
     }
-    // @ts-ignore
     const incomingPaymentCashLabel =
+      // @ts-ignore
       pvpProposal?.payload.dvp.payments[0].id.label;
     const incomingCb = getPartyId(
       incomingPaymentCashLabel === Currency.USD
@@ -39,8 +39,8 @@ export const handleAcceptPvpProposal = async (
         )
         .map((asRule) => asRule.payload.account)
     );
-    // @ts-ignore
     const outgoingPaymentCashLabel =
+      // @ts-ignore
       pvpProposal.payload.dvp.deliveries[0].id.label;
     const outgoingCb = getPartyId(
       outgoingPaymentCashLabel === Currency.USD
