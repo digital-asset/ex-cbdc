@@ -6,6 +6,7 @@
 build: npminstall
 
 test: build
+	npx prettier --check .
 	npm run-script lint -- --max-warnings 0
 	npm test -- --watchAll=false
 
