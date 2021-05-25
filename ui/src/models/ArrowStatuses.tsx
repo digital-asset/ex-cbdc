@@ -3,16 +3,16 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import {ProposeStatusType} from "./ProposePvpModel";
+import { ProposeStatusType } from "./ProposePvpModel";
 
 type statuses = {
-    SUCCESS:string,
-    FAIL:string
-}
+  SUCCESS: string;
+  FAIL: string;
+};
 
-export const arrowStatusesType:statuses = {
-    SUCCESS:"SUCCESS",
-    FAIL:"FAIL"
-}
-const {ACCEPTED, AWAIT_ALLOCATION, SETTLED} = ProposeStatusType
-export const boxesAllowedStatuses = [ACCEPTED, AWAIT_ALLOCATION, SETTLED]
+export const arrowStatusesType: statuses = {
+  SUCCESS: "SUCCESS",
+  FAIL: "FAIL",
+};
+const { ACCEPTED, AWAIT_ALLOCATION, SETTLED } = ProposeStatusType;
+export const boxesAllowedStatuses = [ACCEPTED, AWAIT_ALLOCATION, SETTLED];

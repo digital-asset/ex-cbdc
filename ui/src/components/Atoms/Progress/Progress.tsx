@@ -3,25 +3,23 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import React from 'react';
-import styles from './Progress.module.css';
-import {Styles} from "../../../models/Styles";
+import React from "react";
+import styles from "./Progress.module.css";
+import { Styles } from "../../../models/Styles";
 
 type ProgressProps = {
-  containerStyles?: Styles,
-}
+  containerStyles?: Styles;
+};
 
 const Progress: React.FC<ProgressProps> = (props) => {
-  const {
-    containerStyles = ''
-  } = props;
+  const { containerStyles = "" } = props;
 
-    return (
-        <div className={`${styles.progress} ${containerStyles}`}>
-            <div className={styles.progressLine} />
-            <div className={`${styles.progressLine} ${styles._second}`} />
-        </div>
-    )
-}
+  return (
+    <div className={`${styles.progress} ${containerStyles}`}>
+      <div className={styles.progressLine} />
+      <div className={`${styles.progressLine} ${styles._second}`} />
+    </div>
+  );
+};
 
 export default Progress;

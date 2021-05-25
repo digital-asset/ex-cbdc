@@ -2,90 +2,90 @@
  * Copyright (c) 2021, Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
-.container{
-    position: absolute;
-    z-index: 1000;
-    top:75px;
-    left: 540px;
-    transform-origin: 0 0;
+.container {
+  position: absolute;
+  z-index: 1000;
+  top: 75px;
+  left: 540px;
+  transform-origin: 0 0;
 }
-.titleImage{
-    width: 42px;
-    height: 42px;
-    position: relative;
-    bottom: 65px;
-    left: -22px;
-    cursor: pointer;
-    margin: unset;
-    padding: unset;
+.titleImage {
+  width: 42px;
+  height: 42px;
+  position: relative;
+  bottom: 65px;
+  left: -22px;
+  cursor: pointer;
+  margin: unset;
+  padding: unset;
 }
 .listContainer {
-    background: #ffffff;
-    position: relative;
-    top:-47px;
-    box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.5);
-    border: solid 1px #a7f6ff;
+  background: #ffffff;
+  position: relative;
+  top: -47px;
+  box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.5);
+  border: solid 1px #a7f6ff;
 }
-.contentContainer{
-    padding: 20px 20px 16px 20px;
-    width: 479px;
-    height: max-content;
-    /*display: flex;*/
+.contentContainer {
+  padding: 20px 20px 16px 20px;
+  width: 479px;
+  height: max-content;
+  /*display: flex;*/
 }
-.textMain{
-    font-weight: normal;
-    font-size: 12px;
-    font-family: Brown;
+.textMain {
+  font-weight: normal;
+  font-size: 12px;
+  font-family: Brown;
 }
-._title{
-    text-align: center;
-    padding-bottom: 18px;
-    border-bottom: solid 1px #232f40;
-    font-weight: bold;
-    font-family: Brown-Bold;
+._title {
+  text-align: center;
+  padding-bottom: 18px;
+  border-bottom: solid 1px #232f40;
+  font-weight: bold;
+  font-family: Brown-Bold;
 }
-._subtitle{
-    margin-top:18px;
-    margin-bottom: 12px;
-    font-family: Brown-Bold;
+._subtitle {
+  margin-top: 18px;
+  margin-bottom: 12px;
+  font-family: Brown-Bold;
 }
-h2, h3{
-    margin: unset;
-    padding: unset;
+h2,
+h3 {
+  margin: unset;
+  padding: unset;
 }
-.itemContainer{
-    position: relative;
-
+.itemContainer {
+  position: relative;
 }
-.itemImg{
-    position: absolute;
-    width: 30px;
-    height: 30px;
+.itemImg {
+  position: absolute;
+  width: 30px;
+  height: 30px;
 }
-._hintItemText{
-    display: block;
-    margin-left: 43px;
-    margin-bottom: 20px;
-    word-wrap:break-word;
+._hintItemText {
+  display: block;
+  margin-left: 43px;
+  margin-bottom: 20px;
+  word-wrap: break-word;
 }
 
 .triangle {
-    position: absolute;
-    top:-30px;
-    bottom: -1px;
-    left: -1px;
-    width: 0;
-    height: 0;
-    border-bottom: 30px solid #a7f6ff;
-    border-right: 25px solid transparent;
+  position: absolute;
+  top: -30px;
+  bottom: -1px;
+  left: -1px;
+  width: 0;
+  height: 0;
+  border-bottom: 30px solid #a7f6ff;
+  border-right: 25px solid transparent;
 }
 
 .triangle::after {
-    content: "";
-    position: absolute;
-    top:2px;
-    width: 0;
-    height: 0;
-    border-bottom: 28px solid #fff;
-    border-right: 23px solid transparent;
+  content: "";
+  position: absolute;
+  top: 2px;
+  width: 0;
+  height: 0;
+  border-bottom: 28px solid #fff;
+  border-right: 23px solid transparent;
 }

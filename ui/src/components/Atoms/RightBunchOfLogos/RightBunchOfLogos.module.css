@@ -14,28 +14,28 @@
 /*    top:150px;*/
 /*    left: 870px;*/
 /*}*/
-.azureLogo{
-    position: absolute;
-    left: 75px;
-    top:155px
+.azureLogo {
+  position: absolute;
+  left: 75px;
+  top: 155px;
 }
-.ethereum{
-    position: absolute;
-    left: 220px;
-    top:25px
+.ethereum {
+  position: absolute;
+  left: 220px;
+  top: 25px;
 }
-.twoPointsRight{
-    position: absolute;
-    left: 131px;
-    top:90px;
+.twoPointsRight {
+  position: absolute;
+  left: 131px;
+  top: 90px;
 }
-.damlLogo{
-    position: absolute;
-    left: 20px;
-    top:45px
+.damlLogo {
+  position: absolute;
+  left: 20px;
+  top: 45px;
 }
-.threePointRight{
-    position: absolute;
-    left: 110px;
-    top:50px
+.threePointRight {
+  position: absolute;
+  left: 110px;
+  top: 50px;
 }

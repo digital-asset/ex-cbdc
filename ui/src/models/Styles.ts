@@ -3,6 +3,8 @@
 /// SPDX-License-Identifier: Apache-2.0
 ///
 
-export type Styles = {
-    [key: string]: string
-} | string
+export type Styles =
+  | {
+      [key: string]: string;
+    }
+  | string;

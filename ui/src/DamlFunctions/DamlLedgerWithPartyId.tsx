@@ -7,7 +7,6 @@ import DamlLedger from "@daml/react";
 import React from "react";
 import { Credentials } from "../models/CredentialsType";
 
-
 export function DamlLedgerWithPartyId(props: Credentials) {
-    return <DamlLedger {...props} party={props.partyId.asString()} />
+  return <DamlLedger {...props} party={props.partyId.asString()} />;
 }

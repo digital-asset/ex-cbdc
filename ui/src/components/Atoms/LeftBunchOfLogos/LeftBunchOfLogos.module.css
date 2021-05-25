@@ -2,42 +2,42 @@
  * Copyright (c) 2021, Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
-.damlLogoLeft{
-    position: absolute;
-    top:40px;
-    left:130px
+.damlLogoLeft {
+  position: absolute;
+  top: 40px;
+  left: 130px;
 }
 
-.ibmLogo{
-    position: absolute;
-    bottom: 10px;
+.ibmLogo {
+  position: absolute;
+  bottom: 10px;
 }
 
-.fabricLogo{
-    position: absolute;
-    bottom: 80px;
-    left:-140px
+.fabricLogo {
+  position: absolute;
+  bottom: 80px;
+  left: -140px;
 }
 
-.damlLeftArrow{
-    position: relative;
-    right: 30px;
+.damlLeftArrow {
+  position: relative;
+  right: 30px;
 }
 
-.damlRightArrow{
-    position: relative;
-    top:10px;
-    left: 40px;
+.damlRightArrow {
+  position: relative;
+  top: 10px;
+  left: 40px;
 }
 
-.threePointLeft{
-    position: absolute;
-    left: 20px;
-    top:50%;
-    transform: translateY(-50%);
+.threePointLeft {
+  position: absolute;
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
 }
-.twoPointsLeft{
-    position: absolute;
-    left: 20px;
-    top:84px;
+.twoPointsLeft {
+  position: absolute;
+  left: 20px;
+  top: 84px;
 }

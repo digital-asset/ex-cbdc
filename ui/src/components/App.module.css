@@ -13,14 +13,12 @@
 
 .routeWrapper > div {
   position: absolute;
-
 }
-.appWrapper{
+.appWrapper {
   width: 100vw;
   height: 100vh;
-  background: rgb(35,47,64);
+  background: rgb(35, 47, 64);
 }
-.secondBackground{
-  background: rgb(29,43,62)
+.secondBackground {
+  background: rgb(29, 43, 62);
 }
-

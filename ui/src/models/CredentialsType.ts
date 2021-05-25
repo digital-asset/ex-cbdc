@@ -10,16 +10,16 @@ export class PartyId {
     this.value = value;
   }
 
-  static from(value: string) : PartyId {
-    return new PartyId(value)
+  static from(value: string): PartyId {
+    return new PartyId(value);
   }
 
-  asString() : string {
-    return this.value
+  asString(): string {
+    return this.value;
   }
 
-  equals(partyId: PartyId) : boolean {
-    return this.value === partyId.value
+  equals(partyId: PartyId): boolean {
+    return this.value === partyId.value;
   }
 }
 
@@ -29,4 +29,4 @@ export type Credentials = {
   ledgerId: string;
   httpBaseUrl: string;
   //wsBaseUrl: string;
-}
+};

@@ -116,9 +116,9 @@
 .atomicLogo {
   z-index: 10;
   position: absolute;
-  left:50%;
+  left: 50%;
   transform: translateX(-50%);
-  top:167px;
+  top: 167px;
 }
 
 .invoiceContainer {
@@ -158,11 +158,11 @@
 /*  top: 90px;*/
 /*  left: -215px;*/
 /*}*/
-.certificateImg{
+.certificateImg {
   margin-right: 4px;
   margin-left: 5px;
   position: relative;
-  top:2px
+  top: 2px;
 }
 .block {
   width: 2px;
@@ -174,18 +174,18 @@
   /* dashed border */
   background-image: url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' stroke='%23A7F6FFFF' stroke-width='4' stroke-dasharray='6%2c 14' stroke-dashoffset='0' stroke-linecap='square'/%3e%3c/svg%3e");
 }
-.hintContainer{
+.hintContainer {
   left: 840px;
   transform: rotateY(180deg);
 }
-.hintContentContainer{
+.hintContentContainer {
   transform: scaleX(-1);
   width: 350px;
 }
-.hintImageStyle{
+.hintImageStyle {
   transform: scaleX(-1);
 }
-.textHints{
+.textHints {
   font-weight: normal;
   font-size: 12px;
   font-family: Brown;

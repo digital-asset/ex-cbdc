@@ -2,41 +2,40 @@
  * Copyright (c) 2021, Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
-.container{
-    width: 111px;
-    height: 149px;
-    background: #A7F6FF;
-    font-size: 10px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: space-between;
-    box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.5);
-    position: relative;
-    font-width: bold;
-    padding:15px 12px;
+.container {
+  width: 111px;
+  height: 149px;
+  background: #a7f6ff;
+  font-size: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.5);
+  position: relative;
+  font-width: bold;
+  padding: 15px 12px;
 }
-.text{
-    margin: unset;
-    padding: unset;
-    z-index: 9;
-    text-align: center;
+.text {
+  margin: unset;
+  padding: unset;
+  z-index: 9;
+  text-align: center;
 }
-.image{
-    position: absolute;
-    z-index: 0;
-    overflow:hidden;
-    top:50%;
-    transform: translateY(-50%);
+.image {
+  position: absolute;
+  z-index: 0;
+  overflow: hidden;
+  top: 50%;
+  transform: translateY(-50%);
 }
-._notActiveCContainer{
-    background: rgba(167, 246, 255, 0.5);;
+._notActiveCContainer {
+  background: rgba(167, 246, 255, 0.5);
 }
-._activeBackground{
-    background: #A7F6FF;
-    /*padding: 5px;*/
+._activeBackground {
+  background: #a7f6ff;
+  /*padding: 5px;*/
 }
-._reverse{
-    transform: rotate(180deg) translateY(50%);
-
+._reverse {
+  transform: rotate(180deg) translateY(50%);
 }

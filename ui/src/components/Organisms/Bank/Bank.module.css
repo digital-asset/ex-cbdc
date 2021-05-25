@@ -144,7 +144,7 @@
   min-width: unset !important;
   margin-bottom: 10px;
 }
-.acceptButtons{
+.acceptButtons {
   display: flex;
   align-items: center;
   min-height: 20px;

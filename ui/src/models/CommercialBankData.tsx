@@ -3,8 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-
 export interface CommercialBankData {
-    displayName: string,
-    counterparty: string
+  displayName: string;
+  counterparty: string;
 }
