@@ -3,108 +3,108 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 .content {
-    position: relative;
-    margin: 0 auto;
-    width: 1366px;
-    height: 693px;
-    background-image: url('../../../static/assets/Elements/FullNetworkBackground.png');
-    overflow: hidden;
+  position: relative;
+  margin: 0 auto;
+  width: 1366px;
+  height: 693px;
+  background-image: url("../../../static/assets/Elements/FullNetworkBackground.png");
+  overflow: hidden;
 }
 
 .contentTitle {
-    position: absolute;
-    left: 60px;
-    top: 90px;
-    margin: unset;
-    color: #fff;
-    font-family: Brown-Regular;
-    font-size: 26px;
-    font-weight: normal;
-    letter-spacing: 1.37px;
+  position: absolute;
+  left: 60px;
+  top: 90px;
+  margin: unset;
+  color: #fff;
+  font-family: Brown-Regular;
+  font-size: 26px;
+  font-weight: normal;
+  letter-spacing: 1.37px;
 }
 
 .contentList {
-    position: absolute;
-    left: 60px;
-    bottom: 0px;
+  position: absolute;
+  left: 60px;
+  bottom: 0px;
 }
 
 .contentText {
-    margin: unset;
-    font-size: 20px;
-    font-family: Brown-Regular;
-    line-height: 24px;
-    letter-spacing: 1.1px;
-    color: #fff;
+  margin: unset;
+  font-size: 20px;
+  font-family: Brown-Regular;
+  line-height: 24px;
+  letter-spacing: 1.1px;
+  color: #fff;
 }
 
 .contentImg {
-    position: absolute;
+  position: absolute;
 }
-.link{
-    color:#A7F6FF;
-    position: absolute;
-    font-size: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-padding-left: 35px;
-    margin: unset;
-    /*top: 15px;*/
-    bottom: 0px;
-    font-family: Brown;
+.link {
+  color: #a7f6ff;
+  position: absolute;
+  font-size: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding-left: 35px;
+  margin: unset;
+  /*top: 15px;*/
+  bottom: 0px;
+  font-family: Brown;
 }
 
 ._first {
-    top: 244px;
-    left: 158px;
+  top: 244px;
+  left: 158px;
 }
 
 ._second {
-    top: 7px;
-    left: -215px;
-    opacity: 1;
-    transition:opacity 0.5s linear;
+  top: 7px;
+  left: -215px;
+  opacity: 1;
+  transition: opacity 0.5s linear;
 }
-.hidden{
-    opacity: 0;
+.hidden {
+  opacity: 0;
 }
-.wrapper{
-    width: 100vw;
-    position: relative;
+.wrapper {
+  width: 100vw;
+  position: relative;
 }
-.leftTextContainer{
-    position: absolute;
-    width: max-content;
-    left: 0;
-    top: 120px;
+.leftTextContainer {
+  position: absolute;
+  width: max-content;
+  left: 0;
+  top: 120px;
 }
-.rectangle{
-    position: absolute;
-    left: 0;
-    top:100px;
+.rectangle {
+  position: absolute;
+  left: 0;
+  top: 100px;
 }
-.leftText{
-    position: absolute;
-    top:90px;
-    left:40px;
-    transition:opacity 0.5s linear;
+.leftText {
+  position: absolute;
+  top: 90px;
+  left: 40px;
+  transition: opacity 0.5s linear;
 }
-.rightTextContainer{
-    position: absolute;
-    border: solid red 1px;
-    right: 0;
-    top: 100px;
+.rightTextContainer {
+  position: absolute;
+  border: solid red 1px;
+  right: 0;
+  top: 100px;
 }
-.rectangleRight{
-    position: absolute;
-    transform: scaleX(-1);
-    right: 0;
-    top:90px;
+.rectangleRight {
+  position: absolute;
+  transform: scaleX(-1);
+  right: 0;
+  top: 90px;
 }
-.rightText{
-    position: absolute;
-    top:150px;
-    right: 63px;
-    z-index: 1000;
-    transition:opacity 0.5s linear;
+.rightText {
+  position: absolute;
+  top: 150px;
+  right: 63px;
+  z-index: 1000;
+  transition: opacity 0.5s linear;
 }

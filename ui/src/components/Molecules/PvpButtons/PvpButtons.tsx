@@ -5,23 +5,27 @@
 
 import React from "react";
 import Button from "../../Atoms/Button";
-import styles from './PvpButtons.module.css'
+import styles from "./PvpButtons.module.css";
 
 interface incomeProps {
-    accept:()=>void,
-    decline:()=>void
+  accept: () => void;
+  decline: () => void;
 }
 
-export const PvpButtons:React.FC<incomeProps> =(props)=>{
-    const {
-        accept,
-        decline
-    }=props
-    return (
-        <div className={styles.container}>
-            <Button label={'Decline'} buttonStyle={`${styles.btnContainer}  ${styles._declineBtn}`} onClick={decline}/>
-            <Button label={"Accept"} buttonStyle={`${styles.btnContainer}`} onClick={accept}/>
-        </div>
-    )
-}
-
+export const PvpButtons: React.FC<incomeProps> = (props) => {
+  const { accept, decline } = props;
+  return (
+    <div className={styles.container}>
+      <Button
+        label={"Decline"}
+        buttonStyle={`${styles.btnContainer}  ${styles._declineBtn}`}
+        onClick={decline}
+      />
+      <Button
+        label={"Accept"}
+        buttonStyle={`${styles.btnContainer}`}
+        onClick={accept}
+      />
+    </div>
+  );
+};

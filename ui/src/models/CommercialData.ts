@@ -4,7 +4,7 @@
 ///
 
 export type CommercialData = {
-    centralBank: string | null,
-    transactionError: boolean | null,
-    list: { label: string, value: string }[],
-}
+  centralBank: string | null;
+  transactionError: boolean | null;
+  list: { label: string; value: string }[];
+};

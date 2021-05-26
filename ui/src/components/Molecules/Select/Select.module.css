@@ -3,46 +3,46 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 .select {
-    position: relative;
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    padding-bottom: 2px;
-    border-bottom: 1px solid #232f40;
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding-bottom: 2px;
+  border-bottom: 1px solid #232f40;
 }
 
 .selectText {
-    margin: unset;
-     font-family: Brown-Bold;
-    font-size: 8px;
-    letter-spacing: 0.09px;
-    align-items: center;
-    color: #28364a;
+  margin: unset;
+  font-family: Brown-Bold;
+  font-size: 8px;
+  letter-spacing: 0.09px;
+  align-items: center;
+  color: #28364a;
 }
 
 .selectTitle {
-    margin-bottom: 6px;
+  margin-bottom: 6px;
 }
 
 .selectLabel {
-    margin: unset;
-    padding: unset;
+  margin: unset;
+  padding: unset;
 }
 
 .dropdownItem {
-    padding: 5px 6px;
-    cursor: pointer;
+  padding: 5px 6px;
+  cursor: pointer;
 }
 
 .dropdownItem:hover {
-    background-color: rgba(167, 246, 255, 0.51);
+  background-color: rgba(167, 246, 255, 0.51);
 }
 
 .dropdownIconStyle {
-    width: 8px;
-    height: 8px;
+  width: 8px;
+  height: 8px;
 }
 
 .dropdownListStyles {
-    width: 100%;
+  width: 100%;
 }

@@ -3,13 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 .transaction {
-    position: absolute;
-    top: 314px;
-    left: 554px;
-    width: 230px;
-    height: 150px;
-    background-size: contain;
+  position: absolute;
+  top: 314px;
+  left: 554px;
+  width: 230px;
+  height: 150px;
+  background-size: contain;
 }
-.transactionImg{
-    width: 242px;
+.transactionImg {
+  width: 242px;
 }
