@@ -3,197 +3,196 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 .bank {
-    position: absolute;
-    bottom: 235px;
-    left: 204px;
-    padding: 13px 0;
-    width: 216px;
-    box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.5);
-    border: solid 1px #a7f6ff;
-    background-color: #fff;
+  position: absolute;
+  bottom: 235px;
+  left: 204px;
+  padding: 13px 0;
+  width: 216px;
+  box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.5);
+  border: solid 1px #a7f6ff;
+  background-color: #fff;
 }
 .bankTop {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 0 20px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 20px;
 }
 .bankBorder {
-    border-bottom: 1px solid #232f40;
+  border-bottom: 1px solid #232f40;
 }
 
 .bankBottom {
-    padding: 0 11px;
-    position: relative;
+  padding: 0 11px;
+  position: relative;
 }
 .arrow {
-    position: absolute;
-    right: 50px;
-    bottom: 21px;
+  position: absolute;
+  right: 50px;
+  bottom: 21px;
 }
 .arrowRotate {
-    transform: rotate(180deg);
+  transform: rotate(180deg);
 }
 
 .bankImgContainer {
-    width: 55px;
-    height: 55px;
+  width: 55px;
+  height: 55px;
 }
 
 .bankImg {
-    width: 100%;
+  width: 100%;
 }
 
 .bankText {
-    text-align: center;
-    text-transform: uppercase;
-    color: #232f40;
-    letter-spacing: 0.23px;
-    font-family: Brown-Bold;
-    font-size: 12px;
+  text-align: center;
+  text-transform: uppercase;
+  color: #232f40;
+  letter-spacing: 0.23px;
+  font-family: Brown-Bold;
+  font-size: 12px;
 }
 
 .bankTriangle {
-    position: absolute;
-    bottom: -1px;
-    left: 100%;
-    width: 0;
-    height: 0;
-    border-bottom: 15px solid #a7f6ff;
-    border-right: 19px solid transparent;
+  position: absolute;
+  bottom: -1px;
+  left: 100%;
+  width: 0;
+  height: 0;
+  border-bottom: 15px solid #a7f6ff;
+  border-right: 19px solid transparent;
 }
 
 .bankTriangle::after {
-    content: "";
-    position: absolute;
-    top: 1px;
-    width: 0;
-    height: 0;
-    border-bottom: 13px solid #fff;
-    border-right: 17px solid transparent;
+  content: "";
+  position: absolute;
+  top: 1px;
+  width: 0;
+  height: 0;
+  border-bottom: 13px solid #fff;
+  border-right: 17px solid transparent;
 }
 
 .bankError {
-    position: absolute;
-    right: -17px;
-    bottom: 23px;
-    width: 34px;
-    height: 34px;
-    background-image: url("../../../static/assets/Icons/Error.svg");
-    background-size: contain;
+  position: absolute;
+  right: -17px;
+  bottom: 23px;
+  width: 34px;
+  height: 34px;
+  background-image: url("../../../static/assets/Icons/Error.svg");
+  background-size: contain;
 }
 .errorBtnContainer {
-    display: flex;
+  display: flex;
 }
 .btnError {
-    width: 15px;
-    margin-right: 5px;
+  width: 15px;
+  margin-right: 5px;
 }
 .errorText {
-    font-size: 8px;
-    display: block;
-    margin: 0 0 0 -2px;
+  font-size: 8px;
+  display: block;
+  margin: 0 0 0 -2px;
 }
 
 /* Dropdown Styles */
 .dropdownStyles {
-    position: absolute;
-    right: 15px;
-    top: 0;
+  position: absolute;
+  right: 15px;
+  top: 0;
 }
 
 .dropdownListStyles {
-    padding: 11px;
+  padding: 11px;
 }
-
 
 /* Button Styles */
 .buttonStyle {
-    width: 100%;
+  width: 100%;
 }
 .buttonStyle + .buttonStyle {
-    margin-top: 6px;
+  margin-top: 6px;
 }
 
 /* Select Styles */
 .selectStyles {
-    margin-top: 13px;
-    margin-bottom: 15px;
+  margin-top: 13px;
+  margin-bottom: 15px;
 }
 
 /* Tranfer Buttin Styles */
 .btnTransferContainer {
-    display: flex;
-    justify-content: center;
-    margin-top: 11px;
+  display: flex;
+  justify-content: center;
+  margin-top: 11px;
 }
 
 .btnTransfer {
-    min-width: unset !important;
+  min-width: unset !important;
 }
 
 /* Modifiers */
 ._centralEu {
-    left: unset;
-    bottom: 303px;
-    right: 210px;
+  left: unset;
+  bottom: 303px;
+  right: 210px;
 }
 ._commercialA {
-    left: unset;
-    bottom: 400px;
-    right: 550px;
+  left: unset;
+  bottom: 400px;
+  right: 550px;
 }
 _commercialB {
-    left: unset;
-    bottom: 240px;
-    right: 150px;
+  left: unset;
+  bottom: 240px;
+  right: 150px;
 }
 ._eu {
-    width: 70px;
+  width: 70px;
 }
 
 ._euTrgl {
-    left: unset;
-    right: 100%;
-    transform: rotateY(180deg);
+  left: unset;
+  right: 100%;
+  transform: rotateY(180deg);
 }
 
 ._topTitle {
-    margin-top: 12px;
-    margin-bottom: 17px;
+  margin-top: 12px;
+  margin-bottom: 17px;
 }
 ._topTitleCommercial {
-    margin-top: 0px;
-    margin-bottom: 0px;
+  margin-top: 0px;
+  margin-bottom: 0px;
 }
 
 ._bottomTitle {
-    margin-top: 16px;
-    margin-bottom: 12px;
+  margin-top: 16px;
+  margin-bottom: 12px;
 }
 
 ._openSelect {
-    background-color: #65d3df !important;
+  background-color: #65d3df !important;
 }
 
 ._inProgress {
-    margin-top: 20px;
+  margin-top: 20px;
 }
 
 ._success {
-    background-image: url("../../../static/assets/Icons/Success.svg");
+  background-image: url("../../../static/assets/Icons/Success.svg");
 }
 
 ._centralBank {
-    bottom: 208px;
-    right: 128px;
-    left: unset;
-    width: 218px;
+  bottom: 208px;
+  right: 128px;
+  left: unset;
+  width: 218px;
 }
-._euTitlePaddings{
-    margin: 21px 0 20px 0;
+._euTitlePaddings {
+  margin: 21px 0 20px 0;
 }
-.test{
-    margin-bottom: 10px;
+.test {
+  margin-bottom: 10px;
 }

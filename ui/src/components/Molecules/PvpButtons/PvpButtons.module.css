@@ -2,21 +2,21 @@
  * Copyright (c) 2021, Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
-.container{
-    display: flex;
-    position: relative;
-    width: 100%;
-    justify-content: space-between;
-    box-sizing: border-box;
+.container {
+  display: flex;
+  position: relative;
+  width: 100%;
+  justify-content: space-between;
+  box-sizing: border-box;
 }
 
 .btnContainer {
-    min-width: 40px;
-    padding: 4px 0 5px;
+  min-width: 40px;
+  padding: 4px 0 5px;
 }
 
 ._declineBtn {
-    background: white;
-    box-sizing: border-box;
-    border:solid #a7f6ff 1px;
+  background: white;
+  box-sizing: border-box;
+  border: solid #a7f6ff 1px;
 }

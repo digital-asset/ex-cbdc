@@ -3,4 +3,4 @@
 /// SPDX-License-Identifier: Apache-2.0
 ///
 
-export { default } from './Modal';
+export { default } from "./Modal";

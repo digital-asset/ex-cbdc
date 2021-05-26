@@ -24,7 +24,7 @@
   display: flex;
 }
 
-.mainFishTitle{
+.mainFishTitle {
   font-size: 28px;
   letter-spacing: 1.48px;
 }
@@ -90,7 +90,6 @@
   position: absolute;
   left: 500px;
   top: 530px;
-
 }
 .damlLeftArrow {
   position: absolute;
@@ -127,26 +126,26 @@
   top: 150px;
   left: 870px;
 }
-.finalScreen{
+.finalScreen {
   position: absolute;
   left: 181px;
   bottom: 0;
 }
 
 /* BlueBoxes */
-.boxesContainer{
+.boxesContainer {
   position: absolute;
   display: flex;
-  top:272px;
+  top: 272px;
   left: 564px;
 }
 /*Hints*/
-.textHints{
+.textHints {
   font-weight: normal;
   font-size: 12px;
   font-family: Brown;
 }
-.additionalHintsContainer{
+.additionalHintsContainer {
   display: flex;
   flex-direction: column;
   align-items: center;

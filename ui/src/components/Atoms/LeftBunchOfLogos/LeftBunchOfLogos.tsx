@@ -10,12 +10,17 @@ import damlLogo from "../../../static/assets/Logos/DAML_Logo.svg";
 import ThreePointLeft from "../../../static/assets/Elements/Slides_Three_Node_Network_Left.svg";
 import React from "react";
 
-export const LeftBunchOfLogos =()=>{
-
-    return (<>
-        <img src={Hyperledger_Fabric_Logo} className={styles.fabricLogo} alt={"#"} />
-        <img src={IBM_Cloud_Logo} className={styles.ibmLogo} alt={"#"}/>
-        <img src={damlLogo} className={styles.damlLogoLeft} alt={"#"}/>
-        <img src={ThreePointLeft} className={styles.threePointLeft} alt={"#"}/>
-    </>)
-}
+export const LeftBunchOfLogos = () => {
+  return (
+    <>
+      <img
+        src={Hyperledger_Fabric_Logo}
+        className={styles.fabricLogo}
+        alt={"#"}
+      />
+      <img src={IBM_Cloud_Logo} className={styles.ibmLogo} alt={"#"} />
+      <img src={damlLogo} className={styles.damlLogoLeft} alt={"#"} />
+      <img src={ThreePointLeft} className={styles.threePointLeft} alt={"#"} />
+    </>
+  );
+};

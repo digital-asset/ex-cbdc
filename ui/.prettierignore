@@ -1,0 +1,7 @@
+build
+participants.json
+parties.json
+node_modules
+daml.js
+cbdc-ui.zip
+src/static/fonts/demo.html
