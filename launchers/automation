@@ -5,4 +5,4 @@
 #
 
 scripts/waitForLedger.sh localhost 6865
-scripts/startTriggers.sh localhost 6865 triggers/.daml/dist/triggers-1.0.0.dar
+exec scripts/startTriggers.sh localhost 6865 triggers/.daml/dist/triggers-1.0.0.dar
