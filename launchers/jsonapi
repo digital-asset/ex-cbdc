@@ -5,4 +5,4 @@
 #
 
 scripts/waitForLedger.sh localhost 6865
-exec daml json-api --ledger-host localhost --ledger-port 6865 --http-port 4000
+exec daml json-api --ledger-host localhost --ledger-port 6865 --http-port 4000 --allow-insecure-tokens
