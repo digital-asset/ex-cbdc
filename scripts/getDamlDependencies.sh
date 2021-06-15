@@ -7,13 +7,15 @@
 set -euo pipefail
 
 function getDependencyLinesWithProperErrorHandling() {
-  grep -E '^  - .*/.daml/dist/.*dar$' "$1"
-  # grep returns 1 if no lines were selected, 2 on error :-(
-  if [ $? = 2 ]
+  if ! grep -E '^  - .*/.daml/dist/.*dar$' "$1"
   then
-    return 1
-  else
-    return 0
+    # grep returns 1 if no lines were selected, 2 on error :-(
+    if [ $? = 2 ]
+    then
+      return 1
+    else
+      return 0
+    fi
   fi
 }
 
