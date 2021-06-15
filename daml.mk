@@ -5,9 +5,7 @@
 
 comma := ,
 daml ?= daml
-rdars := $(shell scripts/getDamlProjects.sh)
-dars := $(patsubst %$(comma)js,%,$(patsubst %$(comma),%,$(rdars)))
-jsdars := $(patsubst %$(comma)js,%,$(filter %$(comma)js,$(rdars)))
+dars := $(shell scripts/getDamlProjects.sh)
 project-root = $(patsubst %/.daml/dist,%,$(@D))
 phony-test-targets := $(patsubst %,%-phony-test-target,$(dars))
 
@@ -21,7 +19,7 @@ build-dars: $(dars)
 .PHONY: test-dars
 test-dars: $(phony-test-targets)
 
-ui/daml.js: $(jsdars)
+ui/daml.js: $(dars)
 	$(daml) codegen js $^ -o $@
 	@touch $@
 
