@@ -146,7 +146,7 @@ jobs:
       - run:
           name: UI install dependencies
           command: |
-            make build
+            make build -j3 PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
       - run:
           name: Yarn recursive install
           command: |
