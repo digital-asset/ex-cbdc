@@ -7,20 +7,22 @@
 set -euo pipefail
 
 function getDependencyLinesWithProperErrorHandling() {
-  grep -E '^  - .*/.daml/dist/.*dar$' "$project_dir"/daml.yaml
-  # grep returns 1 if no lines were selected, 2 on error :-(
-  if [ $? = 2 ]
+  if ! grep -E '^  - .*/.daml/dist/.*dar$' "$1"
   then
-    return 1
-  else
-    return 0
+    # grep returns 1 if no lines were selected, 2 on error :-(
+    if [ $? = 2 ]
+    then
+      return 1
+    else
+      return 0
+    fi
   fi
 }
 
 project_dir="$1"
 # yq would be more reliable, but 5-10x slower
-deps=$( getDependencyLinesWithProperErrorHandling | sed "s|^  - |$project_dir/|" )
-[ -n "${deps}" ] && realpath -m --relative-to="${PWD}" ${deps}
+# TODO (see also https://digitalasset.atlassian.net/browse/ERA-940) support arbitrary project structure
+getDependencyLinesWithProperErrorHandling "$project_dir"/daml.yaml | sed "s|^  - ../||"
 
 # TODO - this should be using the source field from daml.yaml
 echo "$project_dir"/daml.yaml

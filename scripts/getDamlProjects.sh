@@ -6,11 +6,24 @@
 
 set -euo pipefail
 
-yamls=( $(find . -mindepth 2 -name 'daml.yaml') )
-names=( $(yq -r '.name + "-" + .version + ".dar," + .build_codegen' ${yamls[@]}) )
-projects=( ${yamls[@]%/*} )
+function yamlPathToDarPath() {
+  echo $i | sed -e 's|\(.*\)/daml.yaml|\1/.daml/dist/\1-1.0.0.dar|g'
+}
 
-for((i=0;i<${#yamls[@]};i++)); do
-    echo "${projects[i]}/.daml/dist/${names[i]}"
+function assertFlatProjectStructure() {
+  deepYamls=$(find . -mindepth 3 -name 'daml.yaml')
+  if [ ! -z "$deepYamls" ]
+  then
+    echo "ERROR: found $deepYamls"
+    echo 'Expected flat project structure: all daml.yaml should be found with e.g. `ls */daml.yaml`'
+    exit 1
+  fi
+}
+
+assertFlatProjectStructure
+
+for i in */daml.yaml
+do
+  yamlPathToDarPath $i
 done \
   | sort
