@@ -10,7 +10,7 @@ project-root = $(patsubst %/.daml/dist,%,$(@D))
 phony-test-targets := $(patsubst %,%-phony-test-target,$(dars))
 
 ifneq ($(.SHELLSTATUS),0)
-  $(error shell command failed)
+  $(error shell command failed (code $(.SHELLSTATUS)), please double check the prerequisites, test manually scripts/getDaml*.sh, etc. Sorry, debugging this error is quite technical, please reach out to maintainers.)
 endif
 
 .PHONY: build-dars
