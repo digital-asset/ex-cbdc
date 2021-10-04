@@ -175,13 +175,13 @@ workflows:
   test:
     jobs:
       - daml_test:
-          daml_sdk_version: "1.16.0"
+          daml_sdk_version: "1.17.0"
           context: refapps
       - ui_test:
-          daml_sdk_version: "1.16.0"
+          daml_sdk_version: "1.17.0"
           context: refapps
       - blackduck_check:
-          daml_sdk_version: "1.16.0"
+          daml_sdk_version: "1.17.0"
           filters:
             branches:
               only:
@@ -201,13 +201,13 @@ workflows:
                 - main
     jobs:
       - daml_test:
-          daml_sdk_version: "1.16.0"
+          daml_sdk_version: "1.17.0"
           context: refapps
       - ui_test:
-          daml_sdk_version: "1.16.0"
+          daml_sdk_version: "1.17.0"
           context: refapps
       - blackduck_check:
-          daml_sdk_version: "1.16.0"
+          daml_sdk_version: "1.17.0"
           context:
             - blackduck
             - refapps

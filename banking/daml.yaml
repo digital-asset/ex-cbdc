@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-sdk-version: 1.16.0
+sdk-version: 1.17.0
 name: banking
 source: daml
 version: 1.0.0
