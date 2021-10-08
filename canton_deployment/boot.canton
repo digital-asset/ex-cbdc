@@ -38,7 +38,7 @@ val bankAParty = bankA.parties.enable("BankA")
 val bankBParty = bankB.parties.enable("BankB")
 val ecbParty = ecb.parties.enable("ECB")
 
-import $ivy.`io.circe::circe-core:0.12.3`, $ivy.`io.circe::circe-generic:0.12.3`, io.circe._, io.circe.generic.auto._, io.circe.syntax._
+import $ivy.`io.circe::circe-core:0.14.1`, $ivy.`io.circe::circe-generic:0.14.1`, io.circe._, io.circe.generic.auto._, io.circe.syntax._
 import better.files._
 import better.files.Dsl.SymbolicOperations
 
@@ -69,7 +69,7 @@ def createPartiesJson() = {
     "ecb" -> ecbParty
   ).mapValues(showPartyId)
 
-  file"canton-parties.json" < cantonParties.asJson.spaces2
+  file"canton-parties.json" < cantonParties.toMap.asJson.spaces2
 }
 
 def createBankATxt() = {
@@ -102,7 +102,7 @@ def createCredentialsConfigJson() = {
     )
   }
 
-  file"canton-credentials-config.json" < parties.asJson.spaces2
+  file"canton-credentials-config.json" < parties.toMap.asJson.spaces2
 }
 
 def uploadDarFiles() = {
