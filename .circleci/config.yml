@@ -108,7 +108,8 @@ jobs:
       - run:
           name: Npm test
           command: |
-            make -C ui test
+            # Puppeteer test tends to have some transient failure, this reduces the chances
+            make -C ui test || make -C ui test || make -C ui test
       - save_cache:
           paths:
             - ~/.daml
