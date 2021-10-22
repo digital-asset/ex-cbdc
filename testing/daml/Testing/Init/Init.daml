@@ -15,7 +15,7 @@ import Testing.Common.Parties
 import Testing.Common.TestUtilities
 import Certificates.Sector.Economic
 import DA.Lib.Types.Sector
-import DA.Set
+import DA.Set as Set
 import DA.Time
 import DA.Date as Date
 import DA.Assert
@@ -68,13 +68,19 @@ initDemo parties@PartiesForTesting{..} = script do
     createCmd DemoAdminRole with demoAdmin
   finished task
 
+  sleep $ seconds 1
+
   let task = "Create USD FRB role"
   started task
-  usFRBRoleInvite <- demoAdmin `submit`
-    exerciseCmd demoAdminRole AddCentralBank with
-      centralBank = usFRB
-      cashLabel = "USD"
-  usFRBRoleInvite <- synchronize usFRB usFRBRoleInvite
+  usFRBRoleInvite <- usFRB `submit`
+     createCmd CentralBankRoleInvite with
+       centralBank = usFRB  
+       demoAdmin = usFRB
+       cashLabel = "USD"
+       accountId =  Id with
+                          label = "Central bank account"
+                          signatories = Set.singleton usFRB
+                          version = 1
   usFRBRole <- usFRB `submit`
     exerciseCmd usFRBRoleInvite CentralBankRoleInvite_Accept
   finished task
@@ -109,6 +115,17 @@ initDemo parties@PartiesForTesting{..} = script do
     exerciseCmd demoAdminRole AddCentralBank with
       centralBank = ecb
       cashLabel = "EUR"
+
+  ecbRoleInvite <- ecb `submit`
+    createCmd CentralBankRoleInvite with
+      centralBank = ecb  
+      demoAdmin = ecb
+      cashLabel = "EUR"
+      accountId =  Id with
+                          label = "Central bank account"
+                          signatories = Set.singleton ecb
+                          version = 1
+    
   ecbRoleInvite <- synchronize ecb ecbRoleInvite
   ecbRole <- ecb `submit`
     exerciseCmd ecbRoleInvite CentralBankRoleInvite_Accept
