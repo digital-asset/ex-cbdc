@@ -111,11 +111,6 @@ initDemo parties@PartiesForTesting{..} = script do
 
   let task = "Create EUR ECB role"
   started task
-  ecbRoleInvite <- demoAdmin `submit`
-    exerciseCmd demoAdminRole AddCentralBank with
-      centralBank = ecb
-      cashLabel = "EUR"
-
   ecbRoleInvite <- ecb `submit`
     createCmd CentralBankRoleInvite with
       centralBank = ecb  
@@ -125,8 +120,6 @@ initDemo parties@PartiesForTesting{..} = script do
                           label = "Central bank account"
                           signatories = Set.singleton ecb
                           version = 1
-    
-  ecbRoleInvite <- synchronize ecb ecbRoleInvite
   ecbRole <- ecb `submit`
     exerciseCmd ecbRoleInvite CentralBankRoleInvite_Accept
   finished task
