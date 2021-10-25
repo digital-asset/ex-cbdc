@@ -36,10 +36,11 @@ template CentralBankRole
         with
           targetAccount : Optional Account
           quantity : Decimal
+          observers : [Party]
         do
           let targetAccount' = fromOptional account targetAccount
               asset = getAsset quantity None $ getCashId centralBank cashLabel
-              deposit = AssetDeposit with account = targetAccount', observers = Set.empty, ..
+              deposit = AssetDeposit with account = targetAccount', observers = Set.fromList observers, ..
           exerciseByKey @AssetSettlementRule deposit.account.id AssetSettlement_Credit with
             asset = deposit.asset
             ctrl = deposit.account.provider

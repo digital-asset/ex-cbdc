@@ -74,7 +74,7 @@ initDemo parties@PartiesForTesting{..} = script do
   started task
   usFRBRoleInvite <- usFRB `submit`
      createCmd CentralBankRoleInvite with
-       centralBank = usFRB  
+       centralBank = usFRB
        demoAdmin = usFRB
        cashLabel = "USD"
        accountId =  Id with
@@ -113,7 +113,7 @@ initDemo parties@PartiesForTesting{..} = script do
   started task
   ecbRoleInvite <- ecb `submit`
     createCmd CentralBankRoleInvite with
-      centralBank = ecb  
+      centralBank = ecb
       demoAdmin = ecb
       cashLabel = "EUR"
       accountId =  Id with
@@ -154,6 +154,7 @@ initDemo parties@PartiesForTesting{..} = script do
     exerciseCmd usFRBRole CreateCbdc with
       quantity = 900_000_000.0
       targetAccount = None
+      observers = [bankA, bankB]
   finished task
 
   let task = "Issue EUR to European Central Bank"
@@ -162,6 +163,7 @@ initDemo parties@PartiesForTesting{..} = script do
     exerciseCmd ecbRole CreateCbdc with
       quantity = 700_000_000.0
       targetAccount = None
+      observers = [bankA, bankB]
 
   -- These steps are needed to provide visibility for the Pvp parties.
   -- We add the other bank to the bank's account as a controller to enable crediting.
@@ -274,7 +276,7 @@ transferFromCentralbankToBank cb bank amount = do
           receiverAccountId = bankRole.account.id
           amount = Some amount
           depositCids = [cbdc]
-  cbdc <- firstContractId <$> queryFilter @AssetDeposit cb (\c -> c.account.owner == cb)
+  cbdc <- firstContractId <$> queryFilter @AssetDeposit cb (\c -> c.account.owner == bank)
   pure cbdc
 
 all_slides_workflow_works : Script ()
@@ -420,6 +422,7 @@ bankA_can_process = do
 
   Some money2Data <- queryContractId bankA money2Cid
   money2Data.asset.quantity === bankBSentAmount
+  pure ()
 
 bankB_can_process : Script ()
 bankB_can_process = do

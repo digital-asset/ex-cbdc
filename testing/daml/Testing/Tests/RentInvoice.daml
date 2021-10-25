@@ -123,6 +123,7 @@ rentInvoiceCanBePaidWithNormal = script do
     exerciseCmd cbRole CreateCbdc with
       quantity = issuedRegularQuantity
       targetAccount = Some renterAccount
+      observers = []
 
   (_, [resultCashFromEarmarked]) <- renter `submit`
     exerciseCmd invoice RentInvoice_Pay with assetDepositCids = [regularAssetDepositCid]
@@ -169,10 +170,12 @@ rentInvoiceCanBePaidWithVariousMixedCBDC = script do
     exerciseCmd cbRole CreateCbdc with
       quantity = issuedRegularQuantity1
       targetAccount = Some renterAccount
+      observers = []
   regularAssetDepositCid2 <- usFRB `submit`
     exerciseCmd cbRole CreateCbdc with
       quantity = issuedRegularQuantity2
       targetAccount = Some renterAccount
+      observers = []
 
   let mixedAssetCids =
         [regularAssetDepositCid1, specialAssetDepositCid1,
@@ -342,6 +345,7 @@ rentInvoiceCanBePaidWithMixedCBDCSetup issuedSpecialQuantity issuedRegularQuanti
     exerciseCmd cbRole CreateCbdc with
       quantity = issuedRegularQuantity
       targetAccount = Some renterAccount
+      observers = []
 
   pure (renter, landlord, invoice, [assetDepositCid, regularAssetDepositCid])
 
