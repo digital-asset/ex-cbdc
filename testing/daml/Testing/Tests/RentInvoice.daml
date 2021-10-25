@@ -360,7 +360,7 @@ setupRoleHierarchy = script do
       centralBank = usFRB
       cashLabel = "EUR"
   cbRole <- usFRB `submit`
-    exerciseCmd cbRoleInv CentralBankRoleInvite_Accept
+    exerciseCmd cbRoleInv CentralBankRoleInvite_Accept with observers = []
 
   -- Landlords association
   landlordsAssociationRole <- landlordsAssociation `submit`

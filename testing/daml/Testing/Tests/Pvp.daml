@@ -319,7 +319,7 @@ setupRolesForPvp = do
       centralBank = usFRB
       cashLabel = "USD"
   usFRBRole <- usFRB `submit`
-    exerciseCmd usFRBRoleInvite CentralBankRoleInvite_Accept
+    exerciseCmd usFRBRoleInvite CentralBankRoleInvite_Accept with observers = []
   usFRBBankAInvite <- usFRB `submit`
     exerciseCmd usFRBRole InviteBank with
       bank = bankA
@@ -338,7 +338,7 @@ setupRolesForPvp = do
       centralBank = ecb
       cashLabel = eur
   ecbRole <- ecb `submit`
-    exerciseCmd ecbRoleInvite CentralBankRoleInvite_Accept
+    exerciseCmd ecbRoleInvite CentralBankRoleInvite_Accept with observers = []
   ecbBankAInvite <- ecb `submit`
     exerciseCmd ecbRole InviteBank with
       bank = bankA

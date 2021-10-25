@@ -82,7 +82,7 @@ initDemo parties@PartiesForTesting{..} = script do
                           signatories = Set.singleton usFRB
                           version = 1
   usFRBRole <- usFRB `submit`
-    exerciseCmd usFRBRoleInvite CentralBankRoleInvite_Accept
+    exerciseCmd usFRBRoleInvite CentralBankRoleInvite_Accept with observers = [bankA, bankB]
   finished task
 
   let task = "FRB invites BankA"
@@ -121,7 +121,7 @@ initDemo parties@PartiesForTesting{..} = script do
                           signatories = Set.singleton ecb
                           version = 1
   ecbRole <- ecb `submit`
-    exerciseCmd ecbRoleInvite CentralBankRoleInvite_Accept
+    exerciseCmd ecbRoleInvite CentralBankRoleInvite_Accept with observers = [bankA, bankB]
   finished task
 
   let task = "ECB invites BankA"
