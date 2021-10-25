@@ -76,11 +76,13 @@ template CentralBankRoleInvite
 
     controller centralBank can
       CentralBankRoleInvite_Accept : ContractId CentralBankRole
+        with 
+          observers : [Party]
         do
           let account = Account with id = accountId, provider = centralBank, owner = centralBank
           create AssetSettlementRule with
             ctrls = Set.singleton centralBank
-            observers = Set.empty
+            observers = Set.fromList observers
             account
           create CentralBankRole with ..
 
