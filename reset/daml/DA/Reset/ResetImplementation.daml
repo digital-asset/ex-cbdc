@@ -11,6 +11,7 @@ import DA.Action (foldlA)
 
 import DA.Reset.Reset
 import DA.NonEmpty hiding (foldlA)
+import Testing.Init.Init
 
 template PendingResetAgreement
   with
@@ -42,10 +43,13 @@ authorizeAgreementByAll signatories@(NonEmpty leader rest) = do
     createCmd PendingResetAgreement with
       resetAgreement = ResetAgreement with signatories = leader::rest
       alreadySigned = [leader]
-  let addSignature cid party =
+
+  let addSignature cid party = do
+        cid <- synchronize party cid 
         submit party do
           exerciseCmd cid Sign with
             signer = party
+  
   finalPending <- foldlA
     addSignature
     pending
