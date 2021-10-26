@@ -319,38 +319,38 @@ setupRolesForPvp = do
       centralBank = usFRB
       cashLabel = "USD"
   usFRBRole <- usFRB `submit`
-    exerciseCmd usFRBRoleInvite CentralBankRoleInvite_Accept with observers = []
+    exerciseCmd usFRBRoleInvite CentralBankRoleInvite_Accept with observers = [bankA, bankB]
   usFRBBankAInvite <- usFRB `submit`
     exerciseCmd usFRBRole InviteBank with
       bank = bankA
       accountId = getId [usFRB, bankA]
   usFRBBankARole <- bankA `submit`
-    exerciseCmd usFRBBankAInvite BankRoleInvite_Accept
+    exerciseCmd usFRBBankAInvite BankRoleInvite_Accept with observers = [bankA, bankB]
   usFRBbankBInvite <- usFRB `submit`
     exerciseCmd usFRBRole InviteBank with
       bank = bankB
       accountId = getId [usFRB, bankB]
   usFRBBankBRole <- bankB `submit`
-    exerciseCmd usFRBbankBInvite BankRoleInvite_Accept
+    exerciseCmd usFRBbankBInvite BankRoleInvite_Accept with observers = [bankA, bankB]
 
   ecbRoleInvite <- demoAdmin `submit`
     exerciseCmd demoAdminRole AddCentralBank with
       centralBank = ecb
       cashLabel = eur
   ecbRole <- ecb `submit`
-    exerciseCmd ecbRoleInvite CentralBankRoleInvite_Accept with observers = []
+    exerciseCmd ecbRoleInvite CentralBankRoleInvite_Accept with observers = [bankA, bankB]
   ecbBankAInvite <- ecb `submit`
     exerciseCmd ecbRole InviteBank with
       bank = bankA
       accountId = getId [ecb, bankA]
   ecbBankARole <- bankA `submit`
-    exerciseCmd ecbBankAInvite BankRoleInvite_Accept
+    exerciseCmd ecbBankAInvite BankRoleInvite_Accept with observers = [bankA, bankB]
   ecbBankBInvite <- ecb `submit`
     exerciseCmd ecbRole InviteBank with
       bank = bankB
       accountId = getId [ecb, bankB]
   ecbBankBRole <- bankB `submit`
-    exerciseCmd ecbBankBInvite BankRoleInvite_Accept
+    exerciseCmd ecbBankBInvite BankRoleInvite_Accept with observers = [bankA, bankB]
 
   pure (parties, RolesForTesting{..})
 

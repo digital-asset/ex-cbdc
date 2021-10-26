@@ -68,8 +68,6 @@ initDemo parties@PartiesForTesting{..} = script do
     createCmd DemoAdminRole with demoAdmin
   finished task
 
-  sleep $ seconds 1
-
   let task = "Create USD FRB role"
   started task
   usFRBRoleInvite <- usFRB `submit`
@@ -94,7 +92,7 @@ initDemo parties@PartiesForTesting{..} = script do
 
   usFRBBankAInvite <- synchronize bankA usFRBBankAInvite
   usFRBBankARole <- bankA `submit`
-    exerciseCmd usFRBBankAInvite BankRoleInvite_Accept
+    exerciseCmd usFRBBankAInvite BankRoleInvite_Accept with observers = [bankA, bankB]
   finished task
 
   let task = "FRB invites BankB"
@@ -106,7 +104,7 @@ initDemo parties@PartiesForTesting{..} = script do
 
   usFRBbankBInvite <- synchronize bankB usFRBbankBInvite
   usFRBBankBRole <- bankB `submit`
-    exerciseCmd usFRBbankBInvite BankRoleInvite_Accept
+    exerciseCmd usFRBbankBInvite BankRoleInvite_Accept with observers = [bankA, bankB]
   finished task
 
   let task = "Create EUR ECB role"
@@ -133,7 +131,7 @@ initDemo parties@PartiesForTesting{..} = script do
 
   ecbBankAInvite <- synchronize bankA ecbBankAInvite
   ecbBankARole <- bankA `submit`
-    exerciseCmd ecbBankAInvite BankRoleInvite_Accept
+    exerciseCmd ecbBankAInvite BankRoleInvite_Accept with observers = [bankA, bankB]
   finished task
 
   let task = "ECB invites BankB"
@@ -145,7 +143,7 @@ initDemo parties@PartiesForTesting{..} = script do
 
   ecbBankBInvite <- synchronize bankB ecbBankBInvite
   ecbBankBRole <- bankB `submit`
-    exerciseCmd ecbBankBInvite BankRoleInvite_Accept
+    exerciseCmd ecbBankBInvite BankRoleInvite_Accept with observers = [bankA, bankB]
   finished task
 
   let task = "Issue USD to Federal Reserve Bank"
@@ -224,7 +222,7 @@ initDemo parties@PartiesForTesting{..} = script do
   usFRB `submit`
     createCmd AssetSettlementRule with
       account = renterAccount
-      observers = empty
+      observers = Set.fromList [renter, landlord]
       ctrls = fromList [renter, usFRB]
   finished task
 
@@ -286,7 +284,7 @@ all_slides_workflow_works = script do
 
   -- Slide 10-16, transfer money from USFRB's account to BankA
   usdCbdc <- transferFromCentralbankToBank usFRB bankA 100_000_000.0
-
+  
   -- Slide 17, transfer money from ECB's account to BankB
   eurCbdc <- transferFromCentralbankToBank ecb bankB 85_000_000.0
 

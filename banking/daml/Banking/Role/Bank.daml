@@ -120,11 +120,12 @@ template BankRoleInvite
 
     controller bank can
       BankRoleInvite_Accept : ContractId BankRole
+        with observers : [Party]
         do
           let account = Account with id = accountId, provider = centralBank, owner = bank
           create AssetSettlementRule with
             ctrls = Set.singleton centralBank
-            observers = Set.empty
+            observers = Set.fromList observers
             account
           create UniqueIdGenerator with counter = 0, ..
           create BankRole with ..
