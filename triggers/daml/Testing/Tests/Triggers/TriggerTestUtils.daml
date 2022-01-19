@@ -13,5 +13,5 @@ import Daml.Trigger (Trigger)
 
 testTrigger : Trigger () -> Party -> ACSBuilder -> Script ([Command])
 testTrigger trigger party acs = do
-  ((), commands) <- testRule trigger party acs Maps.empty ()
+  ((), commands) <- testRule trigger party [] acs Maps.empty ()
   pure $ flattenCommands commands
