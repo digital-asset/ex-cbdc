@@ -24,44 +24,48 @@ template CentralBankRole
   where
     signatory demoAdmin, centralBank
 
-    controller centralBank can
-      nonconsuming InviteBank: ContractId BankRoleInvite
-        with
-          bank: Party
-          accountId : Id
-        do
-          create BankRoleInvite with ..
+    
+    nonconsuming choice InviteBank: ContractId BankRoleInvite
+      with
+        bank: Party
+        accountId : Id
+      controller centralBank
+      do
+        create BankRoleInvite with ..
 
-      nonconsuming CreateCbdc: ContractId AssetDeposit
-        with
-          targetAccount : Optional Account
-          quantity : Decimal
-        do
-          let targetAccount' = fromOptional account targetAccount
-              asset = getAsset quantity None $ getCashId centralBank cashLabel
-              deposit = AssetDeposit with account = targetAccount', observers = Set.empty, ..
-          exerciseByKey @AssetSettlementRule deposit.account.id AssetSettlement_Credit with
-            asset = deposit.asset
-            ctrl = deposit.account.provider
+    nonconsuming choice CreateCbdc: ContractId AssetDeposit
+      with
+        targetAccount : Optional Account
+        quantity : Decimal
+      controller centralBank
+      do
+        let targetAccount' = fromOptional account targetAccount
+            asset = getAsset quantity None $ getCashId centralBank cashLabel
+            deposit = AssetDeposit with account = targetAccount', observers = Set.empty, ..
+        exerciseByKey @AssetSettlementRule deposit.account.id AssetSettlement_Credit with
+          asset = deposit.asset
+          ctrl = deposit.account.provider
 
-      nonconsuming CreateSpecialCbdc: ContractId AssetDeposit
-        with
-          targetAccount : Account
-          quantity : Decimal
-          earmark : Sector
-        do
-          let asset = getAsset quantity (Some earmark) $ getCashId centralBank cashLabel
-              deposit = AssetDeposit with account = targetAccount, observers = Set.empty, ..
-          exerciseByKey @AssetSettlementRule deposit.account.id AssetSettlement_Credit with
-            asset = deposit.asset
-            ctrl = deposit.account.provider
+    nonconsuming choice CreateSpecialCbdc: ContractId AssetDeposit
+      with
+        targetAccount : Account
+        quantity : Decimal
+        earmark : Sector
+      controller centralBank
+      do
+        let asset = getAsset quantity (Some earmark) $ getCashId centralBank cashLabel
+            deposit = AssetDeposit with account = targetAccount, observers = Set.empty, ..
+        exerciseByKey @AssetSettlementRule deposit.account.id AssetSettlement_Credit with
+          asset = deposit.asset
+          ctrl = deposit.account.provider
 
-      nonconsuming CreateCertificate : ContractId EconomicSectorCertificate
-        with
-          landlordsAssociation: Party
-          sector : Sector
-        do
-          create EconomicSectorCertificate with ..
+    nonconsuming choice CreateCertificate : ContractId EconomicSectorCertificate
+      with
+        landlordsAssociation: Party
+        sector : Sector
+      controller centralBank
+      do
+        create EconomicSectorCertificate with ..
 
 
 template CentralBankRoleInvite
@@ -74,15 +78,17 @@ template CentralBankRoleInvite
     signatory demoAdmin
     ensure accountId.signatories == Set.fromList [centralBank]
 
-    controller centralBank can
-      CentralBankRoleInvite_Accept : ContractId CentralBankRole
-        do
-          let account = Account with id = accountId, provider = centralBank, owner = centralBank
-          create AssetSettlementRule with
-            ctrls = Set.singleton centralBank
-            observers = Set.empty
-            account
-          create CentralBankRole with ..
+    
+    choice CentralBankRoleInvite_Accept : ContractId CentralBankRole
+      controller centralBank
+      do
+        let account = Account with id = accountId, provider = centralBank, owner = centralBank
+        create AssetSettlementRule with
+          ctrls = Set.singleton centralBank
+          observers = Set.empty
+          account
+        create CentralBankRole with ..
 
-      CentralBankRoleInvite_Reject : ()
-        do return ()
+    choice CentralBankRoleInvite_Reject : ()
+      controller centralBank
+      do return ()

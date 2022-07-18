@@ -15,14 +15,15 @@ template DemoAdminRole
   where
     signatory demoAdmin
 
-    controller demoAdmin can
-      nonconsuming AddCentralBank: ContractId CentralBankRoleInvite
-        with
-          centralBank : Party
-          cashLabel : Text
-        do
-          let accountId =  Id with
-                          label = "Central bank account"
-                          signatories = Set.singleton centralBank
-                          version = 1
-          create CentralBankRoleInvite with ..
+    
+    nonconsuming choice AddCentralBank: ContractId CentralBankRoleInvite
+      with
+        centralBank : Party
+        cashLabel : Text
+      controller demoAdmin
+      do
+        let accountId =  Id with
+                        label = "Central bank account"
+                        signatories = Set.singleton centralBank
+                        version = 1
+        create CentralBankRoleInvite with ..

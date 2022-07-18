@@ -29,68 +29,72 @@ template BankRole
     signatory centralBank, bank
     ensure account.id.signatories == Set.fromList [centralBank, bank]
 
-    controller centralBank can
-      nonconsuming DoCbdcInjection: (ContractId AssetDeposit, ContractId AssetInjectionNotification)
-        with
-          quantity : Decimal
-        do
-          let asset = getAsset quantity None $ getCashId centralBank cashLabel
-          let deposit = AssetDeposit with observers = Set.empty, ..
-          depositCid <- exerciseByKey @AssetSettlementRule deposit.account.id AssetSettlement_Credit with asset = deposit.asset, ctrl = deposit.account.provider
-          notificationCid <- create AssetInjectionNotification with ..
+    nonconsuming choice DoCbdcInjection: (ContractId AssetDeposit, ContractId AssetInjectionNotification)
+      with
+        quantity : Decimal
+      controller centralBank
+      do
+        let asset = getAsset quantity None $ getCashId centralBank cashLabel
+        let deposit = AssetDeposit with observers = Set.empty, ..
+        depositCid <- exerciseByKey @AssetSettlementRule deposit.account.id AssetSettlement_Credit with asset = deposit.asset, ctrl = deposit.account.provider
+        notificationCid <- create AssetInjectionNotification with ..
 
-          pure (depositCid, notificationCid)
+        pure (depositCid, notificationCid)
 
-    controller bank can
-      nonconsuming RequestCbdcInjection: ContractId AssetInjectionRequest
-        with
-          quantity : Decimal
-        do
-          let asset = getAsset quantity None $ getCashId centralBank cashLabel
-          let deposit = AssetDeposit with observers = Set.empty, ..
-          create AssetInjectionRequest with ..
+    
+    nonconsuming choice RequestCbdcInjection: ContractId AssetInjectionRequest
+      with
+        quantity : Decimal
+      controller bank 
+      do
+        let asset = getAsset quantity None $ getCashId centralBank cashLabel
+        let deposit = AssetDeposit with observers = Set.empty, ..
+        create AssetInjectionRequest with ..
 
-      nonconsuming RequestCbdcExtraction: ContractId AssetExtractionRequest
-        with
-          depositCid : ContractId AssetDeposit
-        do
-          deposit <- fetch depositCid
-          deposit.account === account
-          deposit.asset === getAsset deposit.asset.quantity None (getCashId centralBank cashLabel)
+    nonconsuming choice RequestCbdcExtraction: ContractId AssetExtractionRequest
+      with
+        depositCid : ContractId AssetDeposit
+      controller bank 
+      do
+        deposit <- fetch depositCid
+        deposit.account === account
+        deposit.asset === getAsset deposit.asset.quantity None (getCashId centralBank cashLabel)
 
-          create AssetExtractionRequest with account = deposit.account, ..
+        create AssetExtractionRequest with account = deposit.account, ..
 
-      nonconsuming RequestPvp : ContractId DvpProposal
-        with
-          quantityToSend : Decimal
-          receiver : Party
-          incomingCashId : Id
-          incomingCashQuantity : Decimal
-          ownAccountForIncoming : Account
-        do
-          (keyCounter, _) <- exerciseByKey @UniqueIdGenerator (bank, account) Next
-          let masterAgreement = getDvpMasterAgreementBetween bank receiver
-              dvpSettlement = DvpSettlementRule with masterAgreement
-              ourCashId = getCashId centralBank cashLabel
-              dvp = getDvp masterAgreement bank receiver quantityToSend incomingCashQuantity ourCashId incomingCashId keyCounter
+    nonconsuming choice RequestPvp : ContractId DvpProposal
+      with
+        quantityToSend : Decimal
+        receiver : Party
+        incomingCashId : Id
+        incomingCashQuantity : Decimal
+        ownAccountForIncoming : Account
+      controller bank 
+      do
+        (keyCounter, _) <- exerciseByKey @UniqueIdGenerator (bank, account) Next
+        let masterAgreement = getDvpMasterAgreementBetween bank receiver
+            dvpSettlement = DvpSettlementRule with masterAgreement
+            ourCashId = getCashId centralBank cashLabel
+            dvp = getDvp masterAgreement bank receiver quantityToSend incomingCashQuantity ourCashId incomingCashId keyCounter
 
-          create DvpProposal with
-                  dvpSettlement
-                  dvp
-                  proposer = bank
-                  paymentAccounts = [account]
-                  deliveryAccounts = [ownAccountForIncoming]
+        create DvpProposal with
+                dvpSettlement
+                dvp
+                proposer = bank
+                paymentAccounts = [account]
+                deliveryAccounts = [ownAccountForIncoming]
 
-      nonconsuming AcceptPvp : (ContractId DvpSettlementRule, ContractId Dvp, ContractId SettlementInstruction, ContractId SettlementInstruction)
-        with
-          pvpRequestCid : ContractId DvpProposal
-          ownAccountForIncoming : Account
-        do
-          (dvpSettlementCid, dvpCid, [paySettleCid, delSettleCid]) <-
-              exercise pvpRequestCid DvpProposal_Accept with
-                  otherPaymentAccounts = [ownAccountForIncoming]
-                  otherDeliveryAccounts = [account]
-          return (dvpSettlementCid, dvpCid, paySettleCid, delSettleCid)
+    nonconsuming choice AcceptPvp : (ContractId DvpSettlementRule, ContractId Dvp, ContractId SettlementInstruction, ContractId SettlementInstruction)
+      with
+        pvpRequestCid : ContractId DvpProposal
+        ownAccountForIncoming : Account
+      controller bank 
+      do
+        (dvpSettlementCid, dvpCid, [paySettleCid, delSettleCid]) <-
+            exercise pvpRequestCid DvpProposal_Accept with
+                otherPaymentAccounts = [ownAccountForIncoming]
+                otherDeliveryAccounts = [account]
+        return (dvpSettlementCid, dvpCid, paySettleCid, delSettleCid)
 
 template UniqueIdGenerator
   with
@@ -102,11 +106,12 @@ template UniqueIdGenerator
     key (bank, account): (Party, Account)
     maintainer key._1
 
-    controller bank can
-      Next : (Int, ContractId UniqueIdGenerator)
-        do
-          cid <- create this with counter = counter + 1
-          pure (counter, cid)
+    
+    choice Next : (Int, ContractId UniqueIdGenerator)
+      controller bank
+      do
+        cid <- create this with counter = counter + 1
+        pure (counter, cid)
 
 template BankRoleInvite
   with
@@ -118,19 +123,21 @@ template BankRoleInvite
     signatory centralBank
     ensure accountId.signatories == Set.fromList [centralBank, bank]
 
-    controller bank can
-      BankRoleInvite_Accept : ContractId BankRole
-        do
-          let account = Account with id = accountId, provider = centralBank, owner = bank
-          create AssetSettlementRule with
-            ctrls = Set.singleton centralBank
-            observers = Set.empty
-            account
-          create UniqueIdGenerator with counter = 0, ..
-          create BankRole with ..
+    
+    choice BankRoleInvite_Accept : ContractId BankRole
+      controller bank
+      do
+        let account = Account with id = accountId, provider = centralBank, owner = bank
+        create AssetSettlementRule with
+          ctrls = Set.singleton centralBank
+          observers = Set.empty
+          account
+        create UniqueIdGenerator with counter = 0, ..
+        create BankRole with ..
 
-      BankRoleInvite_Reject : ()
-        do return ()
+    choice BankRoleInvite_Reject : ()
+      controller bank
+      do return ()
 
 getCashId : Party -> Text -> Id
 getCashId centralBank cashLabel =

@@ -16,16 +16,18 @@ template AssetInjectionRequest
     signatory deposit.account.id.signatories
     ensure deposit.asset.quantity > 0.0 && deposit.account.id.signatories == Set.fromList [deposit.account.provider, deposit.account.owner]
 
-    controller deposit.account.provider can
-      AssetInjectionRequest_Accept : (ContractId AssetDeposit, ContractId AssetInjectionNotification)
-        do
-          depositCid <- exerciseByKey @AssetSettlementRule deposit.account.id AssetSettlement_Credit with asset = deposit.asset, ctrl = deposit.account.provider
-          notificationCid <- create AssetInjectionNotification with ..
+    
+    choice AssetInjectionRequest_Accept : (ContractId AssetDeposit, ContractId AssetInjectionNotification)
+      controller deposit.account.provider
+      do
+        depositCid <- exerciseByKey @AssetSettlementRule deposit.account.id AssetSettlement_Credit with asset = deposit.asset, ctrl = deposit.account.provider
+        notificationCid <- create AssetInjectionNotification with ..
 
-          pure (depositCid, notificationCid)
+        pure (depositCid, notificationCid)
 
-      AssetInjectionRequest_Reject : ContractId AssetInjectionFailure
-        do create AssetInjectionFailure with ..
+    choice AssetInjectionRequest_Reject : ContractId AssetInjectionFailure
+      controller deposit.account.provider
+      do create AssetInjectionFailure with ..
 
 template AssetInjectionNotification
   with

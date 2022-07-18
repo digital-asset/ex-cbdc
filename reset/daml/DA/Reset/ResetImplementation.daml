@@ -62,10 +62,11 @@ template ResetRequest
     key party: Party
     maintainer key
 
-    controller party can
-      StartReset : ContractId ResetInProgress
-        do
-          create ResetInProgress with party
+    
+    choice StartReset : ContractId ResetInProgress
+      controller party
+      do
+        create ResetInProgress with party
 
 template ResetInProgress
   with
@@ -75,10 +76,11 @@ template ResetInProgress
     key party: Party
     maintainer key
 
-    controller party can
-      CompleteReset : ()
-        do
-          pure ()
+    
+    choice CompleteReset : ()
+      controller party
+      do
+        pure ()
 
 resetIfRequested: Parties -> Script ()
 resetIfRequested parties = do
