@@ -85,6 +85,31 @@ setQuantity : Decimal -> AssetDeposit -> AssetDeposit
 setQuantity quantity assetDeposit =
     assetDeposit with asset = assetDeposit.asset with quantity = quantity
 
+
+
+makeCounterPartyObserver : MasterAgreement -> ContractId AssetDeposit -> Update (ContractId AssetDeposit)
+makeCounterPartyObserver = addRemoveCounterPartyObserver Action_Add
+  
+removeCounterPartyObserver : MasterAgreement ->  ContractId AssetDeposit -> Update (ContractId AssetDeposit)
+removeCounterPartyObserver = addRemoveCounterPartyObserver Action_Remove
+
+addRemoveCounterPartyObserver : AddRemove -> MasterAgreement ->  ContractId AssetDeposit -> Update (ContractId AssetDeposit)
+addRemoveCounterPartyObserver addRemove masterAgreement depositCid = do
+  let getCounterparty owner
+        | owner == masterAgreement.party1 = masterAgreement.party2
+        | otherwise = masterAgreement.party1
+
+  assetDeposit <- fetch depositCid
+  let counterparty = getCounterparty assetDeposit.account.owner
+      action = case addRemove of
+                 Action_Add -> DA.Set.insert
+                 Action_Remove -> DA.Set.delete
+
+  exercise depositCid AssetDeposit_SetObservers with newObservers = action counterparty (observers assetDeposit)
+
+data AddRemove = Action_Add | Action_Remove
+
+
 -- This function does not check whether all the AssetDeposits have the same Asset.
 splitMergeNewAssetFromAssetsForQuantity : [ContractId AssetDeposit] -> [AssetDeposit] -> Decimal -> Text -> Update (ContractId AssetDeposit)
 splitMergeNewAssetFromAssetsForQuantity depositCids deposits neededQuantity uniqueErrorMsg =

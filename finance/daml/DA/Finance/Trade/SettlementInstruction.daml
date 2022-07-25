@@ -80,6 +80,7 @@ template SettlementInstruction
             error "AssetDeposits passed to AllocateNext don't match the Settlement Instruction."
           (Some sender, True) -> do
             newDepositCid <- splitMergeNewAssetFromAssetsForQuantity depositCids deposits asset.quantity "allocation"
+            newDepositCid <- makeCounterPartyObserver masterAgreement newDepositCid 
             let currNew = curr with depositCid = Some newDepositCid
             create this with steps = done ++ currNew :: next
 
@@ -89,13 +90,15 @@ template SettlementInstruction
       -- assets involved.
       controller masterAgreement.id.signatories
       do
-        mapA
+        transferedAssetDeposits <- mapA
           (\x -> do
             exerciseByKey @AssetSettlementRule x.senderAccount.id AssetSettlement_Transfer with
               receiverAccountId = x.receiverAccount.id, depositCids = [fromSome x.depositCid]
               amount = None
           )
           steps
+        
+        mapA (removeCounterPartyObserver masterAgreement) transferedAssetDeposits
 
     choice SettlementInstruction_Archive : ()
       controller masterAgreement.id.signatories 
