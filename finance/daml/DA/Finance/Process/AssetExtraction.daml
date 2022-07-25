@@ -16,6 +16,7 @@ template AssetExtractionRequest
     depositCid : ContractId AssetDeposit
   where
     signatory account.id.signatories
+    observer account.provider
     ensure account.id.signatories == Set.fromList [account.provider, account.owner]
 
     choice AssetExtractionRequest_Accept : ContractId AssetExtractionNotification

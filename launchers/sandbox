@@ -4,4 +4,4 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-exec daml sandbox --ledgerid demo testing/.daml/dist/testing-1.0.0.dar reset/.daml/dist/reset-1.0.0.dar
+exec daml sandbox --dar testing/.daml/dist/testing-1.0.0.dar --dar reset/.daml/dist/reset-1.0.0.dar

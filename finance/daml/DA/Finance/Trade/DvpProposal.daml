@@ -20,6 +20,7 @@ template DvpProposal
     deliveryAccounts: [Account]
   where
     signatory proposer
+    observer getAcceptingParty dvp proposer
     ensure proposer `elem` [dvp.masterAgreement.party1, dvp.masterAgreement.party2] &&
            dvp.masterAgreement.id.signatories == Set.fromList [proposer, getAcceptingParty dvp proposer] &&
            isValidDvp dvp &&

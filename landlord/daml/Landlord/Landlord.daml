@@ -55,6 +55,7 @@ template RentInvoice
     landlordAccountId : Id
   where
     signatory landlordsAssociation, landlord
+    observer renter
 
     
     choice RentInvoice_Pay : (ContractId LastPaidRentInvoice, [ContractId AssetDeposit])
@@ -122,7 +123,7 @@ template LandlordRoleInvitation
     landlord : Party
   where
     signatory landlordsAssociation
-
+    observer landlord
     
     choice LandlordRoleInvitation_Accept : ContractId LandlordRole
       with

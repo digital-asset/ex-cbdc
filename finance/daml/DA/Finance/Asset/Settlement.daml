@@ -32,7 +32,7 @@ template AssetSettlementRule
       -- of the `AssetSettlement_Credit` choice.
   where
     signatory account.id.signatories
-    observer ctrls, observers
+    observer ctrls, observers, account.owner
 
     key account.id : Id
     maintainer key.signatories

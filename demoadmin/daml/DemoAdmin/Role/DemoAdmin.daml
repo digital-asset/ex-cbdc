@@ -22,7 +22,7 @@ template DemoAdminRole
         cashLabel : Text
       controller demoAdmin
       do
-        let accountId =  Id with
+        let accountId = Id with
                         label = "Central bank account"
                         signatories = Set.singleton centralBank
                         version = 1

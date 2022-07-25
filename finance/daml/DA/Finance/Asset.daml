@@ -35,7 +35,7 @@ template AssetDeposit
     observers : Set Party
   where
     signatory account.id.signatories
-    observer insert account.provider observers
+    observer union observers $ fromList [account.owner, account.provider]
     ensure asset.quantity > 0.0
 
     choice AssetDeposit_SetObservers : ContractId AssetDeposit

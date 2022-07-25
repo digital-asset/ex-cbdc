@@ -76,6 +76,7 @@ template CentralBankRoleInvite
     accountId : Id
   where
     signatory demoAdmin
+    observer centralBank
     ensure accountId.signatories == Set.fromList [centralBank]
 
     

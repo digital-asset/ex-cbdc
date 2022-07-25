@@ -121,6 +121,7 @@ template BankRoleInvite
     cashLabel : Text
   where
     signatory centralBank
+    observer bank
     ensure accountId.signatories == Set.fromList [centralBank, bank]
 
     
