@@ -4,7 +4,7 @@
 ///
 
 import { encode } from "jwt-simple";
-import { credentialsMap, httpBaseUrl, isLocal } from "./config";
+import { partyIdMap, credentialsMap, httpBaseUrl, isLocal } from "./config";
 import { Credentials, PartyId } from "./models/CredentialsType";
 
 const APPLICATION_ID: string = "cbdc";
@@ -26,15 +26,16 @@ function computeToken(partyId: string, ledgerId: string): string {
 }
 
 export const getPartyId = (displayName: string): PartyId => {
-  return PartyId.from(credentialsMap[displayName].partyId);
+  return PartyId.from(partyIdMap[displayName]);
 };
 
 export const computeCredentials = (displayName: string): Credentials => {
-  const { partyId, token, ledgerId } = credentialsMap[displayName];
+  const { ledgerId, token } = credentialsMap[displayName];
+  const partyIdText = partyIdMap[displayName];
 
   return {
-    partyId: PartyId.from(partyId),
-    token: isLocal ? computeToken(partyId, ledgerId) : token,
+    partyId: PartyId.from(partyIdText),
+    token: isLocal ? computeToken(partyIdText, ledgerId) : token,
     ledgerId,
     httpBaseUrl:
       process.env.NODE_ENV === "production"

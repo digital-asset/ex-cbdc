@@ -21,12 +21,12 @@ const createProxyMiddlewareHelper = (party) => {
 
 module.exports = function (app) {
   app.use(
-    createProxyMiddlewareHelper("Alice"),
-    createProxyMiddlewareHelper("Landlord"),
-    createProxyMiddlewareHelper("USFRB"),
-    createProxyMiddlewareHelper("ECB"),
-    createProxyMiddlewareHelper("BankA"),
-    createProxyMiddlewareHelper("BankB"),
-    createProxyMiddlewareHelper("DemoAdmin")
+    createProxyMiddlewareHelper("renter"),
+    createProxyMiddlewareHelper("landlord"),
+    createProxyMiddlewareHelper("usFRB"),
+    createProxyMiddlewareHelper("ecb"),
+    createProxyMiddlewareHelper("bankA"),
+    createProxyMiddlewareHelper("bankB"),
+    createProxyMiddlewareHelper("demoAdmin")
   );
 };
