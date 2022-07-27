@@ -3,9 +3,9 @@
 -- SPDX-License-Identifier: Apache-2.0
 --
 
-module Testing.Models.Parties where
+module Testing.Models.Users where
 
+import Daml.Script
 import Testing.Models.Entities
 
-type PartiesForTesting = EntitiesForTesting Party
-
+type UsersForTesting = EntitiesForTesting User

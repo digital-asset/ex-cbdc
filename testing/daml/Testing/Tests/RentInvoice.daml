@@ -20,6 +20,7 @@ import DemoAdmin.Role.DemoAdmin
 import Testing.Common.Parties
 import Testing.Common.TestUtilities
 import Testing.Models.Parties
+import Testing.Models.Entities
 import Testing.Tests.Finance
 
 rentInvoiceCanBePaidWithExactAmount : Script ()
@@ -115,7 +116,7 @@ rentInvoiceCanBePaidWithNormal = script do
   let issuedRegularQuantity = 1200.0
       invoicePrice = 1000.0
 
-  (parties@PartiesForTesting{..}, onboarding@Onboarding{..}) <- setupRoleHierarchy
+  (parties@EntitiesForTesting{..}, onboarding@Onboarding{..}) <- setupRoleHierarchy
 
   invoice <- createInvoice parties onboarding invoicePrice
 
@@ -150,7 +151,7 @@ rentInvoiceCanBePaidWithVariousMixedCBDC = script do
       extraAmount            = 90.0
       issuedRegularQuantity2 = 700.0 + extraAmount
       invoicePrice = 2500.0
-  (parties@PartiesForTesting{..}, onboarding@Onboarding{..}) <- setupRoleHierarchy
+  (parties@EntitiesForTesting{..}, onboarding@Onboarding{..}) <- setupRoleHierarchy
 
   invoice <- createInvoice parties onboarding invoicePrice
 
@@ -194,7 +195,7 @@ depositIsCorrectlyEarmarked : Script ()
 depositIsCorrectlyEarmarked = script do
   let earmarkedDepositQuantity = 100.0
       earmark = Housing
-  (parties@PartiesForTesting{..}, onboarding@Onboarding{..}) <- setupRoleHierarchy
+  (parties@EntitiesForTesting{..}, onboarding@Onboarding{..}) <- setupRoleHierarchy
 
   assetDepositCid <- usFRB `submit`
     exerciseCmd cbRole CreateSpecialCbdc with
@@ -208,7 +209,7 @@ depositIsCorrectlyEarmarked = script do
 earmarkedCbdcCannotBeTransferred : Script ()
 earmarkedCbdcCannotBeTransferred = script do
   let earmarkedDepositQuantity = 100.0
-  (parties@PartiesForTesting{..}, Onboarding{..}) <- setupRoleHierarchy
+  (parties@EntitiesForTesting{..}, Onboarding{..}) <- setupRoleHierarchy
 
   -- Inject earmarked deposit
   actualTime <- getTime
@@ -230,7 +231,7 @@ earmarkedCbdcCannotBeTransferred = script do
 earmarkedCbdcCannotBeDebited : Script ()
 earmarkedCbdcCannotBeDebited = script do
   let earmarkedDepositQuantity = 500.0
-  (parties@PartiesForTesting{..}, Onboarding{..}) <- setupRoleHierarchy
+  (parties@EntitiesForTesting{..}, Onboarding{..}) <- setupRoleHierarchy
 
   -- Inject earmarked deposit
   actualTime <- getTime
@@ -286,7 +287,7 @@ data Onboarding = Onboarding with
 createInvoice : PartiesForTesting -> Onboarding -> Decimal -> Script (ContractId RentInvoice)
 createInvoice parties onboarding invoicePrice = do
   let Onboarding{..} = onboarding
-  let PartiesForTesting{..} = parties
+  let EntitiesForTesting{..} = parties
 
   -- Central Bank creates proposal of EconomicSectorCertificate
   economicSectorCertificateCid <- usFRB `submit`
@@ -312,7 +313,7 @@ createInvoice parties onboarding invoicePrice = do
 
 rentInvoiceCanBePaidSetup : Decimal -> Decimal -> Script (Party, Party, ContractId RentInvoice, ContractId AssetDeposit)
 rentInvoiceCanBePaidSetup issuedQuantity invoicePrice = script do
-  (parties@PartiesForTesting{..}, onboarding@Onboarding{..}) <- setupRoleHierarchy
+  (parties@EntitiesForTesting{..}, onboarding@Onboarding{..}) <- setupRoleHierarchy
 
   invoice <- createInvoice parties onboarding invoicePrice
 
@@ -327,7 +328,7 @@ rentInvoiceCanBePaidSetup issuedQuantity invoicePrice = script do
 
 rentInvoiceCanBePaidWithMixedCBDCSetup : Decimal -> Decimal -> Decimal -> Script (Party, Party, ContractId RentInvoice, [ContractId AssetDeposit])
 rentInvoiceCanBePaidWithMixedCBDCSetup issuedSpecialQuantity issuedRegularQuantity invoicePrice = script do
-  (parties@PartiesForTesting{..}, onboarding@Onboarding{..}) <- setupRoleHierarchy
+  (parties@EntitiesForTesting{..}, onboarding@Onboarding{..}) <- setupRoleHierarchy
 
   invoice <- createInvoice parties onboarding invoicePrice
 
@@ -348,7 +349,7 @@ rentInvoiceCanBePaidWithMixedCBDCSetup issuedSpecialQuantity issuedRegularQuanti
 setupRoleHierarchy : Script (PartiesForTesting, Onboarding)
 setupRoleHierarchy = script do
   -- Participants set up parties
-  parties@PartiesForTesting{..} <- setupParties
+  parties@EntitiesForTesting{..} <- setupParties
 
   -- DemoAdmin role
   demoAdminRole <- demoAdmin `submit`

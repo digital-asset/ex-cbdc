@@ -10,8 +10,11 @@ import Banking.Role.CentralBank
 import Landlord.Landlord
 import Daml.Script hiding (party)
 import DemoAdmin.Role.DemoAdmin
+import Testing.Models.Entities
 import Testing.Models.Parties
 import Testing.Common.Parties
+import Testing.Models.Users
+import Testing.Common.Users
 import Testing.Common.TestUtilities
 import Certificates.Sector.Economic
 import DA.Lib.Types.Sector
@@ -52,15 +55,22 @@ data PvpContracts =
     delivery : ContractId SettlementInstruction
 
 
-allocateAndInitDemo : Script PartiesForTesting
+allocateAndInitDemo : Script UsersForTesting
 allocateAndInitDemo = script do
   -- Participants set up parties, connecting to the two Banking domains (EUR/GBP)
-  parties@PartiesForTesting{..} <- setupParties
+  users@EntitiesForTesting{..} <- setupPartiesAndUsers
+  let parties = usersToPartiesForTesting users
   initDemo parties
-  return parties
+  return users
+
+usersToPartiesForTesting : UsersForTesting -> PartiesForTesting
+usersToPartiesForTesting = fmap userToParty
+  
+userToParty : User -> Party
+userToParty user = fromSome user.primaryParty
 
 initDemo : PartiesForTesting -> Script InitData
-initDemo parties@PartiesForTesting{..} = script do
+initDemo parties@EntitiesForTesting{..} = script do
   let ledgerSetupTask = "Ledger Setup"
   started ledgerSetupTask
 
@@ -273,7 +283,7 @@ all_slides_workflow_works : Script ()
 all_slides_workflow_works = script do
   parties <- setupParties
   initData@InitData{..} <- initDemo parties
-  let PartiesForTesting{..} = initData.parties
+  let EntitiesForTesting{..} = initData.parties
   let isOwnedBy bank = (bank ==) . (.account.owner)
   let firstContractId = fst . head
 
@@ -444,7 +454,7 @@ bankAEurVsbankBUsdWorkflow
 bankAEurVsbankBUsdWorkflow bankASentAmount bankBSentAmount = script do
   parties <- setupParties
   initData@InitData{..} <- initDemo parties
-  let PartiesForTesting{..} = initData.parties
+  let EntitiesForTesting{..} = initData.parties
   let amount: Decimal = 200_000_000.0
   let isOwnedBy bank = (bank ==) . (.account.owner)
 
