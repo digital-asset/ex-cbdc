@@ -103,7 +103,7 @@ const CentralBank = (props: {
     try {
       const aliceAccount = getAccountFor(
         accountsProvidedByThisCb,
-        partyIdMap[targetPartyDisplayName]
+        partyIdMap.get(targetPartyDisplayName)!
       );
       assertProperRoles(usFRBRole, aliceAccount);
       setIsLoading(true);
@@ -144,7 +144,7 @@ const CentralBank = (props: {
     try {
       const aliceAccount = getAccountFor(
         accountsProvidedByThisCb,
-        partyIdMap[targetPartyDisplayName]
+        partyIdMap.get(targetPartyDisplayName)!
       );
       assertProperRoles(usFRBRole, aliceAccount);
       setIsLoading(true);

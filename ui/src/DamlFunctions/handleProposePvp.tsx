@@ -35,8 +35,8 @@ export const handleProposePvp = async (
 
     const receiverPartyId =
       displayName === Commercial.BankA
-        ? partyIdMap[Commercial.BankB]
-        : partyIdMap[Commercial.BankA];
+        ? partyIdMap.get(Commercial.BankB)!
+        : partyIdMap.get(Commercial.BankA)!;
 
     const quantityToSend = `${inputSellAmount}000000`;
 
@@ -44,16 +44,16 @@ export const handleProposePvp = async (
 
     const buyCashLabel = inputBuyCurrency;
 
-    const incomingCb = partyIdMap[
+    const incomingCb = partyIdMap.get(
       buyCashLabel === Currency.USD
         ? Central.CentralBank1
         : Central.CentralBank2
-    ];
-    const outgoingCb = partyIdMap[
+    )!;
+    const outgoingCb = partyIdMap.get(
       buyCashLabel === Currency.USD
         ? Central.CentralBank2
         : Central.CentralBank1
-    ];
+    )!;
 
     const ownAccountForIncoming = _.first(
       ourAssetSettlements

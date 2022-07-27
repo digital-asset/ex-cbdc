@@ -27,11 +27,11 @@ export const handleAcceptPvpProposal = async (
     const incomingPaymentCashLabel =
       // @ts-ignore
       pvpProposal?.payload.dvp.payments[0].id.label;
-    const incomingCb = partyIdMap[
+    const incomingCb = partyIdMap.get(
       incomingPaymentCashLabel === Currency.USD
         ? Central.CentralBank1
         : Central.CentralBank2
-    ];
+    )!;
     const ownAccountForIncoming = _.first(
       ourAssetSettlements
         .filter(
@@ -42,11 +42,11 @@ export const handleAcceptPvpProposal = async (
     const outgoingPaymentCashLabel =
       // @ts-ignore
       pvpProposal.payload.dvp.deliveries[0].id.label;
-    const outgoingCb = partyIdMap[
+    const outgoingCb = partyIdMap.get(
       outgoingPaymentCashLabel === Currency.USD
         ? Central.CentralBank1
         : Central.CentralBank2
-    ];
+    )!;
     const ourBankRole = _.first(
       ourBankRoles.filter(
         (role) => role.payload.centralBank === outgoingCb.asString()

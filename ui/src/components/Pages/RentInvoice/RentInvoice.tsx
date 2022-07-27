@@ -200,27 +200,27 @@ const Main: React.FC = () => {
         imageStyle={styles.hintImageStyle}
         additionalInfo={AdditionalHints()}
       />
-      {credentialsUSA && (
-        <DamlLedger {...credentialsUSA!}>
+      {credentialsUSA && credentialsAlice && credentialsLandlord && (
+        <DamlLedger {...credentialsUSA}>
           <CentralBank
             isCustomer
-            alice={PartyId.from(credentialsAlice!.party)}
-            landlord={PartyId.from(credentialsLandlord!.party)}
+            alice={PartyId.from(credentialsAlice.party)}
+            landlord={PartyId.from(credentialsLandlord.party)}
           />
         </DamlLedger>
       )}
 
-      {credentialsLandlord && (
+      {credentialsLandlord && credentialsAlice && (
         <DamlLedger {...credentialsLandlord}>
           <LandLordAssociation
             handleCleanState={handleCleanState}
-            renter={PartyId.from(credentialsAlice!.party)}
+            renter={PartyId.from(credentialsAlice.party)}
           />
         </DamlLedger>
       )}
 
       {credentialsAlice && (
-        <DamlLedger {...credentialsAlice!}>
+        <DamlLedger {...credentialsAlice}>
           <Customer
             name="Alice B."
             containerStyles={styles.customerStyles}

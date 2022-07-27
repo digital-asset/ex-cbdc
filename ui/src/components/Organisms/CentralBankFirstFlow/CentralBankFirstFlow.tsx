@@ -40,7 +40,9 @@ const CentralBankFirstFlow = (props: { displayName: string }) => {
   const [selectValue, setSelectValue] = useState("");
   const cbRole = useStreamQueries(CentralBankRole).contracts;
   const bankRoleQuery = () => {
-    return selectValue ? [{ bank: partyIdMap[selectValue].asString() }] : [];
+    return selectValue
+      ? [{ bank: partyIdMap.get(selectValue)!.asString() }]
+      : [];
   };
   const bankRole = useStreamQueries(BankRole, bankRoleQuery, [selectValue]);
 
@@ -224,19 +226,19 @@ const CentralBankFirstFlow = (props: { displayName: string }) => {
     return [
       getBalance(
         balances,
-        partyIdMap[displayName],
+        partyIdMap.get(displayName)!,
         formatMoney,
         BANK_LABELS[displayName]
       ),
       getBalance(
         balances,
-        partyIdMap[Commercial.BankA],
+        partyIdMap.get(Commercial.BankA)!,
         formatMoney,
         BANK_LABELS[Commercial.BankA]
       ),
       getBalance(
         balances,
-        partyIdMap[Commercial.BankB],
+        partyIdMap.get(Commercial.BankB)!,
         formatMoney,
         BANK_LABELS[Commercial.BankB]
       ),

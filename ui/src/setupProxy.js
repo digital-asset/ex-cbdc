@@ -12,7 +12,7 @@ const rewriteFn = (partyName) =>
 
 const createProxyMiddlewareHelper = (party) => {
   return createProxyMiddleware(`/${party}/v1/**`, {
-    target: credentials[party].host,
+    target: process.env.JSON_API_URL,
     ws: true,
     pathRewrite: rewriteFn(party),
     logLevel: "debug",
@@ -27,6 +27,11 @@ module.exports = function (app) {
     createProxyMiddlewareHelper("ecb"),
     createProxyMiddlewareHelper("bankA"),
     createProxyMiddlewareHelper("bankB"),
-    createProxyMiddlewareHelper("demoAdmin")
+    createProxyMiddlewareHelper("demoAdmin"),
+    createProxyMiddleware("/v1/**", {
+    target: process.env.JSON_API_URL,
+    ws: true,
+    logLevel: "debug",
+    })
   );
 };
