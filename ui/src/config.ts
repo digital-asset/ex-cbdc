@@ -5,8 +5,6 @@
 
 const credentials = require(process.env.REACT_APP_CONFIG_FILE as string);
 
-export const partyIdMap = require(process.env.REACT_APP_PARTYID_FILE as string);
-
 export const credentialsMap = credentials;
 
 export const isLocal = process.env.REACT_APP_IS_LOCAL === "true";

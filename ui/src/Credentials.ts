@@ -4,42 +4,55 @@
 ///
 
 import { encode } from "jwt-simple";
-import { partyIdMap, credentialsMap, httpBaseUrl, isLocal } from "./config";
-import { Credentials, PartyId } from "./models/CredentialsType";
+import { credentialsMap } from "./config";
 
-const APPLICATION_ID: string = "cbdc";
+import Ledger from '@daml/ledger';
+import { LedgerProps } from "@daml/react/createLedgerContext";
+import { PartyId } from "./models/CredentialsType";
 
-// NOTE: This is for testing purposes only.
-// To handle authentication properly,
-// see https://docs.daml.com/app-dev/authentication.html.
-const SECRET_KEY: string = "secret";
-
-function computeToken(partyId: string, ledgerId: string): string {
-  const payload = {
-    "https://daml.com/ledger-api": {
-      ledgerId: ledgerId,
-      applicationId: APPLICATION_ID,
-      actAs: [partyId],
-    },
-  };
-  return encode(payload, SECRET_KEY, "HS256");
+const makeToken = (loginName) => {
+  const payload = userManagement.tokenPayload(loginName);
+  return encode(payload, "secret", "HS256");
 }
 
-export const getPartyId = (displayName: string): PartyId => {
-  return PartyId.from(partyIdMap[displayName]);
-};
+const userManagement = {
+  tokenPayload: (loginName: string) =>
+  ({
+    sub: loginName,
+    scope: "daml_ledger_api"
+  }),
+  primaryParty: async (loginName, ledger: Ledger) => {
+    const user = await ledger.getUser();
+    if (user.primaryParty !== undefined) {
+      return user.primaryParty;
+    } else {
+      throw new Error(`User '${loginName}' has no primary party`);
+    }
 
-export const computeCredentials = (displayName: string): Credentials => {
-  const { ledgerId, token } = credentialsMap[displayName];
-  const partyIdText = partyIdMap[displayName];
+  }
+}
+
+export const partyIdMap = new Map<string, PartyId>();
+
+export const computeCredentials = async (displayName: string): Promise<LedgerProps> => {
+  const { userId, host } = credentialsMap[displayName];
+  const token = makeToken(userId);
+  const ledger = new Ledger({ token: token, httpBaseUrl: "http://localhost:3000/ecb/" });
+  const party = await userManagement.primaryParty(userId, ledger).catch(error => {
+          const errorMsg =
+            error instanceof Error ? error.toString() : JSON.stringify(error);
+          alert(`Failed to login as '${userId}':\n${errorMsg}`);
+          throw error;
+        });;
+  partyIdMap.set(displayName, PartyId.from(party));
 
   return {
-    partyId: PartyId.from(partyIdText),
-    token: isLocal ? computeToken(partyIdText, ledgerId) : token,
-    ledgerId,
+    party,
+    token,
     httpBaseUrl:
       process.env.NODE_ENV === "production"
-        ? httpBaseUrl
-        : `${httpBaseUrl}${displayName}/`,
+        ? host
+        : `${host}${displayName}/`,
+    user: userId
   };
 };

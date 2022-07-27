@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import CrossBorderPvp from "./Pages/CrossBorderPvp";
 import RentInvoice from "./Pages/RentInvoice";
 import { Route, useHistory, withRouter } from "react-router-dom";
@@ -16,7 +16,8 @@ import BtnActions from "./Molecules/BtnActions/BtnActions";
 import newDropdownArrow from "../static/assets/Elements/rectangle.svg";
 import reloadIcon from "../static/assets/NewIcons/Reload_Icon.svg";
 import sectionIcon from "../static/assets/NewIcons/Go_Icon_for_Dropdown.svg";
-import { DamlLedgerWithPartyId } from "../DamlFunctions/DamlLedgerWithPartyId";
+import DamlLedger from "@daml/react";
+import { LedgerProps } from "@daml/react/createLedgerContext";
 
 export interface dropdownTypes {
   text: string;
@@ -26,7 +27,17 @@ export interface dropdownTypes {
 }
 
 const App: React.FC = () => {
-  const credentials = computeCredentials(DemoAdmin.DemoAdmin);
+  const [credentials, setCredentials] = useState<LedgerProps>();
+
+  const createCredentials = async () => {
+    const cred = await computeCredentials(DemoAdmin.DemoAdmin);
+    setCredentials(cred);
+  };
+
+  useEffect(() => {
+    createCredentials();
+  }, []);
+
   function glide(val) {
     return spring(val, {
       stiffness: 150,
@@ -81,9 +92,11 @@ const App: React.FC = () => {
         history.location.pathname !== "/" && styles.secondBackground
       }`}
     >
-      <DamlLedgerWithPartyId {...credentials}>
-        <BtnActions buttons={buttons} locationList={locationList} />
-      </DamlLedgerWithPartyId>
+      {credentials && (
+        <DamlLedger {...credentials}>
+          <BtnActions buttons={buttons} locationList={locationList} />
+        </DamlLedger>
+      )}
 
       <AnimatedSwitch
         {...pageTransitions}

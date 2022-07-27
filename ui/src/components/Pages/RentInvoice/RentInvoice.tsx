@@ -3,11 +3,11 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { computeCredentials } from "../../../Credentials";
 import { BankCustomer, Central, Landlord } from "../../../models/Banks";
 import styles from "./RentInvoice.module.css";
-import { useStreamQueries } from "@daml/react";
+import DamlLedger, { useStreamQueries } from "@daml/react";
 import CentralBank from "../../Organisms/CentralBankSecondFlow";
 import Customer from "../../Organisms/Customer";
 import { LandLordAssociation } from "../../Organisms/LandLordAssociation/LandLordAssociation";
@@ -33,13 +33,8 @@ import {
   LastPaidRentInvoice,
   RentInvoice,
 } from "@daml.js/landlord-1.0.0/lib/Landlord/Landlord";
-import { DamlLedgerWithPartyId } from "../../../DamlFunctions/DamlLedgerWithPartyId";
-
-const [centralCredentials, customerCredentials, landlordCredentials] = [
-  Central.CentralBank1,
-  BankCustomer.Alice,
-  Landlord.Landlord,
-].map((el: string) => computeCredentials(el));
+import { LedgerProps } from "@daml/react/createLedgerContext";
+import { PartyId } from "../../../models/CredentialsType";
 
 function RentInvoiceProcessVisualization() {
   const rentInvoice = useStreamQueries(RentInvoice);
@@ -123,6 +118,20 @@ function RentInvoiceProcessVisualization() {
 const Main: React.FC = () => {
   const [startingNewProcess, setStartingNewProcess] = useState<boolean>(false);
 
+  const [credentialsUSA, setCredentialsUSA] = useState<LedgerProps>();
+  const [credentialsAlice, setCredentialsAlice] = useState<LedgerProps>();
+  const [credentialsLandlord, setCredentialsLandlord] = useState<LedgerProps>();
+
+  const createCredentials = async () => {
+    setCredentialsUSA(await computeCredentials(Central.CentralBank1));
+    setCredentialsAlice(await computeCredentials(BankCustomer.Alice));
+    setCredentialsLandlord(await computeCredentials(Landlord.Landlord));
+  };
+
+  useEffect(() => {
+    createCredentials();
+  }, []);
+
   const handleCleanState = (startingNew: boolean) => {
     setStartingNewProcess(startingNew);
   };
@@ -165,9 +174,11 @@ const Main: React.FC = () => {
       {startingNewProcess ? (
         <div />
       ) : (
-        <DamlLedgerWithPartyId {...landlordCredentials}>
-          <RentInvoiceProcessVisualization />
-        </DamlLedgerWithPartyId>
+        credentialsLandlord && (
+          <DamlLedger {...credentialsLandlord}>
+            <RentInvoiceProcessVisualization />
+          </DamlLedger>
+        )
       )}
       <div>
         <img src={SQL_LOGO} alt={"#"} className={styles.sqlLogo} />
@@ -189,26 +200,34 @@ const Main: React.FC = () => {
         imageStyle={styles.hintImageStyle}
         additionalInfo={AdditionalHints()}
       />
-      <DamlLedgerWithPartyId {...centralCredentials}>
-        <CentralBank
-          isCustomer
-          alice={customerCredentials.partyId}
-          landlord={landlordCredentials.partyId}
-        />
-      </DamlLedgerWithPartyId>
-      <DamlLedgerWithPartyId {...landlordCredentials}>
-        <LandLordAssociation
-          handleCleanState={handleCleanState}
-          renter={customerCredentials.partyId}
-        />
-      </DamlLedgerWithPartyId>
-      <DamlLedgerWithPartyId {...customerCredentials}>
-        <Customer
-          name="Alice B."
-          containerStyles={styles.customerStyles}
-          withMenu
-        />
-      </DamlLedgerWithPartyId>
+      {credentialsUSA && (
+        <DamlLedger {...credentialsUSA!}>
+          <CentralBank
+            isCustomer
+            alice={PartyId.from(credentialsAlice!.party)}
+            landlord={PartyId.from(credentialsLandlord!.party)}
+          />
+        </DamlLedger>
+      )}
+
+      {credentialsLandlord && (
+        <DamlLedger {...credentialsLandlord}>
+          <LandLordAssociation
+            handleCleanState={handleCleanState}
+            renter={PartyId.from(credentialsAlice!.party)}
+          />
+        </DamlLedger>
+      )}
+
+      {credentialsAlice && (
+        <DamlLedger {...credentialsAlice!}>
+          <Customer
+            name="Alice B."
+            containerStyles={styles.customerStyles}
+            withMenu
+          />
+        </DamlLedger>
+      )}
     </div>
   );
 };
