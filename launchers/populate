@@ -19,4 +19,5 @@ echo "Market setup script: ${0} $PARTICIPANT_CONFIG"
 
 scripts/waitForLedger.sh localhost 6865
 
-run_script "Testing.Init.Init:allocateAndInitDemo"
+#run_script "Testing.Init.Init:allocateAndInitDemo"
+daml script --dar ./testing/.daml/dist/testing-1.0.0.dar --ledger-host localhost --ledger-port 6865 --script-name "Testing.Init.Init:allocateAndInitDemo"
