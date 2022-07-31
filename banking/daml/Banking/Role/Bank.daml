@@ -94,7 +94,7 @@ template BankRole
             exercise pvpRequestCid DvpProposal_Accept with
                 otherPaymentAccounts = [ownAccountForIncoming]
                 otherDeliveryAccounts = [account]
-        return (dvpSettlementCid, dvpCid, paySettleCid, delSettleCid)
+        pure (dvpSettlementCid, dvpCid, paySettleCid, delSettleCid)
 
 template UniqueIdGenerator
   with
@@ -138,7 +138,7 @@ template BankRoleInvite
 
     choice BankRoleInvite_Reject : ()
       controller bank
-      do return ()
+      do pure ()
 
 getCashId : Party -> Text -> Id
 getCashId centralBank cashLabel =

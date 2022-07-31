@@ -102,7 +102,7 @@ template SettlementInstruction
 
     choice SettlementInstruction_Archive : ()
       controller masterAgreement.id.signatories 
-      do return ()
+      do pure ()
 
 -- | HIDE
 nextSender : SettlementInstruction -> Optional Party

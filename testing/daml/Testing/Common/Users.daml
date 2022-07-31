@@ -22,7 +22,7 @@ setupPartiesAndUsers = do
   landlordsAssociation <- allocatePartyAndUser "landlordsAssociation"
   renter <- allocatePartyAndUser "renter"
 
-  return EntitiesForTesting with ..
+  pure EntitiesForTesting with ..
 
   where
     allocatePartyAndUser displayName = do
@@ -30,4 +30,4 @@ setupPartiesAndUsers = do
       p <- allocateParty displayName
       let u = User userId (Some p)
       createUser u [CanActAs p]
-      return u
+      pure u

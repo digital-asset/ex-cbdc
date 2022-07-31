@@ -59,15 +59,10 @@ allocateAndInitDemo : Script UsersForTesting
 allocateAndInitDemo = script do
   -- Participants set up parties, connecting to the two Banking domains (EUR/GBP)
   users@EntitiesForTesting{..} <- setupPartiesAndUsers
-  let parties = usersToPartiesForTesting users
+  let userToParty user = fromSomeNote "The User has no Party assigned" user.primaryParty
+      parties = fmap userToParty users
   initDemo parties
-  return users
-
-usersToPartiesForTesting : UsersForTesting -> PartiesForTesting
-usersToPartiesForTesting = fmap userToParty
-  
-userToParty : User -> Party
-userToParty user = fromSome user.primaryParty
+  pure users
 
 initDemo : PartiesForTesting -> Script InitData
 initDemo parties@EntitiesForTesting{..} = script do

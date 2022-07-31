@@ -67,7 +67,7 @@ template DvpSettlementRule
           mapA (processSettlementInstruction dvp seller dvp.buyer) $
                 zipChecked dvp.deliveries deliveryInstructionCids
 
-        return DvpSettlement_Process_Result with dvpCid = dvpNewCid, paymentDepositCids, deliveryDepositCids
+        pure DvpSettlement_Process_Result with dvpCid = dvpNewCid, paymentDepositCids, deliveryDepositCids
 
 checkSettlementInstruction : Dvp -> Party -> Party -> Asset -> ContractId SettlementInstruction -> Update ()
 checkSettlementInstruction dvp sender receiver asset instructionCid = do

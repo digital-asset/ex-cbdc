@@ -92,4 +92,4 @@ template CentralBankRoleInvite
 
     choice CentralBankRoleInvite_Reject : ()
       controller centralBank
-      do return ()
+      do pure ()

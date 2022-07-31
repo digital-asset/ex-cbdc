@@ -21,7 +21,7 @@ setupParties = do
   landlordsAssociation <- allocate "LandlordsAssociation" "landlordsAssociation"
   renter <- allocate "Alice" "alice"
 
-  return EntitiesForTesting with ..
+  pure EntitiesForTesting with ..
   where
     allocate name participant =
       allocatePartyWithHintOn

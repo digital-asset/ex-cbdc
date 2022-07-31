@@ -75,7 +75,7 @@ template AssetDeposit
             (\acc cid -> do
               c <- fetchAndArchive cid
               c === setQuantity c.asset.quantity acc
-              return $ setQuantity (acc.asset.quantity + c.asset.quantity) acc
+              pure $ setQuantity (acc.asset.quantity + c.asset.quantity) acc
             )
           this
           depositCids

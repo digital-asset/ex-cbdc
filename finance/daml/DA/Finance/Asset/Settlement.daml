@@ -85,7 +85,7 @@ template AssetSettlementRule
       do
         deposit <- fetchAndArchive depositCid
         deposit.account === account
-        return deposit.asset
+        pure deposit.asset
 
     nonconsuming choice AssetSettlement_Credit : ContractId AssetDeposit
       -- ^ Allows a `ctrl` (if part of `ctrls`) to create an asset deposit.

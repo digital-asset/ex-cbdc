@@ -22,7 +22,7 @@ fetchAndArchive : Template a => ContractId a -> Update a
 fetchAndArchive cid = do
   c <- fetch cid
   archive cid
-  return c
+  pure c
 
 -- | Checks that the ledger time is on or after the provided date.
 assertOnOrAfterDateMsg : Text -> Date -> Update ()
