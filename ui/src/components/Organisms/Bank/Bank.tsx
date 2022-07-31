@@ -265,9 +265,7 @@ const Bank: React.FC<CommercialBankData> = (props) => {
       </div>,
     ];
     function getDisplayName(partyId: PartyId): string {
-      return partyId?.equals(PartyId.from(party))
-        ? displayName
-        : counterparty;
+      return partyId?.equals(PartyId.from(party)) ? displayName : counterparty;
     }
     let approvedData = [
       <p

@@ -29,9 +29,9 @@ module.exports = function (app) {
     createProxyMiddlewareHelper("bankB"),
     createProxyMiddlewareHelper("demoAdmin"),
     createProxyMiddleware("/v1/**", {
-    target: process.env.JSON_API_URL,
-    ws: true,
-    logLevel: "debug",
+      target: process.env.JSON_API_URL,
+      ws: true,
+      logLevel: "debug",
     })
   );
 };
