@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 const { createProxyMiddleware } = require("http-proxy-middleware");
-const credentials = require(process.env.REACT_APP_CONFIG_FILE);
 
 const rewriteFn = (partyName) =>
   function (path) {

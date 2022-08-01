@@ -25,6 +25,12 @@ jest.mock(
           close: jest.fn(),
         };
       }
+
+      getUser() {
+        return {
+          primaryParty: "mockParty",
+        };
+      }
     }
 );
 
