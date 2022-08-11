@@ -17,6 +17,7 @@ import DA.Finance.Process.AssetInjection
 import DA.Finance.Trade.SettlementInstruction
 import Daml.Script hiding (party)
 import DemoAdmin.Role.DemoAdmin
+import Testing.Models.Entities
 import Testing.Models.Parties
 import Testing.Common.Parties
 import Testing.Common.TestUtilities
@@ -40,7 +41,7 @@ data RolesForTesting = RolesForTesting with
 pvpCanBeRepeatedWithSameKeyWithoutDuplicateKeyError : Script ()
 pvpCanBeRepeatedWithSameKeyWithoutDuplicateKeyError = script do
   let cash = 1000.0
-  (parties@PartiesForTesting{..}, roles@RolesForTesting{..}) <- setupRolesForPvp
+  (parties@EntitiesForTesting{..}, roles@RolesForTesting{..}) <- setupRolesForPvp
   injectCashByReqeust bankA usFRBBankARole usFRB cash
   issueCash ecb ecbBankBRole cash
   bankASendsUsdForEur parties roles
@@ -51,7 +52,7 @@ pvpDemoWorkflowCanBeExecuted : Script()
 pvpDemoWorkflowCanBeExecuted = script do
   let cashBankAAmount = 1000.0
       cashBankBAmount = 999.0
-  (parties@PartiesForTesting{..}, RolesForTesting{..}) <- setupRolesForPvp
+  (parties@EntitiesForTesting{..}, RolesForTesting{..}) <- setupRolesForPvp
 
   cashBankA <- injectCashByReqeust bankA usFRBBankARole usFRB cashBankAAmount
   cashBankB <- issueCash ecb ecbBankBRole cashBankBAmount
@@ -75,7 +76,7 @@ pvpReverseDemoWorkflowCanBeExecuted : Script()
 pvpReverseDemoWorkflowCanBeExecuted = script do
   let cashBankAAmount = 1000.0
       cashBankBAmount = 999.0
-  (parties@PartiesForTesting{..}, RolesForTesting{..}) <- setupRolesForPvp
+  (parties@EntitiesForTesting{..}, RolesForTesting{..}) <- setupRolesForPvp
 
   cashBankA <- injectCashByReqeust bankA usFRBBankARole usFRB cashBankAAmount
   cashBankB <- issueCash ecb ecbBankBRole cashBankBAmount
@@ -96,7 +97,7 @@ pvpReverseDemoWorkflowCanBeExecuted = script do
 pvpWorksWithLessThanTheWholeAmountOfIssuedCash : Script()
 pvpWorksWithLessThanTheWholeAmountOfIssuedCash = script do
   let amount = 1000.0
-  (parties@PartiesForTesting{..}, roles@RolesForTesting{..}) <- setupRolesForPvp
+  (parties@EntitiesForTesting{..}, roles@RolesForTesting{..}) <- setupRolesForPvp
 
   injectCashByReqeust bankA usFRBBankARole usFRB amount
   issueCash ecb ecbBankBRole amount
@@ -119,7 +120,7 @@ usingTheWrongAssetLabelForReceivedCashFailsThePvp = script do
       sentAmount = 60.0
       otherAmount = 40.0
       wrongLabel = "USD"
-  (parties@PartiesForTesting{..}, RolesForTesting{..}) <- setupRolesForPvp
+  (parties@EntitiesForTesting{..}, RolesForTesting{..}) <- setupRolesForPvp
 
   cashBankA <- injectCashByReqeust bankA usFRBBankARole usFRB cashBankAAmount
   cashBankB <- issueCash ecb ecbBankBRole cashBankBAmount
@@ -149,7 +150,7 @@ allocationFailsIfCashIsNotEnough = script do
       cashBankBAmount = 999.0
       sentAmount = cashBankAAmount + 100.0
       otherAmount = cashBankBAmount + 100.0
-  (parties@PartiesForTesting{..}, RolesForTesting{..}) <- setupRolesForPvp
+  (parties@EntitiesForTesting{..}, RolesForTesting{..}) <- setupRolesForPvp
 
   cashBankA <- injectCashByReqeust bankA usFRBBankARole usFRB cashBankAAmount
   cashBankB <- issueCash ecb ecbBankBRole cashBankBAmount
@@ -173,7 +174,7 @@ allocationFailsIfCashIsNotEnough = script do
 pvpCanBeReversed : Script()
 pvpCanBeReversed = script do
   let amount = 1000.0
-  (parties@PartiesForTesting{..}, roles@RolesForTesting{..}) <- setupRolesForPvp
+  (parties@EntitiesForTesting{..}, roles@RolesForTesting{..}) <- setupRolesForPvp
 
   injectCashByReqeust bankA usFRBBankARole usFRB amount
   issueCash ecb ecbBankBRole amount
@@ -186,7 +187,7 @@ pvpCanBeReversed = script do
 pvpSamePartyInitiatesReverse : Script()
 pvpSamePartyInitiatesReverse = script do
   let amount = 1000.0
-  (parties@PartiesForTesting{..}, roles@RolesForTesting{..}) <- setupRolesForPvp
+  (parties@EntitiesForTesting{..}, roles@RolesForTesting{..}) <- setupRolesForPvp
 
   injectCashByReqeust bankA usFRBBankARole usFRB amount
   issueCash ecb ecbBankBRole amount
@@ -196,28 +197,28 @@ pvpSamePartyInitiatesReverse = script do
 
 
 bankBSendsEurForUsd : PartiesForTesting -> RolesForTesting -> Script ()
-bankBSendsEurForUsd PartiesForTesting{..} RolesForTesting{..} = do
+bankBSendsEurForUsd EntitiesForTesting{..} RolesForTesting{..} = do
   cashA <- getSomeCashFor bankA usFRB
   cashB <- getSomeCashFor bankB ecb
   void $ executePvp bankB ecbBankBRole 1.0 usFRB cashB
                     bankA usFRBBankARole usd 1.0 ecb cashA
 
 bankBSendsUsdForEur : PartiesForTesting -> RolesForTesting -> Script ()
-bankBSendsUsdForEur PartiesForTesting{..} RolesForTesting{..} = do
+bankBSendsUsdForEur EntitiesForTesting{..} RolesForTesting{..} = do
   cashA <- getSomeCashFor bankA ecb
   cashB <- getSomeCashFor bankB usFRB
   void $ executePvp bankB usFRBBankBRole 1.0 ecb cashB
                     bankA ecbBankARole eur 1.0 usFRB cashA
 
 bankASendsEurForUsd : PartiesForTesting -> RolesForTesting -> Script ()
-bankASendsEurForUsd PartiesForTesting{..} RolesForTesting{..} = do
+bankASendsEurForUsd EntitiesForTesting{..} RolesForTesting{..} = do
   cashA <- getSomeCashFor bankA ecb
   cashB <- getSomeCashFor bankB usFRB
   void $executePvp bankA ecbBankARole 1.0 usFRB cashA
                    bankB usFRBBankBRole usd 1.0 ecb cashB
 
 bankASendsUsdForEur : PartiesForTesting -> RolesForTesting -> Script ()
-bankASendsUsdForEur PartiesForTesting{..} RolesForTesting{..} = do
+bankASendsUsdForEur EntitiesForTesting{..} RolesForTesting{..} = do
   cashA <- getSomeCashFor bankA usFRB
   cashB <- getSomeCashFor bankB ecb
   void $ executePvp bankA usFRBBankARole 1.0 ecb cashA
@@ -310,7 +311,7 @@ executePvp
 
 setupRolesForPvp : Script (PartiesForTesting, RolesForTesting)
 setupRolesForPvp = do
-  parties@PartiesForTesting{..} <- setupParties
+  parties@EntitiesForTesting{..} <- setupParties
 
   demoAdminRole <- demoAdmin `submit`
     createCmd DemoAdminRole with demoAdmin

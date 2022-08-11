@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-sdk-version: 1.18.1
+sdk-version: 2.3.2
 name: banking
 source: daml
 version: 1.0.0
@@ -20,8 +20,8 @@ dependencies:
   - ../certificates/.daml/dist/certificates-1.0.0.dar
   - ../finance/.daml/dist/finance-1.0.0.dar
 build-options:
-  - '--ghc-option'
-  - '-Werror'
-  - '--ghc-option'
-  - '-Wunused-binds'
+  - "--ghc-option"
+  - "-Werror"
+  - "--ghc-option"
+  - "-Wunused-binds"
 build_codegen: js

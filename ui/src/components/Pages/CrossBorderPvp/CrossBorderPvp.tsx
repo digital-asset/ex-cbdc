@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { computeCredentials } from "../../../Credentials";
 import { Central, Commercial } from "../../../models/Banks";
 import Bank from "../../Organisms/Bank/Bank";
@@ -21,22 +21,15 @@ import Atomic from "../../../static/assets/Icons/Atomic_Icon.svg";
 import Privacy from "../../../static/assets/Icons/Privacy_Icon.svg";
 import Button from "../../Atoms/Button";
 import { PvpProcessVisualization } from "./PvpProcessVisualization";
-import { Credentials } from "../../../models/CredentialsType";
-import { DamlLedgerWithPartyId } from "../../../DamlFunctions/DamlLedgerWithPartyId";
-
-const parties = [
-  Central.CentralBank1,
-  Central.CentralBank2,
-  Commercial.BankA,
-  Commercial.BankB,
-];
-const credentials: Credentials[] = parties.map((el: string) =>
-  computeCredentials(el)
-);
-const [credentialUSA, credentialEU, credentialBankA, credentialBankB] =
-  credentials;
+import { LedgerProps } from "@daml/react/createLedgerContext";
+import DamlLedger from "@daml/react";
+import { PartyId } from "../../../models/CredentialsType";
 
 const CrossBorderPvp: React.FC = () => {
+  const [credentialsBankA, setCredentialsBankA] = useState<LedgerProps>();
+  const [credentialsUSA, setCredentialsUSA] = useState<LedgerProps>();
+  const [credentialsEU, setCredentialsEU] = useState<LedgerProps>();
+  const [credentialsBankB, setCredentialsBankB] = useState<LedgerProps>();
   const [showModal, setShowModal] = useState<boolean>(false);
   const handleShowModal = () => setShowModal(true);
 
@@ -45,14 +38,27 @@ const CrossBorderPvp: React.FC = () => {
   const [isShownHints, setIsShownHints] = useState<boolean>(false);
   const handleToggleHints = () => setIsShownHints(!isShownHints);
 
+  const createCredentials = async () => {
+    setCredentialsBankA(await computeCredentials(Commercial.BankA));
+    setCredentialsBankB(await computeCredentials(Commercial.BankB));
+    setCredentialsUSA(await computeCredentials(Central.CentralBank1));
+    setCredentialsEU(await computeCredentials(Central.CentralBank2));
+  };
+  useEffect(() => {
+    createCredentials();
+  }, []);
+
   return (
     <div className={styles.main}>
-      <DamlLedgerWithPartyId {...credentialBankA}>
-        <PvpProcessVisualization
-          bankA={credentialBankA.partyId}
-          bankB={credentialBankB.partyId}
-        />
-      </DamlLedgerWithPartyId>
+      {credentialsBankA && credentialsBankB && (
+        <DamlLedger {...credentialsBankA}>
+          <PvpProcessVisualization
+            bankA={PartyId.from(credentialsBankA.party)}
+            bankB={PartyId.from(credentialsBankB.party)}
+          />
+        </DamlLedger>
+      )}
+
       <div className={`${styles.leftLogosWrapper}`}>
         <LeftBunchOfLogos />
       </div>
@@ -68,22 +74,35 @@ const CrossBorderPvp: React.FC = () => {
         title={"WHAT CAN I DO IN THIS SECTION?"}
         subtitle={"Section Steps:"}
       />
-      <DamlLedgerWithPartyId {...credentialUSA}>
-        <CentralBankFirstFlow displayName={Central.CentralBank1} />
-      </DamlLedgerWithPartyId>
+      {credentialsUSA && (
+        <DamlLedger {...credentialsUSA}>
+          <CentralBankFirstFlow displayName={Central.CentralBank1} />
+        </DamlLedger>
+      )}
 
-      <DamlLedgerWithPartyId {...credentialEU}>
-        <CentralBankFirstFlow displayName={Central.CentralBank2} />
-      </DamlLedgerWithPartyId>
+      {credentialsEU && (
+        <DamlLedger {...credentialsEU}>
+          <CentralBankFirstFlow displayName={Central.CentralBank2} />
+        </DamlLedger>
+      )}
 
-      <DamlLedgerWithPartyId {...credentialBankA}>
-        <Bank displayName={Commercial.BankA} counterparty={Commercial.BankB} />
-      </DamlLedgerWithPartyId>
+      {credentialsBankA && (
+        <DamlLedger {...credentialsBankA}>
+          <Bank
+            displayName={Commercial.BankA}
+            counterparty={Commercial.BankB}
+          />
+        </DamlLedger>
+      )}
 
-      <DamlLedgerWithPartyId {...credentialBankB}>
-        <Bank displayName={Commercial.BankB} counterparty={Commercial.BankA} />
-      </DamlLedgerWithPartyId>
-
+      {credentialsBankB && (
+        <DamlLedger {...credentialsBankB}>
+          <Bank
+            displayName={Commercial.BankB}
+            counterparty={Commercial.BankA}
+          />
+        </DamlLedger>
+      )}
       <Modal show={showModal} handleClose={handleChangeShowModal(false)} />
     </div>
   );

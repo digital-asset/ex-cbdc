@@ -23,7 +23,7 @@ import { BankRole } from "@daml.js/banking-1.0.0/lib/Banking/Role/Bank";
 import { useStreamQueries, useLedger, useParty } from "@daml/react";
 import Error from "../../../static/assets/Icons/Error.svg";
 import { getBalance, getBalances } from "../CentralBankSecondFlow/getBalances";
-import { getPartyId } from "../../../Credentials";
+import { partyIdMap } from "../../../Credentials";
 
 const CentralBankFirstFlow = (props: { displayName: string }) => {
   const { displayName } = props;
@@ -40,7 +40,9 @@ const CentralBankFirstFlow = (props: { displayName: string }) => {
   const [selectValue, setSelectValue] = useState("");
   const cbRole = useStreamQueries(CentralBankRole).contracts;
   const bankRoleQuery = () => {
-    return selectValue ? [{ bank: getPartyId(selectValue).asString() }] : [];
+    return selectValue
+      ? [{ bank: partyIdMap.get(selectValue)!.asString() }]
+      : [];
   };
   const bankRole = useStreamQueries(BankRole, bankRoleQuery, [selectValue]);
 
@@ -224,19 +226,19 @@ const CentralBankFirstFlow = (props: { displayName: string }) => {
     return [
       getBalance(
         balances,
-        getPartyId(displayName),
+        partyIdMap.get(displayName)!,
         formatMoney,
         BANK_LABELS[displayName]
       ),
       getBalance(
         balances,
-        getPartyId(Commercial.BankA),
+        partyIdMap.get(Commercial.BankA)!,
         formatMoney,
         BANK_LABELS[Commercial.BankA]
       ),
       getBalance(
         balances,
-        getPartyId(Commercial.BankB),
+        partyIdMap.get(Commercial.BankB)!,
         formatMoney,
         BANK_LABELS[Commercial.BankB]
       ),

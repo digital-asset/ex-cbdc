@@ -53,8 +53,8 @@ it("computePvpStatus smoke", () => {
     bankAllocationDone,
   } = testInput;
   const expected = {
-    BankA: null,
-    BankB: null,
+    bankA: null,
+    bankB: null,
     "Counterparty:": PartyId.from("BankB"),
     Proposer: PartyId.from("BankA"),
     "Proposer To Buy:": { amount: 10, currency: "USD" },

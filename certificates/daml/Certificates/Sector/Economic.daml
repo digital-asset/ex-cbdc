@@ -17,15 +17,15 @@ template EconomicSectorCertificate
     signatory centralBank
     observer landlordsAssociation
 
-    controller landlordsAssociation can
-      nonconsuming Distribute : ContractId DistributedEconomicSectorCertificate
-        with
-          name : Party
-        do
-          create DistributedEconomicSectorCertificate with
-            owner = name
-            observers = empty
-            ..
+    nonconsuming choice Distribute : ContractId DistributedEconomicSectorCertificate
+      with
+        name : Party
+      controller landlordsAssociation
+      do
+        create DistributedEconomicSectorCertificate with
+          owner = name
+          observers = empty
+          ..
 
 template DistributedEconomicSectorCertificate
   with
@@ -38,15 +38,15 @@ template DistributedEconomicSectorCertificate
     signatory centralBank, landlordsAssociation
     observer observers, owner
 
-    controller landlordsAssociation can
-      DistributedEconomicSectorCertificate_Revoke : ()
-        do
-          pure ()
+    choice DistributedEconomicSectorCertificate_Revoke : ()
+      controller landlordsAssociation
+      do
+        pure ()
 
-    controller owner can
-      AddObserver : ContractId DistributedEconomicSectorCertificate
-        with
-          newObserver : Party
-        do
-          create this with
-            observers = insert newObserver observers
+    choice AddObserver : ContractId DistributedEconomicSectorCertificate
+      with
+        newObserver : Party
+      controller owner
+      do
+        create this with
+          observers = insert newObserver observers

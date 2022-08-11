@@ -28,6 +28,7 @@ import DA.Finance.Process.AssetExtraction
 import DA.Finance.Process.AssetInjection
 
 import Testing.Init.Init
+import Testing.Models.Entities
 import Testing.Models.Parties
 
 template ResetAgreement
@@ -169,7 +170,7 @@ getResetAdmin = demoAdmin
 
 -- listKnownParties may add additional parties not properly listed in participants config e.g. on Canton.
 getAllParties: Parties -> Script (NonEmpty Party)
-getAllParties parties@PartiesForTesting{..} =
+getAllParties parties@EntitiesForTesting{..} =
   pure $ fromList [usFRB, ecb, bankA, bankB, demoAdmin, landlord, landlordsAssociation, renter]
 -- getAllParties parties = (fmap (.party)) <$> listKnownParties
 

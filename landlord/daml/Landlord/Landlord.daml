@@ -26,22 +26,23 @@ template LandlordRole
   where
     signatory landlordsAssociation, landlord
 
-    controller landlord can
-      nonconsuming CreateRentInvoice : ContractId RentInvoice
-        with
-          economicSectorCertificate : Optional (ContractId DistributedEconomicSectorCertificate)
-          renter : Party
-          date : Date
-          price : Decimal
-        do
-          economicSectorCertificate <- forA economicSectorCertificate \certificateCid -> do
-            certificate <- fetch certificateCid
-            assertMsg "Rent invoice can only be created using a certificate for the Housing sector." $
-              Housing == certificate.sector
-            exercise certificateCid AddObserver with newObserver = renter
-          last <- lookupByKey @LastPaidRentInvoice (landlord, renter)
-          forA_ last (`exercise` LastPaidRentInvoice_Archive)
-          create RentInvoice with ..
+    
+    nonconsuming choice CreateRentInvoice : ContractId RentInvoice
+      with
+        economicSectorCertificate : Optional (ContractId DistributedEconomicSectorCertificate)
+        renter : Party
+        date : Date
+        price : Decimal
+      controller landlord
+      do
+        economicSectorCertificate <- forA economicSectorCertificate \certificateCid -> do
+          certificate <- fetch certificateCid
+          assertMsg "Rent invoice can only be created using a certificate for the Housing sector." $
+            Housing == certificate.sector
+          exercise certificateCid AddObserver with newObserver = renter
+        last <- lookupByKey @LastPaidRentInvoice (landlord, renter)
+        forA_ last (`exercise` LastPaidRentInvoice_Archive)
+        create RentInvoice with ..
 
 template RentInvoice
   with
@@ -54,37 +55,39 @@ template RentInvoice
     landlordAccountId : Id
   where
     signatory landlordsAssociation, landlord
+    observer renter
 
-    controller renter can
-      RentInvoice_Pay : (ContractId LastPaidRentInvoice, [ContractId AssetDeposit])
-        with
-          assetDepositCids : [ContractId AssetDeposit]
-        do
-          assetDeposits <- Prelude.mapA fetch assetDepositCids
-          assertMsg "Payment needs some asset deposit." $ not $ Prelude.null assetDepositCids
-          assertMsg "Quantity has to be less or equal than price." $ price <= sum ((.asset.quantity) <$> assetDeposits)
-          let depositCidsWithData = zip assetDepositCids assetDeposits
-              (normalCbdc, everyEarmarkedCbdc) = partition (\(_, d) -> isNone d.asset.earmark) depositCidsWithData
-          (earmarkedSpent, earmarkedResult) <-
-            case economicSectorCertificate of
-              Some certCid ->
-                payWithEarmarkedAsMuchAsPossible landlordAccountId price certCid everyEarmarkedCbdc
-              _ ->
-                pure (0.0, None)
-          normalResult <-
-            if earmarkedSpent < price
-            then do
-              let (normalCbdcCids, _) = unzip normalCbdc
-                  accountId = getAccountId normalCbdc
-              resultCbdc <- exerciseByKey @AssetSettlementRule accountId AssetSettlement_Transfer with
-                receiverAccountId = landlordAccountId
-                depositCids =  normalCbdcCids
-                amount = Some (price - earmarkedSpent)
-              pure $ Some resultCbdc
-            else
-              pure None
-          paid <- create LastPaidRentInvoice with rentInvoice = this
-          pure (paid, optionalToList normalResult <> optionalToList earmarkedResult)
+    
+    choice RentInvoice_Pay : (ContractId LastPaidRentInvoice, [ContractId AssetDeposit])
+      with
+        assetDepositCids : [ContractId AssetDeposit]
+      controller renter
+      do
+        assetDeposits <- Prelude.mapA fetch assetDepositCids
+        assertMsg "Payment needs some asset deposit." $ not $ Prelude.null assetDepositCids
+        assertMsg "Quantity has to be less or equal than price." $ price <= sum ((.asset.quantity) <$> assetDeposits)
+        let depositCidsWithData = zip assetDepositCids assetDeposits
+            (normalCbdc, everyEarmarkedCbdc) = partition (\(_, d) -> isNone d.asset.earmark) depositCidsWithData
+        (earmarkedSpent, earmarkedResult) <-
+          case economicSectorCertificate of
+            Some certCid ->
+              payWithEarmarkedAsMuchAsPossible landlordAccountId price certCid everyEarmarkedCbdc
+            _ ->
+              pure (0.0, None)
+        normalResult <-
+          if earmarkedSpent < price
+          then do
+            let (normalCbdcCids, _) = unzip normalCbdc
+                accountId = getAccountId normalCbdc
+            resultCbdc <- exerciseByKey @AssetSettlementRule accountId AssetSettlement_Transfer with
+              receiverAccountId = landlordAccountId
+              depositCids =  normalCbdcCids
+              amount = Some (price - earmarkedSpent)
+            pure $ Some resultCbdc
+          else
+            pure None
+        paid <- create LastPaidRentInvoice with rentInvoice = this
+        pure (paid, optionalToList normalResult <> optionalToList earmarkedResult)
 
 template LastPaidRentInvoice
   with
@@ -94,10 +97,11 @@ template LastPaidRentInvoice
     key (rentInvoice.landlord, rentInvoice.renter): (Party, Party)
     maintainer key._1
 
-    controller rentInvoice.landlord can
-      LastPaidRentInvoice_Archive : ()
-        do
-          pure ()
+    
+    choice LastPaidRentInvoice_Archive : ()
+      controller rentInvoice.landlord
+      do
+        pure ()
 
 template LandlordsAssociationRole
   with
@@ -105,12 +109,13 @@ template LandlordsAssociationRole
   where
     signatory landlordsAssociation
 
-    controller landlordsAssociation can
-      Invite_Landlord : ContractId LandlordRoleInvitation
-        with
-          landlord : Party
-        do
-          create LandlordRoleInvitation with ..
+    
+    choice Invite_Landlord : ContractId LandlordRoleInvitation
+      with
+        landlord : Party
+      controller landlordsAssociation
+      do
+        create LandlordRoleInvitation with ..
 
 template LandlordRoleInvitation
   with
@@ -118,17 +123,19 @@ template LandlordRoleInvitation
     landlord : Party
   where
     signatory landlordsAssociation
+    observer landlord
+    
+    choice LandlordRoleInvitation_Accept : ContractId LandlordRole
+      with
+        landlordAccountId : Id
+      controller landlord
+      do
+        create LandlordRole with ..
 
-    controller landlord can
-      LandlordRoleInvitation_Accept : ContractId LandlordRole
-        with
-          landlordAccountId : Id
-        do
-          create LandlordRole with ..
-
-      LandlordRoleInvitation_Reject : ()
-        do
-          pure ()
+    choice LandlordRoleInvitation_Reject : ()
+      controller landlord
+      do
+        pure ()
 
 getAccountId : [(ContractId AssetDeposit, AssetDeposit)] -> Id
 getAccountId deposits =

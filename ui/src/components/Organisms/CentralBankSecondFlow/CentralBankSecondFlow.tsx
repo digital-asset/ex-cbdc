@@ -22,7 +22,7 @@ import { Sector } from "@daml.js/lib-1.0.0/lib/DA/Lib/Types";
 import { AssetDeposit } from "@daml.js/finance-1.0.0/lib/DA/Finance/Asset";
 import { getBalance, getBalances } from "./getBalances";
 import { PartyId } from "../../../models/CredentialsType";
-import { getPartyId } from "../../../Credentials";
+import { partyIdMap } from "../../../Credentials";
 import { CreateEvent } from "@daml/ledger";
 
 const LABEL = {
@@ -103,7 +103,7 @@ const CentralBank = (props: {
     try {
       const aliceAccount = getAccountFor(
         accountsProvidedByThisCb,
-        getPartyId(targetPartyDisplayName)
+        partyIdMap.get(targetPartyDisplayName)!
       );
       assertProperRoles(usFRBRole, aliceAccount);
       setIsLoading(true);
@@ -144,7 +144,7 @@ const CentralBank = (props: {
     try {
       const aliceAccount = getAccountFor(
         accountsProvidedByThisCb,
-        getPartyId(targetPartyDisplayName)
+        partyIdMap.get(targetPartyDisplayName)!
       );
       assertProperRoles(usFRBRole, aliceAccount);
       setIsLoading(true);
@@ -207,9 +207,10 @@ const CentralBank = (props: {
       <Select
         key={BankCustomer.Alice}
         title="Recipient:"
-        dropdownList={[BankCustomer.Alice]}
+        dropdownList={[]}
         selectContainerStyle={styles.selectStyles}
-        initialLabel={BankCustomer.Alice}
+        initialLabel={"Alice B."}
+        noArrow={true}
       />,
       <Input
         key="Input"

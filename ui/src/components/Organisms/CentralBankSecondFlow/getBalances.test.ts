@@ -32,72 +32,72 @@ it("getBalances parses and computes correctly", () => {
     };
   }
   const testData = [
-    getAsset("Alice", 1, null),
-    getAsset("Alice", 2, null),
-    getAsset("Alice", 10, "Housing"),
-    getAsset("Alice", 20, "Housing"),
-    getAsset("Landlord", 100, null),
-    getAsset("Landlord", 200, null),
-    getAsset("USFRB", 1, null),
+    getAsset("alice", 1, null),
+    getAsset("alice", 2, null),
+    getAsset("alice", 10, "Housing"),
+    getAsset("alice", 20, "Housing"),
+    getAsset("landlord", 100, null),
+    getAsset("landlord", 200, null),
+    getAsset("usFRB", 1, null),
   ];
   const expected = [
     [
-      { owner: "Alice", quantity: 3 },
-      { owner: "Landlord", quantity: 300 },
-      { owner: "USFRB", quantity: 1 },
+      { owner: "alice", quantity: 3 },
+      { owner: "landlord", quantity: 300 },
+      { owner: "usFRB", quantity: 1 },
     ],
-    [{ owner: "Alice", quantity: 30 }],
+    [{ owner: "alice", quantity: 30 }],
   ];
   expect(getBalances(testData)).toStrictEqual(expected);
 });
 
 it("computeBalances computes balances correctly", () => {
   const testData = [
-    { owner: "Alice", quantity: 1.0, earmark: false },
-    { owner: "Alice", quantity: 2.0, earmark: false },
-    { owner: "Alice", quantity: 10.0, earmark: true },
-    { owner: "Alice", quantity: 20.0, earmark: true },
-    { owner: "Landlord", quantity: 100.0, earmark: false },
-    { owner: "Landlord", quantity: 200.0, earmark: false },
-    { owner: "USFRB", quantity: 1.0, earmark: false },
-    { owner: "BankB", quantity: 1.0, earmark: false },
+    { owner: "alice", quantity: 1.0, earmark: false },
+    { owner: "alice", quantity: 2.0, earmark: false },
+    { owner: "alice", quantity: 10.0, earmark: true },
+    { owner: "alice", quantity: 20.0, earmark: true },
+    { owner: "landlord", quantity: 100.0, earmark: false },
+    { owner: "landlord", quantity: 200.0, earmark: false },
+    { owner: "usFRB", quantity: 1.0, earmark: false },
+    { owner: "bankB", quantity: 1.0, earmark: false },
   ];
   const expected = [
     [
-      { owner: "Alice", quantity: 3 },
-      { owner: "Landlord", quantity: 300 },
-      { owner: "USFRB", quantity: 1 },
-      { owner: "BankB", quantity: 1 },
+      { owner: "alice", quantity: 3 },
+      { owner: "landlord", quantity: 300 },
+      { owner: "usFRB", quantity: 1 },
+      { owner: "bankB", quantity: 1 },
     ],
-    [{ owner: "Alice", quantity: 30 }],
+    [{ owner: "alice", quantity: 30 }],
   ];
   expect(computeBalances(testData)).toStrictEqual(expected);
 });
 
 it("aggregateAllBalances sums assets correctly", () => {
   const testData = [
-    { owner: "Alice", quantity: 1.0, earmark: false },
-    { owner: "Alice", quantity: 2.0, earmark: false },
-    { owner: "Landlord", quantity: 100.0, earmark: false },
-    { owner: "Landlord", quantity: 200.0, earmark: false },
+    { owner: "alice", quantity: 1.0, earmark: false },
+    { owner: "alice", quantity: 2.0, earmark: false },
+    { owner: "landlord", quantity: 100.0, earmark: false },
+    { owner: "landlord", quantity: 200.0, earmark: false },
   ];
   const expected = [
-    { owner: "Alice", quantity: 3 },
-    { owner: "Landlord", quantity: 300 },
+    { owner: "alice", quantity: 3 },
+    { owner: "landlord", quantity: 300 },
   ];
   expect(aggregateAllBalances(testData)).toStrictEqual(expected);
 });
 
 it("getBalance finds and formats", () => {
   const testData = [
-    { owner: "Alice", quantity: 3 },
-    { owner: "Landlord", quantity: 300 },
+    { owner: "alice", quantity: 3 },
+    { owner: "landlord", quantity: 300 },
   ];
   const expected = { label: "Alpha", value: "300 USD" };
   expect(
     getBalance(
       testData,
-      PartyId.from("Landlord"),
+      PartyId.from("landlord"),
       (qty) => `${qty} USD`,
       "Alpha"
     )
@@ -106,8 +106,8 @@ it("getBalance finds and formats", () => {
 
 it("getBalance handles empty", () => {
   const testData = [];
-  const expected = { label: "Alice", value: "0 USD" };
+  const expected = { label: "alice", value: "0 USD" };
   expect(
-    getBalance(testData, PartyId.from("Alice"), (qty) => `${qty} USD`, "Alice")
+    getBalance(testData, PartyId.from("alice"), (qty) => `${qty} USD`, "alice")
   ).toStrictEqual(expected);
 });

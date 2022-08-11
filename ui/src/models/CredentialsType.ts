@@ -22,11 +22,3 @@ export class PartyId {
     return this.value === partyId.value;
   }
 }
-
-export type Credentials = {
-  partyId: PartyId;
-  token: string;
-  ledgerId: string;
-  httpBaseUrl: string;
-  //wsBaseUrl: string;
-};

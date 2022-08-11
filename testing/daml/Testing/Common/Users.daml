@@ -1,0 +1,33 @@
+--
+-- Copyright (c) 2021, Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+--
+
+
+module Testing.Common.Users where
+
+import Daml.Script
+import qualified DA.Text as T
+import Testing.Models.Users
+import Testing.Models.Entities
+
+setupPartiesAndUsers : Script UsersForTesting
+setupPartiesAndUsers = do
+  usFRB <- allocatePartyAndUser "usFRB"
+  ecb <- allocatePartyAndUser "ecb"
+  bankA <- allocatePartyAndUser "bankA"
+  bankB <- allocatePartyAndUser "bankB"
+  demoAdmin <- allocatePartyAndUser "demoAdmin"
+  landlord <- allocatePartyAndUser "landlord"
+  landlordsAssociation <- allocatePartyAndUser "landlordsAssociation"
+  renter <- allocatePartyAndUser "renter"
+
+  pure EntitiesForTesting with ..
+
+  where
+    allocatePartyAndUser displayName = do
+      userId <- validateUserId $ T.asciiToLower displayName
+      p <- allocateParty displayName
+      let u = User userId (Some p)
+      createUser u [CanActAs p]
+      pure u

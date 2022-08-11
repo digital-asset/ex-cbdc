@@ -19,18 +19,20 @@ template UpdateWrapper
     party : Party
   where
     signatory party
-    controller party can
-      Call_SplitMergeSum : ContractId AssetDeposit
-        with sum: NeededDepositSum
-        do
-          splitMergeNewAssetFromNeededDepositSum sum
-      Call_SplitMergeFor : ContractId AssetDeposit
-        with
-          depositCids : [ContractId AssetDeposit]
-          deposits : [AssetDeposit]
-          neededQuantity : Decimal
-        do
-          splitMergeNewAssetFromAssetsForQuantity depositCids deposits neededQuantity ""
+    
+    choice Call_SplitMergeSum : ContractId AssetDeposit
+      with sum: NeededDepositSum
+      controller party
+      do
+        splitMergeNewAssetFromNeededDepositSum sum
+    choice Call_SplitMergeFor : ContractId AssetDeposit
+      with
+        depositCids : [ContractId AssetDeposit]
+        deposits : [AssetDeposit]
+        neededQuantity : Decimal
+      controller party
+      do
+        splitMergeNewAssetFromAssetsForQuantity depositCids deposits neededQuantity ""
 
 testAssetDepositSplitKeepsTheExpectedOrder : Script ()
 testAssetDepositSplitKeepsTheExpectedOrder = do

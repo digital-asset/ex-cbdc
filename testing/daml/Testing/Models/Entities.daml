@@ -1,0 +1,18 @@
+--
+-- Copyright (c) 2021, Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+--
+
+module Testing.Models.Entities where
+
+data EntitiesForTesting a = EntitiesForTesting 
+  with
+    usFRB : a
+    ecb : a
+    bankA : a
+    bankB : a
+    demoAdmin : a
+    landlord : a
+    landlordsAssociation : a
+    renter : a
+  deriving Functor

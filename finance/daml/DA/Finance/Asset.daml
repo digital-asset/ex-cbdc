@@ -35,54 +35,80 @@ template AssetDeposit
     observers : Set Party
   where
     signatory account.id.signatories
-    observer insert account.provider observers
+    observer union observers $ fromList [account.owner, account.provider]
     ensure asset.quantity > 0.0
 
-    controller account.owner can
-      AssetDeposit_SetObservers : ContractId AssetDeposit
-        with newObservers : Set Party
-        do create this with observers = newObservers
+    choice AssetDeposit_SetObservers : ContractId AssetDeposit
+      with newObservers : Set Party
+      controller account.owner
+      do create this with observers = newObservers
 
-    controller account.owner can
-      AssetDeposit_Split : NE.NonEmpty (ContractId AssetDeposit)
-        -- ^ Splits an asset deposit according to the provided list of quantities.
-        with
-          quantities : NE.NonEmpty Decimal
-            -- ^ The quantities of the newly created asset deposits. The total quantity
-            -- needs to be smaller or equal than the current quantity. If it does not add up,
-            -- an asset deposit with the remainder is created.
-        do
-          let quantitySum = NE.foldl (+) 0.0 quantities
-              remainder = asset.quantity - quantitySum
-          assert $ quantitySum <= asset.quantity
+    choice AssetDeposit_Split : NE.NonEmpty (ContractId AssetDeposit)
+      -- ^ Splits an asset deposit according to the provided list of quantities.
+      with
+        quantities : NE.NonEmpty Decimal
+          -- ^ The quantities of the newly created asset deposits. The total quantity
+          -- needs to be smaller or equal than the current quantity. If it does not add up,
+          -- an asset deposit with the remainder is created.
+      controller account.owner
+      do
+        let quantitySum = NE.foldl (+) 0.0 quantities
+            remainder = asset.quantity - quantitySum
+        assert $ quantitySum <= asset.quantity
 
-          let quantitiesAll =
-                if quantitySum == asset.quantity
-                then quantities
-                else NE.append quantities $ NE.singleton remainder
-          Traversable.mapA (\q -> create $ setQuantity q this) quantitiesAll
+        let quantitiesAll =
+              if quantitySum == asset.quantity
+              then quantities
+              else NE.append quantities $ NE.singleton remainder
+        Traversable.mapA (\q -> create $ setQuantity q this) quantitiesAll
 
-      AssetDeposit_Merge : ContractId AssetDeposit
-        -- ^ Merges a list of asset deposits with the given one into one.
-        with
-          depositCids : [ContractId AssetDeposit]
-            -- ^ The asset deposits that will be consumed. All fields except for the quantity
-            -- need to match.
-        do
-          deposit <-
-            foldlA
-              (\acc cid -> do
-                c <- fetchAndArchive cid
-                c === setQuantity c.asset.quantity acc
-                return $ setQuantity (acc.asset.quantity + c.asset.quantity) acc
-              )
-            this
-            depositCids
-          create deposit
+    choice AssetDeposit_Merge : ContractId AssetDeposit
+      -- ^ Merges a list of asset deposits with the given one into one.
+      with
+        depositCids : [ContractId AssetDeposit]
+          -- ^ The asset deposits that will be consumed. All fields except for the quantity
+          -- need to match.
+      controller account.owner
+      do
+        deposit <-
+          foldlA
+            (\acc cid -> do
+              c <- fetchAndArchive cid
+              c === setQuantity c.asset.quantity acc
+              pure $ setQuantity (acc.asset.quantity + c.asset.quantity) acc
+            )
+          this
+          depositCids
+        create deposit
 
 setQuantity : Decimal -> AssetDeposit -> AssetDeposit
 setQuantity quantity assetDeposit =
     assetDeposit with asset = assetDeposit.asset with quantity = quantity
+
+
+
+makeCounterPartyObserver : MasterAgreement -> ContractId AssetDeposit -> Update (ContractId AssetDeposit)
+makeCounterPartyObserver = addRemoveCounterPartyObserver Action_Add
+  
+removeCounterPartyObserver : MasterAgreement ->  ContractId AssetDeposit -> Update (ContractId AssetDeposit)
+removeCounterPartyObserver = addRemoveCounterPartyObserver Action_Remove
+
+addRemoveCounterPartyObserver : AddRemove -> MasterAgreement ->  ContractId AssetDeposit -> Update (ContractId AssetDeposit)
+addRemoveCounterPartyObserver addRemove masterAgreement depositCid = do
+  let getCounterparty owner
+        | owner == masterAgreement.party1 = masterAgreement.party2
+        | otherwise = masterAgreement.party1
+
+  assetDeposit <- fetch depositCid
+  let counterparty = getCounterparty assetDeposit.account.owner
+      action = case addRemove of
+                 Action_Add -> DA.Set.insert
+                 Action_Remove -> DA.Set.delete
+
+  exercise depositCid AssetDeposit_SetObservers with newObservers = action counterparty (observers assetDeposit)
+
+data AddRemove = Action_Add | Action_Remove
+
 
 -- This function does not check whether all the AssetDeposits have the same Asset.
 splitMergeNewAssetFromAssetsForQuantity : [ContractId AssetDeposit] -> [AssetDeposit] -> Decimal -> Text -> Update (ContractId AssetDeposit)

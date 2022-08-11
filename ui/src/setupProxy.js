@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 const { createProxyMiddleware } = require("http-proxy-middleware");
-const credentials = require(process.env.REACT_APP_CONFIG_FILE);
 
 const rewriteFn = (partyName) =>
   function (path) {
@@ -12,7 +11,7 @@ const rewriteFn = (partyName) =>
 
 const createProxyMiddlewareHelper = (party) => {
   return createProxyMiddleware(`/${party}/v1/**`, {
-    target: credentials[party].host,
+    target: process.env.JSON_API_URL,
     ws: true,
     pathRewrite: rewriteFn(party),
     logLevel: "debug",
@@ -21,12 +20,17 @@ const createProxyMiddlewareHelper = (party) => {
 
 module.exports = function (app) {
   app.use(
-    createProxyMiddlewareHelper("Alice"),
-    createProxyMiddlewareHelper("Landlord"),
-    createProxyMiddlewareHelper("USFRB"),
-    createProxyMiddlewareHelper("ECB"),
-    createProxyMiddlewareHelper("BankA"),
-    createProxyMiddlewareHelper("BankB"),
-    createProxyMiddlewareHelper("DemoAdmin")
+    createProxyMiddlewareHelper("renter"),
+    createProxyMiddlewareHelper("landlord"),
+    createProxyMiddlewareHelper("usFRB"),
+    createProxyMiddlewareHelper("ecb"),
+    createProxyMiddlewareHelper("bankA"),
+    createProxyMiddlewareHelper("bankB"),
+    createProxyMiddlewareHelper("demoAdmin"),
+    createProxyMiddleware("/v1/**", {
+      target: process.env.JSON_API_URL,
+      ws: true,
+      logLevel: "debug",
+    })
   );
 };

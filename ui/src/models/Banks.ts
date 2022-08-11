@@ -4,24 +4,24 @@
 ///
 
 export enum Central {
-  CentralBank1 = "USFRB",
-  CentralBank2 = "ECB",
+  CentralBank1 = "usFRB",
+  CentralBank2 = "ecb",
 }
 
 export enum Commercial {
-  BankA = "BankA",
-  BankB = "BankB",
+  BankA = "bankA",
+  BankB = "bankB",
 }
 
 export enum DemoAdmin {
-  DemoAdmin = "DemoAdmin",
+  DemoAdmin = "demoAdmin",
 }
 
 export enum BankCustomer {
-  Alice = "Alice",
-  AlphaProperties = "Landlord",
+  Alice = "renter",
+  AlphaProperties = "landlord",
 }
 
 export enum Landlord {
-  Landlord = "Landlord",
+  Landlord = "landlord",
 }

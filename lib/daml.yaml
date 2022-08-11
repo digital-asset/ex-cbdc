@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-sdk-version: 1.18.1
+sdk-version: 2.3.2
 name: lib
 source: daml
 version: 1.0.0
@@ -11,8 +11,8 @@ dependencies:
   - daml-prim
   - daml-stdlib
 build-options:
-  - '--ghc-option'
-  - '-Werror'
-  - '--ghc-option'
-  - '-Wunused-binds'
+  - "--ghc-option"
+  - "-Werror"
+  - "--ghc-option"
+  - "-Wunused-binds"
 build_codegen: js

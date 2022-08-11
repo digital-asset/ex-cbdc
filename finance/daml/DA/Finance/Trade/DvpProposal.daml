@@ -20,40 +20,44 @@ template DvpProposal
     deliveryAccounts: [Account]
   where
     signatory proposer
+    observer getAcceptingParty dvp proposer
     ensure proposer `elem` [dvp.masterAgreement.party1, dvp.masterAgreement.party2] &&
            dvp.masterAgreement.id.signatories == Set.fromList [proposer, getAcceptingParty dvp proposer] &&
            isValidDvp dvp &&
            length dvp.payments == length paymentAccounts &&
            length dvp.deliveries == length deliveryAccounts
 
-    controller getAcceptingParty dvp proposer can
-      DvpProposal_Accept : (ContractId DvpSettlementRule, ContractId Dvp, [ContractId SettlementInstruction])
-        with
-          otherPaymentAccounts : [Account]
-          otherDeliveryAccounts : [Account]
-        do
-          assertMsg "number of settlement contracts matches (payments)" $
-            length dvp.payments == length otherPaymentAccounts
-          assertMsg "number of settlement contracts matches (deliveries)" $
-            length dvp.deliveries == length otherDeliveryAccounts
+    
+    choice DvpProposal_Accept : (ContractId DvpSettlementRule, ContractId Dvp, [ContractId SettlementInstruction])
+      with
+        otherPaymentAccounts : [Account]
+        otherDeliveryAccounts : [Account]
+      controller getAcceptingParty dvp proposer
+      do
+        assertMsg "number of settlement contracts matches (payments)" $
+          length dvp.payments == length otherPaymentAccounts
+        assertMsg "number of settlement contracts matches (deliveries)" $
+          length dvp.deliveries == length otherDeliveryAccounts
 
-          dvpSettlementCid <- createDvpSettlementIfNeeded dvpSettlement
-          dvpCid <- create dvp with status = SettlementStatus_Instructed
+        dvpSettlementCid <- createDvpSettlementIfNeeded dvpSettlement
+        dvpCid <- create dvp with status = SettlementStatus_Instructed
 
-          paymentCids <- forA (zip3 dvp.payments paymentAccounts otherPaymentAccounts)
-                              (createSettlementInstructionForPayment proposer dvp)
-          deliveryCids <- forA (zip3 dvp.deliveries deliveryAccounts otherDeliveryAccounts)
-                               (createSettlementInstructionForDelivery proposer dvp)
+        paymentCids <- forA (zip3 dvp.payments paymentAccounts otherPaymentAccounts)
+                            (createSettlementInstructionForPayment proposer dvp)
+        deliveryCids <- forA (zip3 dvp.deliveries deliveryAccounts otherDeliveryAccounts)
+                              (createSettlementInstructionForDelivery proposer dvp)
 
-          pure (dvpSettlementCid, dvpCid, paymentCids ++ deliveryCids)
+        pure (dvpSettlementCid, dvpCid, paymentCids ++ deliveryCids)
 
-    controller getAcceptingParty dvp proposer can
-      DvpProposal_Reject : ContractId DvpCancellation
-        do create DvpCancellation with dvp, info = "unilateral", canceledBy = getAcceptingParty dvp proposer
+  
+    choice DvpProposal_Reject : ContractId DvpCancellation
+      controller getAcceptingParty dvp proposer
+      do create DvpCancellation with dvp, info = "unilateral", canceledBy = getAcceptingParty dvp proposer
 
-    controller proposer can
-      DvpProposal_Cancel : ContractId DvpCancellation
-        do create DvpCancellation with dvp, info = "unilateral", canceledBy = proposer
+  
+    choice DvpProposal_Cancel : ContractId DvpCancellation
+      controller proposer
+      do create DvpCancellation with dvp, info = "unilateral", canceledBy = proposer
 
 
 template DvpCancellation

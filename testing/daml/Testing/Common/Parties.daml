@@ -7,14 +7,13 @@
 module Testing.Common.Parties where
 
 import Daml.Script
-
 import Testing.Models.Parties
+import Testing.Models.Entities
 
 setupParties : Script PartiesForTesting
 setupParties = do
   usFRB <- allocate "USFRB" "usfrb"
   ecb <- allocate "ECB" "ecb"
-
   bankA <- allocate "BankA" "bankA"
   bankB <- allocate "BankB" "bankB"
   demoAdmin <- allocate "DemoAdmin" "ecb"
@@ -22,7 +21,7 @@ setupParties = do
   landlordsAssociation <- allocate "LandlordsAssociation" "landlordsAssociation"
   renter <- allocate "Alice" "alice"
 
-  return $ PartiesForTesting with ..
+  pure EntitiesForTesting with ..
   where
     allocate name participant =
       allocatePartyWithHintOn

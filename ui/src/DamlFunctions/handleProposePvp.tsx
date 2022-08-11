@@ -4,7 +4,7 @@
 //
 
 import { Central, Commercial } from "../models/Banks";
-import { getPartyId } from "../Credentials";
+import { partyIdMap } from "../Credentials";
 import { Currency } from "../models/Curency";
 import _ from "lodash";
 import { BankRole } from "@daml.js/banking-1.0.0/lib/Banking/Role/Bank";
@@ -35,8 +35,8 @@ export const handleProposePvp = async (
 
     const receiverPartyId =
       displayName === Commercial.BankA
-        ? getPartyId(Commercial.BankB)
-        : getPartyId(Commercial.BankA);
+        ? partyIdMap.get(Commercial.BankB)!
+        : partyIdMap.get(Commercial.BankA)!;
 
     const quantityToSend = `${inputSellAmount}000000`;
 
@@ -44,16 +44,16 @@ export const handleProposePvp = async (
 
     const buyCashLabel = inputBuyCurrency;
 
-    const incomingCb = getPartyId(
+    const incomingCb = partyIdMap.get(
       buyCashLabel === Currency.USD
         ? Central.CentralBank1
         : Central.CentralBank2
-    );
-    const outgoingCb = getPartyId(
+    )!;
+    const outgoingCb = partyIdMap.get(
       buyCashLabel === Currency.USD
         ? Central.CentralBank2
         : Central.CentralBank1
-    );
+    )!;
 
     const ownAccountForIncoming = _.first(
       ourAssetSettlements

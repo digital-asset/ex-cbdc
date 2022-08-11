@@ -10,8 +10,11 @@ import Banking.Role.CentralBank
 import Landlord.Landlord
 import Daml.Script hiding (party)
 import DemoAdmin.Role.DemoAdmin
+import Testing.Models.Entities
 import Testing.Models.Parties
 import Testing.Common.Parties
+import Testing.Models.Users
+import Testing.Common.Users
 import Testing.Common.TestUtilities
 import Certificates.Sector.Economic
 import DA.Lib.Types.Sector
@@ -51,14 +54,18 @@ data PvpContracts =
     payment : ContractId SettlementInstruction
     delivery : ContractId SettlementInstruction
 
-allocateAndInitDemo : Script InitData
+
+allocateAndInitDemo : Script UsersForTesting
 allocateAndInitDemo = script do
   -- Participants set up parties, connecting to the two Banking domains (EUR/GBP)
-  parties@PartiesForTesting{..} <- setupParties
+  users@EntitiesForTesting{..} <- setupPartiesAndUsers
+  let userToParty user = fromSomeNote "The User has no Party assigned" user.primaryParty
+      parties = fmap userToParty users
   initDemo parties
+  pure users
 
 initDemo : PartiesForTesting -> Script InitData
-initDemo parties@PartiesForTesting{..} = script do
+initDemo parties@EntitiesForTesting{..} = script do
   let ledgerSetupTask = "Ledger Setup"
   started ledgerSetupTask
 
@@ -269,8 +276,9 @@ transferFromCentralbankToBank cb bank amount = do
 
 all_slides_workflow_works : Script ()
 all_slides_workflow_works = script do
-  initData@InitData{..} <- allocateAndInitDemo
-  let PartiesForTesting{..} = initData.parties
+  parties <- setupParties
+  initData@InitData{..} <- initDemo parties
+  let EntitiesForTesting{..} = initData.parties
   let isOwnedBy bank = (bank ==) . (.account.owner)
   let firstContractId = fst . head
 
@@ -439,8 +447,9 @@ bankAEurVsbankBUsdWorkflow
   -> Script (Party, Party, ContractId SettlementInstruction,
              ContractId SettlementInstruction, PvpContracts)
 bankAEurVsbankBUsdWorkflow bankASentAmount bankBSentAmount = script do
-  initData@InitData{..} <- allocateAndInitDemo
-  let PartiesForTesting{..} = initData.parties
+  parties <- setupParties
+  initData@InitData{..} <- initDemo parties
+  let EntitiesForTesting{..} = initData.parties
   let amount: Decimal = 200_000_000.0
   let isOwnedBy bank = (bank ==) . (.account.owner)
 

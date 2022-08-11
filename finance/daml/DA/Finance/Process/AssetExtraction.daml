@@ -16,24 +16,26 @@ template AssetExtractionRequest
     depositCid : ContractId AssetDeposit
   where
     signatory account.id.signatories
+    observer account.provider
     ensure account.id.signatories == Set.fromList [account.provider, account.owner]
 
-    controller account.provider can
-      AssetExtractionRequest_Accept : ContractId AssetExtractionNotification
-        do
-          deposit <- fetch depositCid
-          deposit.account === account
+    choice AssetExtractionRequest_Accept : ContractId AssetExtractionNotification
+      controller account.provider 
+      do
+        deposit <- fetch depositCid
+        deposit.account === account
 
-          archive depositCid
+        archive depositCid
 
-          create AssetExtractionNotification with ..
+        create AssetExtractionNotification with ..
 
-      AssetExtractionRequest_Reject : ContractId AssetExtractionFailure
-        do
-          deposit <- fetch depositCid
-          deposit.account === account
+    choice AssetExtractionRequest_Reject : ContractId AssetExtractionFailure
+      controller account.provider 
+      do
+        deposit <- fetch depositCid
+        deposit.account === account
 
-          create AssetExtractionFailure with ..
+        create AssetExtractionFailure with ..
 
 template AssetExtractionNotification
   with

@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-sdk-version: 1.18.1
+sdk-version: 2.3.2
 name: demoadmin
 source: daml
 version: 1.0.0
@@ -21,8 +21,8 @@ dependencies:
   - ../finance/.daml/dist/finance-1.0.0.dar
   - ../banking/.daml/dist/banking-1.0.0.dar
 build-options:
-  - '--ghc-option'
-  - '-Werror'
-  - '--ghc-option'
-  - '-Wunused-binds'
+  - "--ghc-option"
+  - "-Werror"
+  - "--ghc-option"
+  - "-Wunused-binds"
 build_codegen: js

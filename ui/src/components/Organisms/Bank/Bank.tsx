@@ -37,7 +37,6 @@ import { handleAcceptPvpProposal } from "../../../DamlFunctions/handleAcceptPvpP
 import { getBalances } from "../CentralBankSecondFlow/getBalances";
 import { getPvpStatus } from "./computePvpStatus";
 import { PartyId } from "../../../models/CredentialsType";
-import { getPartyId } from "../../../Credentials";
 
 const handleDeclinePvp = async (pvpProposals, ledger, DvpProposal) => {
   try {
@@ -199,7 +198,7 @@ const Bank: React.FC<CommercialBankData> = (props) => {
     setInputSellAmount("");
   }
 
-  function SET_LIST(bank: string) {
+  function SET_LIST(bankParty: string) {
     let spliceNumber = 0,
       startPosition = 0;
 
@@ -266,9 +265,7 @@ const Bank: React.FC<CommercialBankData> = (props) => {
       </div>,
     ];
     function getDisplayName(partyId: PartyId): string {
-      return partyId?.equals(getPartyId(displayName))
-        ? displayName
-        : counterparty;
+      return partyId?.equals(PartyId.from(party)) ? displayName : counterparty;
     }
     let approvedData = [
       <p
@@ -310,7 +307,7 @@ const Bank: React.FC<CommercialBankData> = (props) => {
     ];
 
     if (
-      !pvpStatus[ProposePvpModel.PROPOSER]?.equals(getPartyId(bank)) &&
+      !pvpStatus[ProposePvpModel.PROPOSER]?.equals(PartyId.from(bankParty)) &&
       pvpStatus[ProposePvpModel.STATUS] === ProposeStatusType.AWAITING_RESPONSE
     ) {
       approvedData.push(
@@ -373,7 +370,7 @@ const Bank: React.FC<CommercialBankData> = (props) => {
           open={isOpen}
           dropdownStyles={styles.dropdownStyles}
           dropdownListStyles={styles.dropdownListStyles}
-          list={SET_LIST(displayName)}
+          list={SET_LIST(party)}
         />
         {/*}*/}
       </div>

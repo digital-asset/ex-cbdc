@@ -32,58 +32,60 @@ template AssetSettlementRule
       -- of the `AssetSettlement_Credit` choice.
   where
     signatory account.id.signatories
-    observer ctrls, observers
+    observer ctrls, observers, account.owner
 
     key account.id : Id
     maintainer key.signatories
 
-    controller account.owner can
-      nonconsuming AssetSettlement_Transfer : ContractId AssetDeposit
-        -- ^ Gives the owner the right to transfer an asset deposit to a new owner.
-        -- Requires that the AssetSettlementRule of the receiver account is available
-        -- for use.
-        with
-          receiverAccountId : Id
-            -- ^ The account id to which the asset deposit will be transferred to.
-          amount : Optional Decimal
-          depositCids : [ContractId AssetDeposit]
-            -- ^ The asset deposits that will be consumed.
-        do
-          checkAndTransferDeposits self account depositCids amount receiverAccountId isNonEarmarked "non-earmarked"
+    nonconsuming choice AssetSettlement_Transfer : ContractId AssetDeposit
+      -- ^ Gives the owner the right to transfer an asset deposit to a new owner.
+      -- Requires that the AssetSettlementRule of the receiver account is available
+      -- for use.
+      with
+        receiverAccountId : Id
+          -- ^ The account id to which the asset deposit will be transferred to.
+        amount : Optional Decimal
+        depositCids : [ContractId AssetDeposit]
+          -- ^ The asset deposits that will be consumed.
+      controller account.owner
+      do
+        checkAndTransferDeposits self account depositCids amount receiverAccountId isNonEarmarked "non-earmarked"
 
-      nonconsuming AssetSettlement_Earmarked_Transfer : ContractId AssetDeposit
-        -- ^ Gives the owner the right to transfer an asset deposit to a new owner.
-        -- Requires that the AssetSettlementRule of the receiver account is available
-        -- for use.
-        with
-          receiverAccountId : Id
-            -- ^ The account id to which the asset deposit will be transferred to.
-          depositCids : [ContractId AssetDeposit]
-            -- ^ The asset deposits that will be consumed.
-          amount : Optional Decimal
-          certificateCid : ContractId DistributedEconomicSectorCertificate
-        do
-          certificate <- fetch certificateCid
-          assertMsg "Account provider must match the certificate issuer." (certificate.centralBank == account.provider)
-          checkAndTransferDeposits self account depositCids amount receiverAccountId isEarmarked "earmarked"
+    nonconsuming choice AssetSettlement_Earmarked_Transfer : ContractId AssetDeposit
+      -- ^ Gives the owner the right to transfer an asset deposit to a new owner.
+      -- Requires that the AssetSettlementRule of the receiver account is available
+      -- for use.
+      with
+        receiverAccountId : Id
+          -- ^ The account id to which the asset deposit will be transferred to.
+        depositCids : [ContractId AssetDeposit]
+          -- ^ The asset deposits that will be consumed.
+        amount : Optional Decimal
+        certificateCid : ContractId DistributedEconomicSectorCertificate
+      controller account.owner
+      do
+        certificate <- fetch certificateCid
+        assertMsg "Account provider must match the certificate issuer." (certificate.centralBank == account.provider)
+        checkAndTransferDeposits self account depositCids amount receiverAccountId isEarmarked "earmarked"
 
-      AssetSettlement_AddController : ContractId AssetSettlementRule
-        with
-          ctrl : Party
-        do
-          create this with ctrls = Set.insert ctrl ctrls
+    choice AssetSettlement_AddController : ContractId AssetSettlementRule
+      with
+        ctrl : Party
+      controller account.owner
+      do
+        create this with ctrls = Set.insert ctrl ctrls
 
-    controller account.id.signatories can
-      nonconsuming AssetSettlement_Debit : Asset
-        -- ^ Gives the account.id.signatories the right to debit (i.e. archive)
-        -- an asset deposit.
-        with
-          depositCid : ContractId AssetDeposit
-            -- ^ The asset deposit that will be consumed.
-        do
-          deposit <- fetchAndArchive depositCid
-          deposit.account === account
-          return deposit.asset
+    nonconsuming choice AssetSettlement_Debit : Asset
+      -- ^ Gives the account.id.signatories the right to debit (i.e. archive)
+      -- an asset deposit.
+      with
+        depositCid : ContractId AssetDeposit
+          -- ^ The asset deposit that will be consumed.
+      controller account.id.signatories
+      do
+        deposit <- fetchAndArchive depositCid
+        deposit.account === account
+        pure deposit.asset
 
     nonconsuming choice AssetSettlement_Credit : ContractId AssetDeposit
       -- ^ Allows a `ctrl` (if part of `ctrls`) to create an asset deposit.

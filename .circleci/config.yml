@@ -32,7 +32,7 @@ commands:
       - slack/status:
           fail_only: true
           only_for_branches: main
-          webhook: '${SLACK_WEBHOOK}'
+          webhook: "${SLACK_WEBHOOK}"
 
 jobs:
   daml_test:
@@ -176,13 +176,13 @@ workflows:
   test:
     jobs:
       - daml_test:
-          daml_sdk_version: "1.18.1"
+          daml_sdk_version: "2.3.2"
           context: refapps
       - ui_test:
-          daml_sdk_version: "1.18.1"
+          daml_sdk_version: "2.3.2"
           context: refapps
       - blackduck_check:
-          daml_sdk_version: "1.18.1"
+          daml_sdk_version: "2.3.2"
           filters:
             branches:
               only:
@@ -202,13 +202,13 @@ workflows:
                 - main
     jobs:
       - daml_test:
-          daml_sdk_version: "1.18.1"
+          daml_sdk_version: "2.3.2"
           context: refapps
       - ui_test:
-          daml_sdk_version: "1.18.1"
+          daml_sdk_version: "2.3.2"
           context: refapps
       - blackduck_check:
-          daml_sdk_version: "1.18.1"
+          daml_sdk_version: "2.3.2"
           context:
             - blackduck
             - refapps
