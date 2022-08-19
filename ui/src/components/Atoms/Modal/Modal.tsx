@@ -8,8 +8,7 @@ import styles from "./Modal.module.css";
 import Slide1 from "../../../static/assets/Modal/UC_1_Slide_13_Modal.png";
 import Slide2 from "../../../static/assets/Modal/UC_1_Slide_14_Modal.png";
 import Slide3 from "../../../static/assets/Modal/UC_1_Slide_15_Modal.png";
-import Carousel from "react-elastic-carousel";
-import ReactElasticCarousel from "react-elastic-carousel";
+import Slider from "react-slick";
 import _ from "lodash";
 
 type ModalProps = {
@@ -29,20 +28,27 @@ const Modal: React.FC<ModalProps> = (props) => {
 
   const [activeSlide, setActiveSlide] = useState<number>(0);
   const [activeImg, setActiveImg] = useState<string>(Slide1);
-  const ref =
-    useRef<ReactElasticCarousel & { goTo: (slide: number) => void }>(null);
+  const refCarousel = useRef<Slider>(null);
 
   const handleChange = (type: string) => () => {
     const current = _.findIndex(slides, (el) => el === activeImg);
     if (type === CLICK_TYPE.NEXT) {
-      ref.current?.goTo(activeSlide + 1);
+      refCarousel.current?.slickNext();
       setActiveSlide(activeSlide + 1);
       return setActiveImg(slides[current + 1]);
     }
-    ref.current?.goTo(activeSlide - 1);
+    refCarousel.current?.slickPrev();
     setActiveSlide(activeSlide - 1);
     setActiveImg(slides[current - 1]);
     return;
+  };
+
+  const settings = {
+    dots: true,
+    infinite: true,
+    speed: 500,
+    slidesToShow: 1,
+    slidesToScroll: 1
   };
 
   return (
@@ -62,6 +68,23 @@ const Modal: React.FC<ModalProps> = (props) => {
         />
       )}
 
+      <Slider
+        {...settings}
+      >
+        {/* {slides.map((img) => {
+          console.log(img)
+          return (<img
+            key={img + Math.random()}
+            src={img}
+            className={styles.modalImg}
+            alt="Modals slide"
+          />)
+        })} */}
+        <div className={styles.modalImg}>asdfg</div>
+        <div className={styles.modalImg}>12345</div>
+        <div className={styles.modalImg}>';iiop\';</div>
+      </Slider>
+{/* 
       <Carousel
         itemsToShow={1}
         pagination={false}
@@ -78,7 +101,7 @@ const Modal: React.FC<ModalProps> = (props) => {
             alt="Modals slide"
           />
         ))}
-      </Carousel>
+      </Carousel> */}
     </div>
   );
 };

@@ -6,9 +6,12 @@
 import React, { useEffect, useState } from "react";
 import CrossBorderPvp from "./Pages/CrossBorderPvp";
 import RentInvoice from "./Pages/RentInvoice";
-import { Route, useHistory, withRouter } from "react-router-dom";
+import {
+  Routes,
+  Route,
+  useLocation
+} from "react-router-dom";
 import styles from "./App.module.css";
-import { spring, AnimatedSwitch } from "react-router-transition";
 import Conclusion from "./Pages/Conclusion";
 import { computeCredentials } from "../Credentials";
 import { DemoAdmin } from "../models/Banks";
@@ -38,28 +41,28 @@ const App: React.FC = () => {
     createCredentials();
   }, []);
 
-  function glide(val) {
-    return spring(val, {
-      stiffness: 150,
-      damping: 20,
-    });
-  }
-  const pageTransitions = {
-    atEnter: {
-      offset: -100,
-      opacity: 0,
-    },
-    atLeave: {
-      offset: glide(150),
-      opacity: glide(0),
-    },
-    atActive: {
-      offset: glide(0),
-      opacity: glide(1),
-    },
-  };
+  // function glide(val) {
+  //   return spring(val, {
+  //     stiffness: 150,
+  //     damping: 20,
+  //   });
+  // }
+  // const pageTransitions = {
+  //   atEnter: {
+  //     offset: -100,
+  //     opacity: 0,
+  //   },
+  //   atLeave: {
+  //     offset: glide(150),
+  //     opacity: glide(0),
+  //   },
+  //   atActive: {
+  //     offset: glide(0),
+  //     opacity: glide(1),
+  //   },
+  // };
 
-  const history = useHistory();
+  const location = useLocation();
 
   const buttons = [
     { text: "SECTIONS", icon: newDropdownArrow },
@@ -89,7 +92,7 @@ const App: React.FC = () => {
   return (
     <div
       className={`${styles.appWrapper} ${
-        history.location.pathname !== "/" && styles.secondBackground
+        location.pathname !== "/" && styles.secondBackground
       }`}
     >
       {credentials && (
@@ -98,19 +101,20 @@ const App: React.FC = () => {
         </DamlLedger>
       )}
 
-      <AnimatedSwitch
-        {...pageTransitions}
-        mapStyles={(styles) => ({
-          opacity: `${styles.opacity}`,
-        })}
-        className={styles.routeWrapper}
+      <Routes
+        // {...pageTransitions}
+        // mapStyles={(styles) => ({
+        //   opacity: `${styles.opacity}`,
+        // })}
+        // className={styles.routeWrapper}
       >
-        <Route exact path="/" component={CrossBorderPvp} />
-        <Route exact path="/customer" component={RentInvoice} />
-        <Route exact path="/complete" component={Conclusion} />
-      </AnimatedSwitch>
+        <Route path="/" element={<CrossBorderPvp/>} />
+        <Route path="/customer" element={<RentInvoice/>} />
+        <Route path="/complete" element={<Conclusion/>} />
+      </Routes>
     </div>
   );
 };
 
-export default withRouter(App);
+export default App
+

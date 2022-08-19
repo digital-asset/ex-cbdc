@@ -8,7 +8,7 @@ import _ from "lodash";
 import * as Role from "@daml.js/demoadmin-1.0.0/lib/DemoAdmin/Role";
 import * as ResetImplementation from "@daml.js/reset-1.0.0/lib/DA/Reset/ResetImplementation";
 import { useStreamQueries, useLedger } from "@daml/react";
-import { useHistory } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import styles from "./BtnActions.module.css";
 import { TextButton } from "../../Atoms/TextButton/TextButton";
 import { dropdownTypes } from "../../App";
@@ -32,10 +32,11 @@ const BtnActions: React.FC<BtnActionsProps> = (props) => {
 
   const [isDropdownShown, setIsDropdownShown] = useState<boolean>(false);
 
-  const history = useHistory();
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const handleRedirect = (path: string, cb: (item: boolean) => void) => () => {
-    history.push(path);
+    navigate(path);
     cb(false);
   };
   const handleToggleDropdown = () => setIsDropdownShown(!isDropdownShown);
@@ -43,7 +44,7 @@ const BtnActions: React.FC<BtnActionsProps> = (props) => {
   function getDrowpDownList() {
     const duplicate = [...locationList];
     const item = duplicate.find(
-      (item) => item.location === history.location.pathname
+      (item) => item.location === location.pathname
     );
     const idx = duplicate.findIndex((i) => i.text === item?.text);
     duplicate[idx].active = true;
@@ -65,7 +66,7 @@ const BtnActions: React.FC<BtnActionsProps> = (props) => {
         .catch((e) => {
           console.log(e);
         });
-      history.replace("/");
+      navigate("/", {replace: true});
       window.location.reload();
     } catch (e) {
       console.error(e);
